@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { ButtonProps } from "@relume_io/relume-ui";
 import { BiEnvelope, BiMap, BiPhone } from "react-icons/bi";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
@@ -13,7 +12,6 @@ type Props = {
   email: string;
   phone: string;
   address: string;
-  button: ButtonProps;
 };
 
 export type Contact5Props = React.ComponentPropsWithoutRef<"section"> &
@@ -144,10 +142,9 @@ export const Contattaci = (props: Contact5Props) => {
 };
 
 export const Contact5Defaults: Contact5Props = {
-  heading: "Contact us",
-  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-  email: "hello@relume.io",
-  phone: "+1 (555) 000-0000",
-  address: "123 Sample St, Sydney NSW 2000 AU",
-  button: { title: "Submit" },
+  heading: "Contattaci",
+  description: "Compila il form per metterti in contatto con noi.",
+  email: "alcabrokersrl@legalmail.it",
+  phone: "+39 081 529 70 45",
+  address: "Via Vittoria Colonna 14 - 80121 Napoli (NA)",
 };

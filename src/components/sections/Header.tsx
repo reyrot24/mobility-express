@@ -26,7 +26,15 @@ export const Header = (props: Header62Props) => {
         </h1>
         <p className="md:text-md">{description}</p>
         <div className="mt-6 flex items-center justify-center gap-x-4 md:mt-8">
-          <Button>Prenota un consulto</Button>
+          <Button>
+            <a
+              href="https://tidycal.com/sviluppo/introduzione-mobility-express"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Prenota un consulto
+            </a>
+          </Button>
         </div>
       </div>
     </section>
@@ -34,9 +42,10 @@ export const Header = (props: Header62Props) => {
 };
 
 export const Header62Defaults: Header62Props = {
-  heading: "Short heading here",
+  heading:
+    "Diventa Parte della Più Solida Rete di Subagenti Assicurativi in Italia",
   description:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.",
+    "Amplia il tuo business con il potere di una rete nazionale. Sfrutta opportunità esclusive e ricevi un supporto personalizzato per la tua crescita.",
   buttons: [
     {
       title: "Button",

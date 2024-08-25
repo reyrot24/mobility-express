@@ -69,8 +69,8 @@ const Testimonianze = (props: Testimonial3Props) => {
 };
 
 export const Testimonial3Defaults: Testimonial3Props = {
-  heading: "Customer testimonials",
-  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  heading: "Testimonianze",
+  description: "Leggi le testimonianze di alcuni clienti soddisfatti.",
 };
 
 export default Testimonianze;

@@ -93,7 +93,15 @@ export const Navbar = (props: Navbar1Props) => {
               <Button className="w-full" variant="outlineToggle">
                 Iscriviti
               </Button>
-              <Button className="w-full">Prenota</Button>
+              <Button className="w-full">
+                <a
+                  href="https://tidycal.com/sviluppo/introduzione-mobility-express"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  Prenota
+                </a>
+              </Button>
             </div>
           </motion.div>
         </div>
@@ -101,7 +109,15 @@ export const Navbar = (props: Navbar1Props) => {
           <Button className="w-full" variant="outlineToggle">
             Iscriviti
           </Button>
-          <Button className="w-full">Prenota</Button>
+          <Button className="w-full">
+            <a
+              href="https://tidycal.com/sviluppo/introduzione-mobility-express"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Prenota
+            </a>
+          </Button>
         </div>
       </div>
     </nav>

@@ -23,7 +23,15 @@ export const CTA = (props: Cta25Props) => {
         </h2>
         <p className="md:text-md">{description}</p>
         <div className="mt-6 flex items-center justify-center gap-4 md:mt-8">
-          <Button>Prenota un consulto</Button>
+          <Button>
+            <a
+              href="https://tidycal.com/sviluppo/introduzione-mobility-express"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Prenota un consulto
+            </a>
+          </Button>
         </div>
       </div>
     </section>
@@ -31,8 +39,6 @@ export const CTA = (props: Cta25Props) => {
 };
 
 export const Cta25Defaults: Cta25Props = {
-  heading: "Medium length heading goes here",
-  description:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.",
-  buttons: [{ title: "Button" }, { title: "Button", variant: "secondary" }],
+  heading: "Pronto a far parte del nostro team?",
+  description: "Prenota un consulto o contattaci quì sotto.",
 };

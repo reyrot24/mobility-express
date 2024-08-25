@@ -4,8 +4,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../ui/accordion";
-
-import type { ButtonProps } from "@relume_io/relume-ui";
 import { Button } from "../ui/button";
 
 type QuestionsProps = {
@@ -18,7 +16,6 @@ type Props = {
   description: string;
   footerHeading: string;
   footerDescription: string;
-  button: ButtonProps;
   questions: QuestionsProps[];
 };
 
@@ -65,7 +62,15 @@ export const FAQs = (props: Faq1Props) => {
           </h4>
           <p className="md:text-md">{footerDescription}</p>
           <div className="mt-6 md:mt-8">
-            <Button>Prenota un consulto</Button>
+            <Button>
+              <a
+                href="https://tidycal.com/sviluppo/introduzione-mobility-express"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Prenota un consulto
+              </a>
+            </Button>
           </div>
         </div>
       </div>
@@ -75,39 +80,24 @@ export const FAQs = (props: Faq1Props) => {
 
 export const Faq1Defaults: Faq1Props = {
   heading: "FAQs",
-  description:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.",
+  description: "Ecco le risposte alle domande più frequenti.",
   questions: [
     {
-      title: "Question text goes here",
+      title: "Cos'è Mobility Express?",
       answer:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat. Aenean faucibus nibh et justo cursus id rutrum lorem imperdiet. Nunc ut sem vitae risus tristique posuere.",
+        "Mobility Express è la rete di subagenti assicurativi indipendente più solida d'Italia, progettata per intermediari che desiderano espandere il proprio business. Con la nostra piattaforma avanzata, puoi proporre ai tuoi clienti un'ampia gamma di prodotti assicurativi, Energia e Noleggio a lungo termine, supportato da tecnologie all'avanguardia e un sistema di provvigioni vanataggioso. Offriamo strumenti esclusivi per semplificare la gestione della tua attività e la possibilità di aumentare visibilità attraverso i nostri strumenti per massimizzare i guadagni.",
     },
     {
-      title: "Question text goes here",
+      title: "Qauli vantaggi offre la piattaforma Mobility Express?",
       answer:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat. Aenean faucibus nibh et justo cursus id rutrum lorem imperdiet. Nunc ut sem vitae risus tristique posuere.",
+        "Se sei un subagente, avere a disposizione la piattaforma Mobility Express ti offre l'accesso a una vasta gamma di prodotti assicurativi, sia per il settore motor che per altri rami. Potrai approfittare di opportunità economiche vantaggiose, ricevere supporto dedicato nelle fasi di pre e post vendita e utilizzare una tecnologia all'avanguardia per accelerare e operare in modo rapido ed efficiente.",
     },
     {
-      title: "Question text goes here",
+      title: "Quali vantaggi economici ci sono?",
       answer:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat. Aenean faucibus nibh et justo cursus id rutrum lorem imperdiet. Nunc ut sem vitae risus tristique posuere.",
-    },
-    {
-      title: "Question text goes here",
-      answer:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat. Aenean faucibus nibh et justo cursus id rutrum lorem imperdiet. Nunc ut sem vitae risus tristique posuere.",
-    },
-    {
-      title: "Question text goes here",
-      answer:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat. Aenean faucibus nibh et justo cursus id rutrum lorem imperdiet. Nunc ut sem vitae risus tristique posuere.",
+        "Entrando a far parte della nostra rete, avrai accesso a provvigioni competitive su un ampio range di prodotti. Inoltre, potrai partecipare a contest con premi.",
     },
   ],
-  footerHeading: "Still have questions?",
-  footerDescription: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-  button: {
-    title: "Contact",
-    variant: "secondary",
-  },
+  footerHeading: "Hai ancora domande?",
+  footerDescription: "Clicca il pulsante qui sotto per contattarci.",
 };

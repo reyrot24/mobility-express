@@ -30,7 +30,15 @@ export const Image = (props: Layout90Props) => {
         </h3>
         <p className="mt-5 md:mt-6 md:text-md">{description}</p>
         <div className="mt-6  gap-x-4 md:mt-8">
-          <Button>Prenota un consulto</Button>
+          <Button>
+            <a
+              href="https://tidycal.com/sviluppo/introduzione-mobility-express"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Prenota un consulto
+            </a>
+          </Button>
         </div>
       </div>
     </section>
@@ -38,9 +46,9 @@ export const Image = (props: Layout90Props) => {
 };
 
 export const Layout90Defaults: Layout90Props = {
-  heading: "Long heading is what you see here in this feature section",
+  heading: "Mobility Express: Requisiti d'ingresso",
   description:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla.",
+    "Per entrare nella rete Mobility Express, è necessario essere un intermediario assicurativo iscritto come subagente nella sezione E del RUI e soddisfare tutti i requisiti normativi, Se possiedi questi requisiti e desideri unirti al nostro team di consulenti, compila il form con i tuoi dati, contatti e numeor d'iscrizione al RUI. Invia la tua candidatura oggi stesso e diventa parte della nostra rete!",
   image: {
     src: "https://relume-assets.s3.amazonaws.com/placeholder-image-landscape.svg",
     alt: "Placeholder image",

@@ -1,6 +1,4 @@
 import { Button } from "../ui/button";
-import type { ButtonProps } from "@relume_io/relume-ui";
-import { RxChevronRight } from "react-icons/rx";
 
 type ImageProps = {
   src: string;
@@ -15,7 +13,6 @@ type FeaturesProps = {
 
 type Props = {
   features: FeaturesProps[];
-  buttons: ButtonProps[];
   heading: string;
   description: string;
 };
@@ -42,7 +39,15 @@ export const Caratteristiche = (props: Layout221Props) => {
             </h2>
             <p className="md:text-md">{description}</p>
             <div className="mt-6 flex items-center gap-x-4 md:mt-8">
-              <Button>Prenota un consulto</Button>
+              <Button>
+                <a
+                  href="https://tidycal.com/sviluppo/introduzione-mobility-express"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  Prenota un consulto
+                </a>
+              </Button>
             </div>
           </div>
           <div className="order-1 lg:order-2 md:col-span-7">
@@ -52,7 +57,7 @@ export const Caratteristiche = (props: Layout221Props) => {
                   <div className="mb-3 md:mb-4">
                     <img
                       src={feature.icon.src}
-                      className="size-12"
+                      className="size-12 text-orange"
                       alt={feature.icon.alt}
                     />
                   </div>
@@ -74,54 +79,42 @@ export const Layout221Defaults: Layout221Props = {
   features: [
     {
       icon: {
-        src: "https://relume-assets.s3.amazonaws.com/relume-icon.svg",
-        alt: "Relume logo 1",
+        src: "https://cdn-icons-png.flaticon.com/512/1378/1378723.png",
+        alt: "Tecnologia",
       },
-      heading: "Short heading here",
+      heading: "Tecnologia Avanzata",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros.",
+        "Gestisci preventivi, confronti ed emissioni assicurative da un'unica piattaforma integrata.",
     },
     {
       icon: {
-        src: "https://relume-assets.s3.amazonaws.com/relume-icon.svg",
-        alt: "Relume logo 2",
+        src: "https://www.svgrepo.com/show/167663/earn-money.svg",
+        alt: "Guadagni",
       },
-      heading: "Short heading here",
+      heading: "Maggiori Guadagni",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros.",
+        "Accedi a opportunità di guadagno rapide e vantaggiose con facilità.",
     },
     {
       icon: {
-        src: "https://relume-assets.s3.amazonaws.com/relume-icon.svg",
-        alt: "Relume logo 3",
+        src: "https://cdn-icons-png.flaticon.com/512/8744/8744612.png",
+        alt: "Prodotti",
       },
-      heading: "Short heading here",
+      heading: "Ampia Gamma di Prodotti",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros.",
+        "Trova le soluzione assicurative più adatte ai tuoi clienti con accesso diretto ai principali prodotti.",
     },
     {
       icon: {
-        src: "https://relume-assets.s3.amazonaws.com/relume-icon.svg",
-        alt: "Relume logo 4",
+        src: "https://www.svgrepo.com/show/304477/support.svg",
+        alt: "Supporto",
       },
-      heading: "Short heading here",
+      heading: "Supporto Dedicato",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros.",
+        "Affidati all'esperienza di professionisti per migliorare e gestire ogni fase del processo, dalla vendita all'assistenza post-vendita.",
     },
   ],
-  buttons: [
-    {
-      title: "Button",
-      variant: "secondary",
-    },
-    {
-      title: "Button",
-      variant: "link",
-      size: "link",
-      iconRight: <RxChevronRight />,
-    },
-  ],
-  heading: "Medium length section heading goes here",
+  heading: "Potenzia il Tuo Business con la nostra Piattaforma Innovativa",
   description:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.",
+    "Una piattaforma all-in-one che semplifica ogni aspetto del tuo lavoro assicurativo. Accedi a strumenti avanzati per far crescere la tua attività e ottimizzare il processo di vendita con un'interfaccia intuitiva. Riduci i tempi di gestione e aumenta l'efficienza del tuo servizio con soluzione professionali.",
 };
