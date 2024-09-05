@@ -3,8 +3,8 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "../ui/accordion";
-import { Button } from "../ui/button";
+} from "../../../ui/accordion";
+import { Button } from "../../../ui/button";
 
 type QuestionsProps = {
   title: string;
@@ -62,15 +62,13 @@ export const FAQs = (props: Faq1Props) => {
           </h4>
           <p className="md:text-md">{footerDescription}</p>
           <div className="mt-6 md:mt-8">
-            <Button>
-              <a
-                href="https://tidycal.com/sviluppo/introduzione-mobility-express"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                Prenota un consulto
-              </a>
-            </Button>
+            <a
+              href="https://tidycal.com/sviluppo/introduzione-mobility-express"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <Button>Prenota un consulto</Button>
+            </a>
           </div>
         </div>
       </div>
@@ -88,7 +86,7 @@ export const Faq1Defaults: Faq1Props = {
         "Mobility Express è la rete di subagenti assicurativi indipendente più solida d'Italia, progettata per intermediari che desiderano espandere il proprio business. Con la nostra piattaforma avanzata, puoi proporre ai tuoi clienti un'ampia gamma di prodotti assicurativi, Energia e Noleggio a lungo termine, supportato da tecnologie all'avanguardia e un sistema di provvigioni vanataggioso. Offriamo strumenti esclusivi per semplificare la gestione della tua attività e la possibilità di aumentare visibilità attraverso i nostri strumenti per massimizzare i guadagni.",
     },
     {
-      title: "Qauli vantaggi offre la piattaforma Mobility Express?",
+      title: "Quali vantaggi offre la piattaforma Mobility Express?",
       answer:
         "Se sei un subagente, avere a disposizione la piattaforma Mobility Express ti offre l'accesso a una vasta gamma di prodotti assicurativi, sia per il settore motor che per altri rami. Potrai approfittare di opportunità economiche vantaggiose, ricevere supporto dedicato nelle fasi di pre e post vendita e utilizzare una tecnologia all'avanguardia per accelerare e operare in modo rapido ed efficiente.",
     },

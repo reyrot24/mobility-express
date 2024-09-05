@@ -1,5 +1,5 @@
 import { ButtonProps } from "@relume_io/relume-ui";
-import { Button } from "../ui/button";
+import { Button } from "../../../ui/button";
 
 type Props = {
   heading: string;
@@ -23,15 +23,13 @@ export const CTA = (props: Cta25Props) => {
         </h2>
         <p className="md:text-md">{description}</p>
         <div className="mt-6 flex items-center justify-center gap-4 md:mt-8">
-          <Button>
-            <a
-              href="https://tidycal.com/sviluppo/introduzione-mobility-express"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              Prenota un consulto
-            </a>
-          </Button>
+          <a
+            href="https://tidycal.com/sviluppo/introduzione-mobility-express"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <Button>Prenota un consulto</Button>
+          </a>
         </div>
       </div>
     </section>

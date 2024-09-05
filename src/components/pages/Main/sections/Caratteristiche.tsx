@@ -1,4 +1,6 @@
-import { Button } from "../ui/button";
+import { icone } from "@/constants/images";
+import { useTheme } from "../../../dark-mode/theme-provider";
+import { Button } from "../../../ui/button";
 
 type ImageProps = {
   src: string;
@@ -7,6 +9,7 @@ type ImageProps = {
 
 type FeaturesProps = {
   icon: ImageProps;
+  iconDark: ImageProps;
   heading: string;
   description: string;
 };
@@ -25,6 +28,7 @@ export const Caratteristiche = (props: Layout221Props) => {
     ...Layout221Defaults,
     ...props,
   } as Props;
+  const { theme } = useTheme();
 
   return (
     <section
@@ -35,19 +39,18 @@ export const Caratteristiche = (props: Layout221Props) => {
         <div className="grid grid-cols-1 gap-y-12 md:grid-cols-12 md:items-center md:gap-x-12 lg:gap-x-20">
           <div className="static md:sticky md:top-[30%] md:col-span-5">
             <h2 className="mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl">
-              {heading}
+              {heading}{" "}
+              <span className="text-orange">Piattaforma Innovativa</span>
             </h2>
             <p className="md:text-md">{description}</p>
             <div className="mt-6 flex items-center gap-x-4 md:mt-8">
-              <Button>
-                <a
-                  href="https://tidycal.com/sviluppo/introduzione-mobility-express"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  Prenota un consulto
-                </a>
-              </Button>
+              <a
+                href="https://tidycal.com/sviluppo/introduzione-mobility-express"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <Button>Prenota un consulto</Button>
+              </a>
             </div>
           </div>
           <div className="order-1 lg:order-2 md:col-span-7">
@@ -55,13 +58,21 @@ export const Caratteristiche = (props: Layout221Props) => {
               {features.map((feature, index) => (
                 <div key={index}>
                   <div className="mb-3 md:mb-4">
-                    <img
-                      src={feature.icon.src}
-                      className="size-12 text-orange"
-                      alt={feature.icon.alt}
-                    />
+                    {theme === "light" ? (
+                      <img
+                        src={feature.icon.src}
+                        className="size-12"
+                        alt={feature.icon.alt}
+                      />
+                    ) : (
+                      <img
+                        src={feature.iconDark.src}
+                        className="size-12"
+                        alt={feature.iconDark.alt}
+                      />
+                    )}
                   </div>
-                  <h1 className="mb-3 text-xl font-bold md:mb-4 md:text-2xl">
+                  <h1 className="mb-3 text-xl font-bold md:mb-4 md:text-2xl underline decoration-orangeHover">
                     {feature.heading}
                   </h1>
                   <p>{feature.description}</p>
@@ -78,43 +89,35 @@ export const Caratteristiche = (props: Layout221Props) => {
 export const Layout221Defaults: Layout221Props = {
   features: [
     {
-      icon: {
-        src: "https://cdn-icons-png.flaticon.com/512/1378/1378723.png",
-        alt: "Tecnologia",
-      },
+      icon: icone.tecnologiaLight,
+      iconDark: icone.tecnologiaDark,
       heading: "Tecnologia Avanzata",
       description:
         "Gestisci preventivi, confronti ed emissioni assicurative da un'unica piattaforma integrata.",
     },
     {
-      icon: {
-        src: "https://www.svgrepo.com/show/167663/earn-money.svg",
-        alt: "Guadagni",
-      },
+      icon: icone.guadagniLight,
+      iconDark: icone.guadagniDark,
       heading: "Maggiori Guadagni",
       description:
         "Accedi a opportunità di guadagno rapide e vantaggiose con facilità.",
     },
     {
-      icon: {
-        src: "https://cdn-icons-png.flaticon.com/512/8744/8744612.png",
-        alt: "Prodotti",
-      },
+      icon: icone.prodottiLight,
+      iconDark: icone.prodottiDark,
       heading: "Ampia Gamma di Prodotti",
       description:
         "Trova le soluzione assicurative più adatte ai tuoi clienti con accesso diretto ai principali prodotti.",
     },
     {
-      icon: {
-        src: "https://www.svgrepo.com/show/304477/support.svg",
-        alt: "Supporto",
-      },
+      icon: icone.supportoLight,
+      iconDark: icone.supportoDark,
       heading: "Supporto Dedicato",
       description:
         "Affidati all'esperienza di professionisti per migliorare e gestire ogni fase del processo, dalla vendita all'assistenza post-vendita.",
     },
   ],
-  heading: "Potenzia il Tuo Business con la nostra Piattaforma Innovativa",
+  heading: "Potenzia il Tuo Business con la nostra",
   description:
     "Una piattaforma all-in-one che semplifica ogni aspetto del tuo lavoro assicurativo. Accedi a strumenti avanzati per far crescere la tua attività e ottimizzare il processo di vendita con un'interfaccia intuitiva. Riduci i tempi di gestione e aumenta l'efficienza del tuo servizio con soluzione professionali.",
 };

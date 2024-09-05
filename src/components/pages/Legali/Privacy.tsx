@@ -5,12 +5,12 @@ const Privacy = () => {
         Privacy Policy
       </h1>
       <div className="my-4">
-        <h1 className="text-md font-semibold">INTRODUZIONE</h1>
+        <h1 className="text-md font-semibold mb-2">INTRODUZIONE</h1>
         <p>
-          Alca Broler srl ("il Titolare") è un broker di assicurazioni (Numero
+          Alca Broker srl ("il Titolare") è un broker di assicurazioni (Numero
           Iscrizione RUI: B000514026). La presente Informativa ha lo scopo di
           informare l’utente circa le modalità di trattamento dei dati personali
-          che lo riguardano. Alca Broler srl in linea con il D. Lgs. 196/2003
+          che lo riguardano. Alca Broker srl in linea con il D. Lgs. 196/2003
           (di seguito "Codice Privacy") e il Regolamento (UE) 2016/679 (di
           seguito "GDPR"), intende garantire la privacy e la sicurezza dei dati
           personali di ciascun visitatore coerentemente con quanto prescritto
@@ -20,10 +20,12 @@ const Privacy = () => {
         </p>
       </div>
       <div className="my-4">
-        <h1 className="text-md font-semibold">TIPOLOGIA DI DATI TRATTATI</h1>
+        <h1 className="text-md font-semibold mb-2">
+          TIPOLOGIA DI DATI TRATTATI
+        </h1>
         <p>
           Il sito web offre contenuti di tipo informativo e, talvolta,
-          interattivo. Durante la navigazione del sito Alca Broler srl potrà,
+          interattivo. Durante la navigazione del sito Alca Broker srl potrà,
           quindi, acquisire informazioni sul visitatore, nei seguenti modi: DATI
           DI NAVIGAZIONE I sistemi informatici e le procedure software preposte
           al funzionamento di questo sito web acquisiscono, nel corso del loro
@@ -39,21 +41,23 @@ const Privacy = () => {
         </p>
       </div>
       <div className="my-4">
-        <h1 className="text-md font-semibold">ULTERIORI CATEGORIE DI DATI</h1>
+        <h1 className="text-md font-semibold mb-2">
+          ULTERIORI CATEGORIE DI DATI
+        </h1>
         <p>
           {" "}
           Si tratta di tutti quei dati personali forniti dal visitatore
           attraverso il sito, ad esempio, registrandosi e/o accedendo ad una
           area riservata e/o ad un servizio e/o partecipando a una delle
-          iniziative lanciate da Alca Broler srl da sola o in partnership con
+          iniziative lanciate da Alca Broker srl da sola o in partnership con
           soggetti terzi, scrivendo ad un indirizzo di posta elettronica di Alca
-          Broler srl per richiedere informazioni oppure telefonando ad un nostro
+          Broker srl per richiedere informazioni oppure telefonando ad un nostro
           numero telefonico per avere un contatto diretto con il servizio
           clienti.
         </p>
       </div>
       <div className="my-4">
-        <h1 className="text-md font-semibold">FINALITÀ DEL TRATTAMENTO</h1>{" "}
+        <h1 className="text-md font-semibold mb-2">FINALITÀ DEL TRATTAMENTO</h1>{" "}
         <p>
           Finalità Base giuridica Fornire il bene e/o il servizio richiesto
           dall'utente, gestire i contratti perfezionati dall'utente, espletare i
@@ -69,7 +73,7 @@ const Privacy = () => {
         </p>
       </div>
       <div className="my-4">
-        <h1 className="text-md font-semibold">
+        <h1 className="text-md font-semibold mb-2">
           AMBITO DI CIRCOLAZIONE DEI DATI
         </h1>
         <p>
@@ -79,21 +83,21 @@ const Privacy = () => {
         </p>
       </div>
       <div className="my-4">
-        <h1 className="text-md font-semibold">
+        <h1 className="text-md font-semibold mb-2">
           I RUOLI E LE RESPONSABILITÀ IN AMBITO PRIVACY
         </h1>
         <p>
-          I suoi dati personali sono trattati da Alca Broler srl, in qualità di
+          I suoi dati personali sono trattati da Alca Broker srl, in qualità di
           Titolare del trattamento. Informazioni più dettagliate sui nominativi
           dei Responsabili del trattamento potranno essere richieste inviando
           una mail al seguente indirizzo: privacy@ alcabroker.it . Le
-          comunichiamo, inoltre, che all'interno dell'azienda Alca Broler srl è
+          comunichiamo, inoltre, che all'interno dell'azienda Alca Broker srl è
           stato identificato un Data Protection Officer, contattabile al
           seguente indirizzo mail: dpo@ alcabroker.it.
         </p>
       </div>
       <div className="my-4">
-        <h1 className="text-md font-semibold">
+        <h1 className="text-md font-semibold mb-2">
           MODALITÀ DEL TRATTAMENTO DI DATI
         </h1>
         <p>
@@ -106,7 +110,7 @@ const Privacy = () => {
         </p>
       </div>
       <div className="my-4">
-        <h1 className="text-md font-semibold">
+        <h1 className="text-md font-semibold mb-2">
           COLLEGAMENTO VERSO/DA SITI TERZI
         </h1>
         <p>
@@ -119,7 +123,7 @@ const Privacy = () => {
         </p>
       </div>
       <div className="my-4">
-        <h1 className="text-md font-semibold">CONSERVAZIONE DEI DATI</h1>
+        <h1 className="text-md font-semibold mb-2">CONSERVAZIONE DEI DATI</h1>
         <p>
           La informiamo che i dati relativi ai log di navigazione, qualora
           registrati, saranno conservati dal Titolare per un periodo pari a 3
@@ -133,20 +137,22 @@ const Privacy = () => {
         </p>
       </div>
       <div className="my-4">
-        <h1 className="text-md font-semibold">DIRITTI DEGLI INTERESSATI</h1>
+        <h1 className="text-md font-semibold mb-2">
+          DIRITTI DEGLI INTERESSATI
+        </h1>
         <p>
           I soggetti cui si riferiscono i sopra citati dati personali (c.d.
           "interessati"), hanno la facoltà di esercitare i propri diritti
           secondo le modalità e nei limiti previsti dalla vigente normativa
           privacy. In relazione al trattamento dei suoi dati personali, ha
-          diritto di chiedere a Alca Broler srl l'accesso: può chiedere conferma
+          diritto di chiedere a Alca Broker srl l'accesso: può chiedere conferma
           che sia o meno in essere un trattamento di dati che la riguardano,
           oltre a maggiori chiarimenti circa le informazioni di cui alla
           presente Informativa, nonché di ricevere i dati stessi, nei limiti
           della ragionevolezza; la rettifica: può chiedere di rettificare o
           integrare i dati che ci ha fornito o comunque in nostro possesso,
           qualora inesatti; la cancellazione: può chiedere che i suoi dati
-          acquisiti o trattati da Alca Broler srl vengano cancellati, qualora
+          acquisiti o trattati da Alca Broker srl vengano cancellati, qualora
           non siano più necessari alle nostre finalità o laddove non vi siano
           contestazioni o controversie in essere, in caso di revoca del consenso
           o sua opposizione al trattamento, in caso di trattamento illecito,
@@ -174,24 +180,26 @@ const Privacy = () => {
           problemi o chiedere chiarimenti sul trattamento dei propri dati
           personali può inviare una mail a privacy@alcabroker.it . Le
           comunichiamo, inoltre, che è possibile inoltrare le sue richieste
-          anche via posta, scrivendo al Titolare del Trattamento, Alca Broler
+          anche via posta, scrivendo al Titolare del Trattamento, Alca Broker
           srl, con sede in Via Vittoria Colonna, 14 NA, specificando l'oggetto
           della richiesta.
         </p>
       </div>
       <div className="my-4">
-        <h1 className="text-md font-semibold">DIRITTO ALL'OBLIO</h1>
+        <h1 className="text-md font-semibold mb-2">DIRITTO ALL'OBLIO</h1>
         <p>
           La informiamo che la presente Informativa riguarda esclusivamente il
           trattamento dei dati personali che lei ha fornito o fornirà a Alca
-          Broler srl - eventualmente anche acquistando nostri servizi forniti
-          dietro pagamento - e quelli che, eventualmente, Alca Broler srl
+          Broker srl - eventualmente anche acquistando nostri servizi forniti
+          dietro pagamento - e quelli che, eventualmente, Alca Broker srl
           acquisirà nel corso del presente rapporto e/o di ulteriori rapporti
           tra lei e noi.
         </p>
       </div>
       <div className="my-4">
-        <h1 className="text-md font-semibold">MODIFICHE ALL'INFORMATIVA</h1>
+        <h1 className="text-md font-semibold mb-2">
+          MODIFICHE ALL'INFORMATIVA
+        </h1>
         <p>
           L'eventuale entrata in vigore di nuove normative di settore, come
           anche il costante esame ed aggiornamento dei servizi all'utente,

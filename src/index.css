@@ -5,7 +5,7 @@
 :root{
   --orange: #FF6B01;
   --blue-text: #040C54;
-  --white-orange: #FFFBF7;
+  --white-orange: #fff5eb;
   --hover-whiteOrange: #fff4e8;
   --bluebg-dark: #1B2635;
   --bluebg-light: #233044;
@@ -91,3 +91,14 @@
   }
 }
 
+@layer utilities {
+  /* Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}

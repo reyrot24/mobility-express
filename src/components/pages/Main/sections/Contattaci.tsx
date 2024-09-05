@@ -1,10 +1,18 @@
 import { useState } from "react";
 import { BiEnvelope, BiMap, BiPhone } from "react-icons/bi";
-import { Button } from "../ui/button";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
-import { Checkbox } from "../ui/checkbox";
+import { Button } from "../../../ui/button";
+import { Label } from "../../../ui/label";
+import { Input } from "../../../ui/input";
+import { Textarea } from "../../../ui/textarea";
+import { Checkbox } from "../../../ui/checkbox";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogTrigger,
+} from "../../../ui/dialog";
+import TerminiDiServizio from "../../Legali/TerminiDiServizio";
 
 type Props = {
   heading: string;
@@ -56,20 +64,19 @@ export const Contattaci = (props: Contact5Props) => {
 
           <div className="grid grid-cols-1 gap-4 py-2">
             <div className="flex items-center gap-4">
-              <BiEnvelope className="size-6 flex-none" />
+              <BiEnvelope className="size-6 flex-none text-orangeHover" />
               <p>{email}</p>
             </div>
             <div className="flex items-center gap-4">
-              <BiPhone className="size-6 flex-none" />
+              <BiPhone className="size-6 flex-none text-orangeHover" />
               <p>{phone}</p>
             </div>
             <div className="flex items-center gap-4">
-              <BiMap className="size-6 flex-none" />
+              <BiMap className="size-6 flex-none text-orangeHover" />
               <p>{address}</p>
             </div>
           </div>
         </div>
-
         <form
           className="grid grid-cols-1 grid-rows-[auto_auto] gap-6"
           onSubmit={handleSubmit}
@@ -119,19 +126,31 @@ export const Contattaci = (props: Contact5Props) => {
               checked={acceptTerms}
               onCheckedChange={setAcceptTerms}
             />
-            <Label htmlFor="terms" className="cursor-pointer">
-              Accetto i{" "}
-              <a
-                className="text-text hover:text-gray-300 underline"
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Termini di Servizi
-              </a>
-            </Label>
+            <div>
+              <Label htmlFor="terms" className="cursor-pointer ">
+                Accetto i
+              </Label>
+            </div>
+            <div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <p className="font-semibold underline decoration-text cursor-pointer hover:decoration-whiteHover underline-offset-1 hover:text-whiteHover ">
+                    Termini di Servizi
+                  </p>
+                </DialogTrigger>
+                <DialogContent className="h-[500px] overflow-auto no-scrollbar">
+                  <TerminiDiServizio />
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button type="button" variant="default">
+                        Close
+                      </Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
-
           <div>
             <Button>Invia</Button>
           </div>
@@ -144,7 +163,7 @@ export const Contattaci = (props: Contact5Props) => {
 export const Contact5Defaults: Contact5Props = {
   heading: "Contattaci",
   description: "Compila il form per metterti in contatto con noi.",
-  email: "alcabrokersrl@legalmail.it",
+  email: "sviluppo@alcabroker.it",
   phone: "+39 081 529 70 45",
   address: "Via Vittoria Colonna 14 - 80121 Napoli (NA)",
 };
