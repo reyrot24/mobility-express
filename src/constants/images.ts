@@ -1,5 +1,14 @@
 import LogoDark from "../assets/LogoDarkMode.png";
 import LogoLight from "../assets/LogoLightMode.png";
+import TecnologiaLight from "../assets/TecnologiaLight.png";
+import TecnologiaDark from "../assets/TecnologiaDark.png";
+import GuadagniLight from "../assets/GuadagniLight.png";
+import GuadagniDark from "../assets/GuadagniDark.png";
+import ProdottiLight from "../assets/ProdottiLight.png";
+import ProdottiDark from "../assets/ProdottiDark.png";
+import SupportoLight from "../assets/SupportoLight.png";
+import SupportoDark from "../assets/SupportoDark.png";
+import Piattaforma from "../assets/Piattaforma.png";
 
 export const logos = {
   logoDark: { url: "/", src: LogoDark, alt: "Logo Dark" },
@@ -8,40 +17,40 @@ export const logos = {
 
 export const icone = {
   tecnologiaLight: {
-    src: "./TecnologiaLight.png",
+    src: TecnologiaLight,
     alt: "Tecnologia Light",
   },
   tecnologiaDark: {
-    src: "./TecnologiaDark.png",
+    src: TecnologiaDark,
     alt: "Tecnologia Dark",
   },
   guadagniLight: {
-    src: "./GuadagniLight.png",
+    src: GuadagniLight,
     alt: "Guadagni Light",
   },
   guadagniDark: {
-    src: "./GuadagniDark.png",
+    src: GuadagniDark,
     alt: "Guadagni Dark",
   },
   prodottiLight: {
-    src: "./ProdottiLight.png",
+    src: ProdottiLight,
     alt: "Prodotti Light",
   },
   prodottiDark: {
-    src: "./ProdottiDark.png",
+    src: ProdottiDark,
     alt: "Prodotti Dark",
   },
   supportoLight: {
-    src: "./SupportoLight.png",
+    src: SupportoLight,
     alt: "Supporto Light",
   },
   supportoDark: {
-    src: "./SupportoDark.png",
+    src: SupportoDark,
     alt: "Supporto Dark",
   },
 };
 
 export const foto = {
-  src: "./Piattaforma.png",
+  src: Piattaforma,
   alt: "Immagine Piattaforma",
 };
