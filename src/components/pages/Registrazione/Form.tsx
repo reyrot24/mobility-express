@@ -20,19 +20,54 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import TerminiDiServizio from "../Legali/TerminiDiServizio";
+import emailjs from "@emailjs/browser";
+import { useForm } from "react-hook-form";
 
 type Props = {
-  tagline: string;
-  heading: string;
-  description: string;
-  email: string;
-  phone: string;
-  address: string;
   button: ButtonProps;
 };
 
 export type Contact6Props = React.ComponentPropsWithoutRef<"section"> &
   Partial<Props>;
+
+interface IFormInput {
+  //Dati anagrafici & responsabile
+  cognome: string;
+  nome: string;
+  cf: string;
+  data_nascita: string;
+  luogo_nascita: string;
+  via_corso: string;
+  indirizzo: string;
+  civico: string;
+  cap: string;
+  comune: string;
+  provincia: string;
+  rui: string;
+  data_iscrizione: string;
+  telefono: string;
+  cellulare: string;
+  email: string;
+
+  //Dati Azienda
+  ragione_sociale: string;
+  piva: string;
+  via_corso_azienda: string;
+  indirizzo_azienda: string;
+  civico_azienda: string;
+  cap_azienda: string;
+  comune_azienda: string;
+  provincia_azienda: string;
+  rui_azienda: string;
+  data_iscrizione_azienda: string;
+  telefono_azienda: string;
+  fax_azienda: string;
+  email_azienda: string;
+  pec: string;
+
+  //Altro
+  note: string;
+}
 
 export const Form = (props: Contact6Props) => {
   const { button } = {
@@ -40,48 +75,49 @@ export const Form = (props: Contact6Props) => {
     ...props,
   } as Props;
 
-  // Stati Dati Azienda
-  const [ragioneSociale, setRagioneSociale] = useState("");
-  const [pIva, setPIva] = useState("");
-  const [viaCorso, setViaCorso] = useState("");
-  const [indirizzo, setIndirizzo] = useState("");
-  const [civico, setCivico] = useState("");
-  const [cap, setCAP] = useState("");
-  const [comune, setComune] = useState("");
-  const [provincia, setProvincia] = useState("");
-  const [RUIAzienda, setRUIAzienda] = useState("");
-  const [dataIscrizioneAzienda, setDataIscrizioneAzienda] = useState("");
-  const [telefonoAzienda, setTelefonoAzienda] = useState("");
-  const [fax, setFax] = useState("");
-  const [emailAzienda, setEmailAzienda] = useState("");
-  const [pec, setPEC] = useState("");
-
-  // Stati Dati Responsabile
-  const [cognome, setCognome] = useState("");
-  const [nome, setNome] = useState("");
-  const [cf, setCf] = useState("");
-  const [dataNascita, setDataNascita] = useState("");
-  const [luogoNascita, setLuogoNascita] = useState("");
-  const [RUIResponsabile, setRUIResponsabile] = useState("");
-  const [dataIscrizioneResponsabile, setdataIscrizioneResponsabile] =
-    useState("");
-  const [telefonoResponsabile, setTelefonoResponsabile] = useState("");
-  const [cellulare, setCellulare] = useState("");
-  const [emailResponsabile, setEmailResponsabile] = useState("");
-
-  const [selectedItem, setSelectedItem] = useState("");
-  const [note, setNote] = useState("");
+  const [loading, setLoading] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState<boolean | "indeterminate">(
     false
   );
+  const [selectedItem, setSelectedItem] = useState("");
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    console.log({
-      selectedItem,
-      note,
-      acceptTerms,
-    });
+  const { register, handleSubmit, reset } = useForm<IFormInput>();
+
+  const onSubmit = (data: IFormInput) => {
+    setLoading(true);
+    let templateParams = {};
+    if (acceptTerms) {
+      if (selectedItem === "persona-fisica") {
+        templateParams = {
+          ...data,
+          tipologia: "Persona Fisica",
+        };
+      } else if (selectedItem === "ditta-individuale") {
+        templateParams = {
+          ...data,
+          tipologia: "Ditta Individuale",
+        };
+      } else {
+        templateParams = {
+          ...data,
+          tipologia: "Società",
+        };
+      }
+      emailjs
+        .send(
+          import.meta.env.VITE_EMAIL_SERVICE_ID,
+          import.meta.env.VITE_EMAIL_TEMPLATE_ID_ISCRIVITI,
+          templateParams,
+          import.meta.env.VITE_EMAIL_PUBLIC_KEY
+        )
+        .then(() => {
+          reset();
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
+      alert("Accept the Privacy!");
+    }
   };
 
   const tipologia = [
@@ -90,155 +126,12 @@ export const Form = (props: Contact6Props) => {
     { value: "persona-fisica", label: "Persona Fisica" },
   ];
 
-  function setValueDatiAzienda(e: string, id: string) {
-    switch (id) {
-      case "ragione-sociale":
-        setRagioneSociale(e);
-        break;
-      case "p-iva":
-        setPIva(e);
-        break;
-      case "via-corso":
-        setViaCorso(e);
-        break;
-      case "indirizzo":
-        setIndirizzo(e);
-        break;
-      case "civico":
-        setCivico(e);
-        break;
-      case "cap":
-        setCAP(e);
-        break;
-      case "comune":
-        setComune(e);
-        break;
-      case "provincia":
-        setProvincia(e);
-        break;
-      case "rui":
-        setRUIAzienda(e);
-        break;
-      case "data-IscrizioneAzienda-azienda":
-        setDataIscrizioneAzienda(e);
-        break;
-      case "telefono-azienda":
-        setTelefonoAzienda(e);
-        break;
-      case "fax":
-        setFax(e);
-        break;
-      case "email-azienda":
-        setEmailAzienda(e);
-        break;
-      case "pec":
-        setPEC(e);
-        break;
-      default:
-        break;
-    }
-  }
-
-  function setValueDatiResponsabile(e: string, id: string) {
-    switch (id) {
-      case "cognome":
-        setCognome(e);
-        break;
-      case "nome":
-        setNome(e);
-        break;
-      case "cf":
-        setCf(e);
-        break;
-      case "data-nascita":
-        setDataNascita(e);
-        break;
-      case "luogo-nascita":
-        setLuogoNascita(e);
-        break;
-      case "rui":
-        setRUIResponsabile(e);
-        break;
-      case "data-iscrizione-responsabile":
-        setdataIscrizioneResponsabile(e);
-        break;
-      case "telefono-responsabile":
-        setTelefonoResponsabile(e);
-        break;
-      case "cellulare":
-        setCellulare(e);
-        break;
-      case "e-mail-responsabile":
-        setEmailResponsabile(e);
-        break;
-
-      default:
-        break;
-    }
-  }
-
-  function setValueDatiAnagrafici(e: string, id: string) {
-    switch (id) {
-      case "cognome":
-        setCognome(e);
-        break;
-      case "nome":
-        setNome(e);
-        break;
-      case "cf":
-        setCf(e);
-        break;
-      case "data-nascita":
-        setDataNascita(e);
-        break;
-      case "luogo-nascita":
-        setLuogoNascita(e);
-        break;
-      case "via-corso":
-        setViaCorso(e);
-        break;
-      case "indirizzo":
-        setIndirizzo(e);
-        break;
-      case "civico":
-        setCivico(e);
-        break;
-      case "cap":
-        setCAP(e);
-        break;
-      case "comune":
-        setComune(e);
-        break;
-      case "provincia":
-        setProvincia(e);
-        break;
-      case "rui":
-        setRUIResponsabile(e);
-        break;
-      case "data-iscrizione":
-        setdataIscrizioneResponsabile(e);
-        break;
-      case "telefono":
-        setTelefonoResponsabile(e);
-        break;
-      case "cellulare":
-        setCellulare(e);
-        break;
-      case "e-mail":
-        setEmailResponsabile(e);
-        break;
-
-      default:
-        break;
-    }
-  }
-
   return (
     <section className="px-[5%] pt-36 md:pt-42 md:pt-50 pb-18 md:pb-20 md:pb-25 bg-background1">
       <div className="container flex items-center justify-center gap-y-12 md:gap-x-12 lg:gap-x-20 lg:gap-y-16">
         <form
           className="grid grid-cols-1 grid-rows-[auto_auto] gap-6"
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmit(onSubmit)}
         >
           {/* Select */}
           <div className="grid w-full items-center bg-background2 px-[5%] rounded-xl">
@@ -276,13 +169,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAnagrafici.cognome.id}
-                      value={cognome}
-                      onChange={(e) =>
-                        setValueDatiAnagrafici(
-                          e.target.value,
-                          datiAnagrafici.cognome.id
-                        )
-                      }
+                      {...register("cognome", { required: true })}
                       required
                     />
                   </div>
@@ -292,13 +179,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAnagrafici.nome.id}
-                      value={nome}
-                      onChange={(e) =>
-                        setValueDatiAnagrafici(
-                          e.target.value,
-                          datiAnagrafici.nome.id
-                        )
-                      }
+                      {...register("nome", { required: true })}
                       required
                     />
                   </div>
@@ -308,13 +189,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAnagrafici.cf.id}
-                      value={cf}
-                      onChange={(e) =>
-                        setValueDatiAnagrafici(
-                          e.target.value,
-                          datiAnagrafici.cf.id
-                        )
-                      }
+                      {...register("cf", { required: true })}
                       required
                     />
                   </div>
@@ -326,14 +201,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="date"
                       id={datiAnagrafici.dataNascita.id}
-                      value={dataNascita}
-                      onChange={(e) =>
-                        setValueDatiResponsabile(
-                          e.target.value,
-                          datiAnagrafici.dataNascita.id
-                        )
-                      }
-                      required
+                      {...register("data_nascita", { required: true })}
                     />
                   </div>
                   {/* -> Luogo Nascita */}
@@ -344,13 +212,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAnagrafici.luogoNascita.id}
-                      value={luogoNascita}
-                      onChange={(e) =>
-                        setValueDatiAnagrafici(
-                          e.target.value,
-                          datiAnagrafici.luogoNascita.id
-                        )
-                      }
+                      {...register("luogo_nascita", { required: true })}
                       required
                     />
                   </div>
@@ -362,13 +224,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAnagrafici.viaCorso.id}
-                      value={viaCorso}
-                      onChange={(e) =>
-                        setValueDatiAnagrafici(
-                          e.target.value,
-                          datiAnagrafici.viaCorso.id
-                        )
-                      }
+                      {...register("via_corso", { required: true })}
                       required
                     />
                   </div>
@@ -380,13 +236,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAnagrafici.indirizzo.id}
-                      value={indirizzo}
-                      onChange={(e) =>
-                        setValueDatiAnagrafici(
-                          e.target.value,
-                          datiAnagrafici.indirizzo.id
-                        )
-                      }
+                      {...register("indirizzo", { required: true })}
                       required
                     />
                   </div>
@@ -398,13 +248,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAnagrafici.civico.id}
-                      value={civico}
-                      onChange={(e) =>
-                        setValueDatiAnagrafici(
-                          e.target.value,
-                          datiAnagrafici.civico.id
-                        )
-                      }
+                      {...register("civico", { required: true })}
                       required
                     />
                   </div>
@@ -414,13 +258,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAnagrafici.cap.id}
-                      value={cap}
-                      onChange={(e) =>
-                        setValueDatiResponsabile(
-                          e.target.value,
-                          datiAnagrafici.cap.id
-                        )
-                      }
+                      {...register("cap", { required: true })}
                       required
                     />
                   </div>
@@ -432,13 +270,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAnagrafici.comune.id}
-                      value={comune}
-                      onChange={(e) =>
-                        setValueDatiResponsabile(
-                          e.target.value,
-                          datiAnagrafici.comune.id
-                        )
-                      }
+                      {...register("comune", { required: true })}
                       required
                     />
                   </div>
@@ -450,13 +282,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAnagrafici.provincia.id}
-                      value={provincia}
-                      onChange={(e) =>
-                        setValueDatiResponsabile(
-                          e.target.value,
-                          datiAnagrafici.provincia.id
-                        )
-                      }
+                      {...register("provincia", { required: true })}
                       required
                     />
                   </div>
@@ -466,13 +292,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAnagrafici.rui.id}
-                      value={RUIResponsabile}
-                      onChange={(e) =>
-                        setValueDatiResponsabile(
-                          e.target.value,
-                          datiAnagrafici.rui.id
-                        )
-                      }
+                      {...register("rui", { required: true })}
                       required
                     />
                   </div>
@@ -484,13 +304,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="date"
                       id={datiAnagrafici.dataIscrizione.id}
-                      value={dataIscrizioneResponsabile}
-                      onChange={(e) =>
-                        setValueDatiResponsabile(
-                          e.target.value,
-                          datiAnagrafici.dataIscrizione.id
-                        )
-                      }
+                      {...register("data_iscrizione", { required: true })}
                       required
                     />
                   </div>
@@ -502,13 +316,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAnagrafici.telefono.id}
-                      value={telefonoResponsabile}
-                      onChange={(e) =>
-                        setValueDatiResponsabile(
-                          e.target.value,
-                          datiAnagrafici.telefono.id
-                        )
-                      }
+                      {...register("telefono", { required: true })}
                     />
                   </div>
                   {/* -> Cellulare */}
@@ -519,13 +327,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAnagrafici.cellulare.id}
-                      value={cellulare}
-                      onChange={(e) =>
-                        setValueDatiResponsabile(
-                          e.target.value,
-                          datiAnagrafici.cellulare.id
-                        )
-                      }
+                      {...register("cellulare", { required: true })}
                       required
                     />
                   </div>
@@ -535,13 +337,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="email"
                       id={datiAnagrafici.email.id}
-                      value={emailResponsabile}
-                      onChange={(e) =>
-                        setValueDatiResponsabile(
-                          e.target.value,
-                          datiAnagrafici.email.id
-                        )
-                      }
+                      {...register("email", { required: true })}
                       required
                     />
                   </div>
@@ -562,13 +358,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAzienda.ragioneSociale.id}
-                      value={ragioneSociale}
-                      onChange={(e) =>
-                        setValueDatiAzienda(
-                          e.target.value,
-                          datiAzienda.ragioneSociale.id
-                        )
-                      }
+                      {...register("ragione_sociale", { required: true })}
                     />
                   </div>
                   {/* -> P. Iva */}
@@ -577,10 +367,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAzienda.pIva.id}
-                      value={pIva}
-                      onChange={(e) =>
-                        setValueDatiAzienda(e.target.value, datiAzienda.pIva.id)
-                      }
+                      {...register("piva", { required: true })}
                     />
                   </div>
                   {/* -> Via, Corso */}
@@ -589,13 +376,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAzienda.viaCorso.id}
-                      value={viaCorso}
-                      onChange={(e) =>
-                        setValueDatiAzienda(
-                          e.target.value,
-                          datiAzienda.viaCorso.id
-                        )
-                      }
+                      {...register("via_corso_azienda", { required: true })}
                     />
                   </div>
                   {/* -> Indirizzo */}
@@ -606,13 +387,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAzienda.indirizzo.id}
-                      value={indirizzo}
-                      onChange={(e) =>
-                        setValueDatiAzienda(
-                          e.target.value,
-                          datiAzienda.indirizzo.id
-                        )
-                      }
+                      {...register("indirizzo_azienda", { required: true })}
                     />
                   </div>
                   {/* -> Civico */}
@@ -621,13 +396,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAzienda.civico.id}
-                      value={civico}
-                      onChange={(e) =>
-                        setValueDatiAzienda(
-                          e.target.value,
-                          datiAzienda.civico.id
-                        )
-                      }
+                      {...register("civico_azienda", { required: true })}
                     />
                   </div>
                   {/* -> CAP */}
@@ -636,10 +405,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAzienda.cap.id}
-                      value={cap}
-                      onChange={(e) =>
-                        setValueDatiAzienda(e.target.value, datiAzienda.cap.id)
-                      }
+                      {...register("cap_azienda", { required: true })}
                     />
                   </div>
                   {/* -> Comune */}
@@ -648,13 +414,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAzienda.comune.id}
-                      value={comune}
-                      onChange={(e) =>
-                        setValueDatiAzienda(
-                          e.target.value,
-                          datiAzienda.comune.id
-                        )
-                      }
+                      {...register("comune_azienda", { required: true })}
                     />
                   </div>
                   {/* -> Provincia */}
@@ -665,13 +425,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAzienda.provincia.id}
-                      value={provincia}
-                      onChange={(e) =>
-                        setValueDatiAzienda(
-                          e.target.value,
-                          datiAzienda.provincia.id
-                        )
-                      }
+                      {...register("provincia_azienda", { required: true })}
                     />
                   </div>
                   {/* -> RUI */}
@@ -680,13 +434,10 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAzienda.rui.id}
-                      value={RUIAzienda}
-                      onChange={(e) =>
-                        setValueDatiAzienda(e.target.value, datiAzienda.rui.id)
-                      }
+                      {...register("rui_azienda", { required: true })}
                     />
                   </div>
-                  {/* -> Data IscrizioneAzienda */}
+                  {/* -> Data Iscrizione Azienda */}
                   <div className="py-2 flex flex-col">
                     <Label className="mb-2">
                       {datiAzienda.dataIscrizione.label}
@@ -694,13 +445,9 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="date"
                       id={datiAzienda.dataIscrizione.id}
-                      value={dataIscrizioneAzienda}
-                      onChange={(e) =>
-                        setValueDatiAzienda(
-                          e.target.value,
-                          datiAzienda.dataIscrizione.id
-                        )
-                      }
+                      {...register("data_iscrizione_azienda", {
+                        required: true,
+                      })}
                     />
                   </div>
                   {/* -> Telefono */}
@@ -709,13 +456,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAzienda.telefono.id}
-                      value={telefonoAzienda}
-                      onChange={(e) =>
-                        setValueDatiAzienda(
-                          e.target.value,
-                          datiAzienda.telefono.id
-                        )
-                      }
+                      {...register("telefono_azienda", { required: true })}
                     />
                   </div>
                   {/* -> Fax */}
@@ -724,10 +465,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAzienda.fax.id}
-                      value={fax}
-                      onChange={(e) =>
-                        setValueDatiAzienda(e.target.value, datiAzienda.fax.id)
-                      }
+                      {...register("fax_azienda")}
                     />
                   </div>
                   {/* -> E-mail */}
@@ -736,13 +474,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="email"
                       id={datiAzienda.email.id}
-                      value={emailAzienda}
-                      onChange={(e) =>
-                        setValueDatiAzienda(
-                          e.target.value,
-                          datiAzienda.email.id
-                        )
-                      }
+                      {...register("email_azienda", { required: true })}
                     />
                   </div>
                   {/* -> PEC */}
@@ -751,10 +483,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiAzienda.pec.id}
-                      value={pec}
-                      onChange={(e) =>
-                        setValueDatiAzienda(e.target.value, datiAzienda.pec.id)
-                      }
+                      {...register("pec")}
                     />
                   </div>
                 </section>
@@ -771,14 +500,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiResponsabile.cognome.id}
-                      value={cognome}
-                      onChange={(e) =>
-                        setValueDatiResponsabile(
-                          e.target.value,
-                          datiResponsabile.cognome.id
-                        )
-                      }
-                      required
+                      {...register("cognome", { required: true })}
                     />
                   </div>
                   {/* -> Nome */}
@@ -789,14 +511,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiResponsabile.nome.id}
-                      value={nome}
-                      onChange={(e) =>
-                        setValueDatiResponsabile(
-                          e.target.value,
-                          datiResponsabile.nome.id
-                        )
-                      }
-                      required
+                      {...register("nome", { required: true })}
                     />
                   </div>
                   {/* -> CF */}
@@ -805,14 +520,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiResponsabile.cf.id}
-                      value={cf}
-                      onChange={(e) =>
-                        setValueDatiResponsabile(
-                          e.target.value,
-                          datiResponsabile.cf.id
-                        )
-                      }
-                      required
+                      {...register("cf", { required: true })}
                     />
                   </div>
                   {/* -> Data Nascita */}
@@ -823,14 +531,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="date"
                       id={datiResponsabile.dataNascita.id}
-                      value={dataNascita}
-                      onChange={(e) =>
-                        setValueDatiResponsabile(
-                          e.target.value,
-                          datiResponsabile.dataNascita.id
-                        )
-                      }
-                      required
+                      {...register("data_nascita", { required: true })}
                     />
                   </div>
                   {/* -> Luogo Nascita */}
@@ -841,14 +542,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiResponsabile.luogoNascita.id}
-                      value={luogoNascita}
-                      onChange={(e) =>
-                        setValueDatiResponsabile(
-                          e.target.value,
-                          datiResponsabile.luogoNascita.id
-                        )
-                      }
-                      required
+                      {...register("luogo_nascita", { required: true })}
                     />
                   </div>
                   {/* -> RUI */}
@@ -857,14 +551,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiResponsabile.rui.id}
-                      value={RUIResponsabile}
-                      onChange={(e) =>
-                        setValueDatiResponsabile(
-                          e.target.value,
-                          datiResponsabile.rui.id
-                        )
-                      }
-                      required
+                      {...register("rui", { required: true })}
                     />
                   </div>
                   {/* -> Data Iscrizione */}
@@ -875,14 +562,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="date"
                       id={datiResponsabile.dataIscrizione.id}
-                      value={dataIscrizioneResponsabile}
-                      onChange={(e) =>
-                        setValueDatiResponsabile(
-                          e.target.value,
-                          datiResponsabile.dataIscrizione.id
-                        )
-                      }
-                      required
+                      {...register("data_iscrizione", { required: true })}
                     />
                   </div>
                   {/* -> Telefono */}
@@ -893,13 +573,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiResponsabile.telefono.id}
-                      value={telefonoResponsabile}
-                      onChange={(e) =>
-                        setValueDatiResponsabile(
-                          e.target.value,
-                          datiResponsabile.telefono.id
-                        )
-                      }
+                      {...register("telefono")}
                     />
                   </div>
                   {/* -> Cellulare */}
@@ -910,14 +584,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="text"
                       id={datiResponsabile.cellulare.id}
-                      value={cellulare}
-                      onChange={(e) =>
-                        setValueDatiResponsabile(
-                          e.target.value,
-                          datiResponsabile.cellulare.id
-                        )
-                      }
-                      required
+                      {...register("cellulare", { required: true })}
                     />
                   </div>
                   {/* -> Email */}
@@ -928,14 +595,7 @@ export const Form = (props: Contact6Props) => {
                     <Input
                       type="email"
                       id={datiResponsabile.email.id}
-                      value={emailResponsabile}
-                      onChange={(e) =>
-                        setValueDatiResponsabile(
-                          e.target.value,
-                          datiResponsabile.email.id
-                        )
-                      }
-                      required
+                      {...register("email", { required: true })}
                     />
                   </div>
                 </section>
@@ -947,12 +607,7 @@ export const Form = (props: Contact6Props) => {
             <Label htmlFor="message" className="mb-2">
               Note
             </Label>
-            <Input
-              type="text"
-              id="note"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-            />
+            <Input type="text" id="note" {...register("note")} />
           </div>
 
           <div className="mb-3 flex items-center space-x-2 text-sm md:mb-4">
@@ -988,7 +643,9 @@ export const Form = (props: Contact6Props) => {
           </div>
 
           <div>
-            <Button>{button.title}</Button>
+            <Button disabled={loading} type="submit">
+              {button.title}
+            </Button>
           </div>
         </form>
       </div>
@@ -997,11 +654,5 @@ export const Form = (props: Contact6Props) => {
 };
 
 export const Contact6Defaults: Contact6Props = {
-  tagline: "Tagline",
-  heading: "Contact us",
-  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-  email: "hello@relume.io",
-  phone: "+1 (555) 000-0000",
-  address: "123 Sample St, Sydney NSW 2000 AU",
   button: { title: "Submit" },
 };

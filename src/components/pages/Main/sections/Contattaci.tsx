@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { BiEnvelope, BiMap, BiPhone } from "react-icons/bi";
 import { Button } from "../../../ui/button";
 import { Label } from "../../../ui/label";
@@ -13,6 +13,9 @@ import {
   DialogTrigger,
 } from "../../../ui/dialog";
 import TerminiDiServizio from "../../Legali/TerminiDiServizio";
+import emailjs from "@emailjs/browser";
+import { useForm } from "react-hook-form";
+import ReCAPTCHA from "react-google-recaptcha";
 
 type Props = {
   heading: string;
@@ -25,27 +28,60 @@ type Props = {
 export type Contact5Props = React.ComponentPropsWithoutRef<"section"> &
   Partial<Props>;
 
+interface IFormInput {
+  user_name: string;
+  user_email: string;
+  message: string;
+}
+
 export const Contattaci = (props: Contact5Props) => {
   const { heading, description, email, phone, address } = {
     ...Contact5Defaults,
     ...props,
   } as Props;
 
-  const [nameInput, setNameInput] = useState("");
-  const [emailInput, setEmailInput] = useState("");
-  const [messageInput, setMessageInput] = useState("");
+  const [loading, setLoading] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState<boolean | "indeterminate">(
     false
   );
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    console.log({
-      nameInput,
-      emailInput,
-      messageInput,
-      acceptTerms,
-    });
+  const { register, handleSubmit, reset } = useForm<IFormInput>();
+
+  const recaptcha = useRef<ReCAPTCHA>(null);
+
+  const onSubmit = (data: IFormInput) => {
+    setLoading(true);
+
+    const captchaValue = recaptcha.current?.getValue();
+    if (!captchaValue) {
+      alert("Verifica il reCAPTCHA!");
+      setLoading(false);
+    } else {
+      const templateParams = {
+        ...data,
+        "g-recaptcha-response": captchaValue,
+      };
+
+      if (acceptTerms) {
+        emailjs
+          .send(
+            import.meta.env.VITE_EMAIL_SERVICE_ID,
+            import.meta.env.VITE_EMAIL_TEMPLATE_ID,
+            templateParams,
+            import.meta.env.VITE_EMAIL_PUBLIC_KEY
+          )
+          .then(() => {
+            reset();
+            setLoading(false);
+            alert(
+              "Email inviata con successo. A breve riceverà un'email di conferma!"
+            );
+          });
+      } else {
+        setLoading(false);
+        alert("Accetta la Privacy!");
+      }
+    }
   };
 
   return (
@@ -79,7 +115,7 @@ export const Contattaci = (props: Contact5Props) => {
         </div>
         <form
           className="grid grid-cols-1 grid-rows-[auto_auto] gap-6"
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmit(onSubmit)}
         >
           <div className="grid w-full items-center">
             <Label htmlFor="name" className="mb-2">
@@ -87,10 +123,9 @@ export const Contattaci = (props: Contact5Props) => {
             </Label>
             <Input
               type="text"
-              id="name"
               placeholder="Nome"
-              value={nameInput}
-              onChange={(e) => setNameInput(e.target.value)}
+              id="user_name"
+              {...register("user_name", { required: true })}
             />
           </div>
 
@@ -100,10 +135,9 @@ export const Contattaci = (props: Contact5Props) => {
             </Label>
             <Input
               type="email"
-              id="email"
               placeholder="Email"
-              value={emailInput}
-              onChange={(e) => setEmailInput(e.target.value)}
+              id="user_email"
+              {...register("user_email", { required: true })}
             />
           </div>
 
@@ -115,8 +149,7 @@ export const Contattaci = (props: Contact5Props) => {
               id="message"
               placeholder="Il tuo messaggio..."
               className="min-h-[11.25rem] overflow-auto"
-              value={messageInput}
-              onChange={(e) => setMessageInput(e.target.value)}
+              {...register("message", { required: true })}
             />
           </div>
 
@@ -151,8 +184,16 @@ export const Contattaci = (props: Contact5Props) => {
               </Dialog>
             </div>
           </div>
+          {/*  <Recaptcha siteKey="6LdEmoIqAAAAAGSf5nsJgjLMsWtu7_UCIKSC-opI" /> */}
+          <ReCAPTCHA
+            ref={recaptcha}
+            sitekey="6LdEmoIqAAAAAGSf5nsJgjLMsWtu7_UCIKSC-opI"
+          />
+
           <div>
-            <Button>Invia</Button>
+            <Button disabled={loading} type="submit">
+              Invia
+            </Button>
           </div>
         </form>
       </div>
@@ -167,3 +208,18 @@ export const Contact5Defaults: Contact5Props = {
   phone: "+39 081 529 70 45",
   address: "Via Vittoria Colonna 14 - 80121 Napoli (NA)",
 };
+
+//registrazioni@mobilityexpress.it
+/*
+emailjs.send("service_id", "template_id", {
+  to_name: "Mario Rossi",
+  from_name: "La Tua Azienda",
+  message: "Grazie per esserti registrato!",
+  subject: "Benvenuto nella nostra piattaforma" // Oggetto fisso
+}, "user_id")
+.then((response) => {
+  console.log("Email inviata con successo!", response.status, response.text);
+})
+.catch((error) => {
+  console.error("Errore nell'invio dell'email:", error);
+}); */

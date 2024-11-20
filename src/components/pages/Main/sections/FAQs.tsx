@@ -83,7 +83,7 @@ export const Faq1Defaults: Faq1Props = {
     {
       title: "Cos'è Mobility Express?",
       answer:
-        "Mobility Express è la rete di subagenti assicurativi indipendente più solida d'Italia, progettata per intermediari che desiderano espandere il proprio business. Con la nostra piattaforma avanzata, puoi proporre ai tuoi clienti un'ampia gamma di prodotti assicurativi, Energia e Noleggio a lungo termine, supportato da tecnologie all'avanguardia e un sistema di provvigioni vanataggioso. Offriamo strumenti esclusivi per semplificare la gestione della tua attività e la possibilità di aumentare visibilità attraverso i nostri strumenti per massimizzare i guadagni.",
+        "Mobility Express è il brand di Alca Broker dedicato a una piattaforma avanzata per la preventivazione, gestione e vendita di polizze assicurative. Questo progetto unisce la solidità di una rete di subagenti assicurativi indipendenti con tecnologie all'avanguardia, offrendo agli intermediari una soluzione completa per espandere il proprio business. Grazie a Mobility Express, puoi proporre ai tuoi clienti un'ampia gamma di prodotti assicurativi, oltre a servizi come Energia e Noleggio a lungo termine, usufruendo di un sistema di provvigioni vantaggioso e strumenti esclusivi per semplificare la gestione della tua attività. La piattaforma ti permette inoltre di aumentare la tua visibilità e massimizzare i guadagni con i nostri strumenti innovativi.",
     },
     {
       title: "Quali vantaggi offre la piattaforma Mobility Express?",
