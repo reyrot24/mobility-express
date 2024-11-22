@@ -8,7 +8,7 @@ import ProdottiLight from "../assets/ProdottiLight.png";
 import ProdottiDark from "../assets/ProdottiDark.png";
 import SupportoLight from "../assets/SupportoLight.png";
 import SupportoDark from "../assets/SupportoDark.png";
-import Piattaforma from "../assets/Piattaforma.png";
+import Piattaforma from "../assets/Piattaforma.jpeg";
 
 export const logos = {
   logoDark: { url: "/", src: LogoDark, alt: "Logo Dark" },

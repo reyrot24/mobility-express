@@ -1,4 +1,4 @@
-import { client, urlFor } from "@/client";
+import { client } from "@/client";
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -51,11 +51,7 @@ const Testimonianze = (props: Testimonial3Props) => {
                 {testimonianza.testimonianza}
                 <span className="text-orange">"</span>
               </blockquote>
-              <img
-                src={urlFor(testimonianza.foto).toString()}
-                alt="Img"
-                className="mb-4 size-14 min-h-14 min-w-14 rounded-full object-cover"
-              />
+
               <p className="font-semibold text-orange">{testimonianza.nome}</p>
             </div>
           ))}

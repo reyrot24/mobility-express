@@ -51,6 +51,6 @@ export const Image = (props: Layout90Props) => {
 export const Layout90Defaults: Layout90Props = {
   heading: "Mobility Express: Requisiti d'ingresso",
   description:
-    "Per entrare nella rete Mobility Express, è necessario essere un intermediario assicurativo iscritto come subagente nella sezione E del RUI e soddisfare tutti i requisiti normativi, Se possiedi questi requisiti e desideri unirti al nostro team di consulenti, compila il form con i tuoi dati, contatti e numero d'iscrizione al RUI. Invia la tua candidatura oggi stesso e diventa parte della nostra rete!",
+    "Per entrare nella rete Mobility Express, è necessario essere un intermediario assicurativo iscritto come subagente nella sezione E del RUI e soddisfare tutti i requisiti normativi. Se possiedi questi requisiti e desideri unirti al nostro team di consulenti, compila il form con i tuoi dati, contatti e numero d'iscrizione al RUI. Invia la tua candidatura oggi stesso e diventa parte della nostra rete!",
   image: foto,
 };
