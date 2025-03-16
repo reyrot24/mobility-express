@@ -8,7 +8,7 @@ import {
 
 type risultatiType = {
   name: string;
-  vatNo: string[];
+  address: { simpleValue: string };
   nrea: string;
   id: string;
 };
@@ -29,7 +29,7 @@ const SearchPIVA = ({
             <TableHeader>
               <TableRow>
                 <TableCell className="text-left">Ragione Sociale</TableCell>
-                <TableCell className="text-center">P. IVA</TableCell>
+                <TableCell className="text-left">Indirizzo</TableCell>
                 {/* <TableCell className="text-center">N. REA</TableCell> */}
               </TableRow>
             </TableHeader>
@@ -60,7 +60,9 @@ const SearchPIVA = ({
                       {el?.name}
                     </span>
                   </TableCell>
-                  <TableCell className="text-center">{el?.vatNo[0]}</TableCell>
+                  <TableCell className="text-left">
+                    {el?.address.simpleValue}
+                  </TableCell>
                   {/* <TableCell>{el?.nrea}</TableCell> */}
                 </TableRow>
               ))}
