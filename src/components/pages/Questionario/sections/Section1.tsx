@@ -10,14 +10,12 @@ import {
   DialogContent,
   DialogDescription,
   DialogFooter,
-  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import SearchPIVA from "../utils/searchPIVA";
 import { useState } from "react";
 import { RingSpinnerOverlay } from "react-spinner-overlay";
-import { validatePIVA } from "../utils/validationFunctions";
 
 const Section1 = ({ errors }: { errors: { [key: string]: string | null } }) => {
   const { formState, dispatch } = useForm();
