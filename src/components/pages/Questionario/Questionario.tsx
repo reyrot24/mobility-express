@@ -18,7 +18,6 @@ const QuestionarioContent = () => {
 
   const { idUid } = useParams();
   const navigate = useNavigate();
-  console.log(idUid);
 
   const validateForm = (): boolean => {
     const errors: { [key: string]: string | null } = {};

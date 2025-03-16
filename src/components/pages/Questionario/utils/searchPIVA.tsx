@@ -50,7 +50,7 @@ const SearchPIVA = ({
                 ))
               )} */}
               {risultati.map((el) => (
-                <TableRow key={el.vatNo[0]}>
+                <TableRow key={el.id}>
                   <TableCell className="font-medium">
                     {/*Chiedere se selezionare tutta la riga o solo il nome */}
                     <span

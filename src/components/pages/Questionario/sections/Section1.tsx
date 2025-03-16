@@ -63,32 +63,36 @@ const Section1 = ({ errors }: { errors: { [key: string]: string | null } }) => {
         options
       );
       const responseData = await response.json();
-      const dataCostituzione = new Date(
-        responseData.data.report.alternateSummary.incorporationDate
-      )
-        .toISOString()
-        .split("T")[0];
+      const report = responseData.data?.report;
+      const companySummary = report?.companySummary;
+      const alternateSummary = report?.alternateSummary;
 
-      // Update the form state with company details
-      //Business name = Ragione sociale,
-      //Address = sede legale
-      //data costituzione = incorporationDate
-      //Codice ateco = company summary -> mainActivity -> code
-      //Rimuovere gg/mm/aaaa dalla data costituzione
+      // Controlli sui dati ricevuti
+      const ragioneSociale = companySummary?.businessName || "";
+      const sedeLegale = alternateSummary?.address || "";
+      const codiceAteco = companySummary?.mainActivity?.code || "";
+
+      let dataCostituzione = "";
+      if (alternateSummary?.incorporationDate) {
+        dataCostituzione = new Date(alternateSummary.incorporationDate)
+          .toISOString()
+          .split("T")[0];
+      }
+
+      // Dispatch aggiornando solo una volta
       dispatch({
         type: "section1",
         payload: {
-          ragioneSociale: responseData.data.report.companySummary.businessName,
-          sedeLegale: responseData.data.report.alternateSummary.address,
-          dataCostituzione: dataCostituzione,
-          codiceAteco:
-            responseData.data.report.companySummary.mainActivity.code,
+          ragioneSociale,
+          sedeLegale,
+          codiceAteco,
+          dataCostituzione,
         },
       });
-      setLoading(false);
     } catch (err) {
       console.log(err);
     }
+    setLoading(false);
   }
 
   return (
