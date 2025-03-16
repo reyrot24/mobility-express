@@ -1,9 +1,6 @@
 const TerminiDiServizio = () => {
   return (
     <div>
-      <h1 className="mb-5 text-3xl font-bold md:mb-6 md:text-4xl lg:text-5xl">
-        Termini di Servizio
-      </h1>
       <div className="my-4">
         <h1 className="text-md font-semibold  mb-2 ">
           1. Accettazione dei Termini
