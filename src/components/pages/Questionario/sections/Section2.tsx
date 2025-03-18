@@ -9,69 +9,20 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import DataTable from "../utils/datagrid";
-import { useForm } from "../FormContext";
 
-const Section2 = ({ errors }: { errors: { [key: string]: string | null } }) => {
-  const { formState, dispatch } = useForm();
-  const [eventiNegliUltimi10Anni, setEventiNegliUltimi10Anni] = useState("");
+const Section2 = ({
+  errors,
+  setFormLocale,
+  formLocale,
+}: {
+  errors: { [key: string]: string | null };
+  setFormLocale: any;
+  formLocale: any;
+}) => {
+  const [eventiNegliUltimi10Anni, setEventiNegliUltimi10Anni] = useState(
+    formLocale.section2.eventiNegliUltimi10Anni
+  );
   const [migliorieApportate, setMigliorieApportate] = useState("");
-
-  /* const validateForm = (): boolean => {
-    const errors: { [key: string]: string | null } = {};
-    let hasErrors = false;
-
-    // Validate fields
-    if (!formState.section2.indirizzoCompleto.trim()) {
-      errors.indirizzoCompleto = "Indirizzo completo non può essere vuoto";
-      hasErrors = true;
-    }
-    if (!formState.section2.annoCostruzione.trim()) {
-      errors.annoCostruzione =
-        "Anno di costruzione del fabbricato non può essere vuoto";
-      hasErrors = true;
-    }
-    if (!formState.section2.annoRistrutturazione.trim()) {
-      errors.annoRistrutturazione =
-        "Anno di ristrutturazione antisismica non può essere vuoto";
-      hasErrors = true;
-    }
-    if (!formState.section2.superficieTotale.trim()) {
-      errors.superficieTotale = "Superficie Totale non può essere vuoto";
-      hasErrors = true;
-    }
-    if (!formState.section2.superficieCoperta.trim()) {
-      errors.superficieCoperta =
-        "Superficie Coperta in pianta non può essere vuoto";
-      hasErrors = true;
-    }
-    if (!formState.section2.numeroPianiTotali.trim()) {
-      errors.numeroPianiTotali = "Numero piani totali non può essere vuoto";
-      hasErrors = true;
-    }
-    if (!formState.section2.numeroPianiAttività.trim()) {
-      errors.numeroPianiAttività =
-        "Numero di piani su cui si sviluppa l’attività non può essere vuoto";
-      hasErrors = true;
-    }
-
-    // Dispatch errors to the state
-    dispatch({ type: "SET_ERRORS", payload: errors });
-
-    // If there are errors, show them in an alert
-    if (hasErrors) {
-      let errorMessage = "Please fix the following errors:\n\n";
-      for (const key in errors) {
-        if (errors[key]) {
-          errorMessage += `${errors[key]}\n`;
-        }
-      }
-      toast.error("Error");
-      alert(errorMessage); // Show the errors in an alert
-    }
-
-    return !hasErrors;
-  }; */
-
   return (
     <section className="w-full items-center bg-background2 px-[5%] rounded-xl">
       <div>
@@ -86,11 +37,14 @@ const Section2 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                 <Label className="mb-2">Indirizzo completo</Label>
                 <Input
                   type="text"
-                  value={formState.section2.indirizzoCompleto}
+                  value={formLocale.section2.indirizzoCompleto}
                   onChange={(e) =>
-                    dispatch({
-                      type: "section2",
-                      payload: { indirizzoCompleto: e.target.value },
+                    setFormLocale({
+                      ...formLocale,
+                      section2: {
+                        ...formLocale.section2,
+                        indirizzoCompleto: e.target.value,
+                      },
                     })
                   }
                   className={`col-span-3 ${
@@ -105,11 +59,14 @@ const Section2 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                 </Label>
                 <Input
                   type="number"
-                  value={formState.section2.annoCostruzione}
+                  value={formLocale.section2.annoCostruzione}
                   onChange={(e) =>
-                    dispatch({
-                      type: "section2",
-                      payload: { annoCostruzione: e.target.value },
+                    setFormLocale({
+                      ...formLocale,
+                      section2: {
+                        ...formLocale.section2,
+                        annoCostruzione: e.target.value,
+                      },
                     })
                   }
                   className={`col-span-3 ${
@@ -125,11 +82,14 @@ const Section2 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                 </Label>
                 <Input
                   type="number"
-                  value={formState.section2.annoRistrutturazione}
+                  value={formLocale.section2.annoRistrutturazione}
                   onChange={(e) =>
-                    dispatch({
-                      type: "section2",
-                      payload: { annoRistrutturazione: e.target.value },
+                    setFormLocale({
+                      ...formLocale,
+                      section2: {
+                        ...formLocale.section2,
+                        annoRistrutturazione: e.target.value,
+                      },
                     })
                   }
                   className={`col-span-3 ${
@@ -143,11 +103,15 @@ const Section2 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                 <Label className="mb-2">Fabbricato</Label>
                 <Select
                   onValueChange={(value) =>
-                    dispatch({
-                      type: "section2",
-                      payload: { fabbricato: value },
+                    setFormLocale({
+                      ...formLocale,
+                      section2: {
+                        ...formLocale.section2,
+                        fabbricato: value,
+                      },
                     })
                   }
+                  value={formLocale.section2.fabbricato}
                   defaultValue="proprieta"
                 >
                   <SelectTrigger>
@@ -165,11 +129,14 @@ const Section2 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                 </Label>
                 <Input
                   type="number"
-                  value={formState.section2.superficieTotale}
+                  value={formLocale.section2.superficieTotale}
                   onChange={(e) =>
-                    dispatch({
-                      type: "section2",
-                      payload: { superficieTotale: e.target.value },
+                    setFormLocale({
+                      ...formLocale,
+                      section2: {
+                        ...formLocale.section2,
+                        superficieTotale: e.target.value,
+                      },
                     })
                   }
                   className={`col-span-3 ${
@@ -186,11 +153,14 @@ const Section2 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                 </Label>
                 <Input
                   type="number"
-                  value={formState.section2.superficieCoperta}
+                  value={formLocale.section2.superficieCoperta}
                   onChange={(e) =>
-                    dispatch({
-                      type: "section2",
-                      payload: { superficieCoperta: e.target.value },
+                    setFormLocale({
+                      ...formLocale,
+                      section2: {
+                        ...formLocale.section2,
+                        superficieCoperta: e.target.value,
+                      },
                     })
                   }
                   className={`col-span-3 ${
@@ -214,11 +184,14 @@ const Section2 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                 </Label>
                 <Input
                   type="number"
-                  value={formState.section2.numeroPianiTotali}
+                  value={formLocale.section2.numeroPianiTotali}
                   onChange={(e) =>
-                    dispatch({
-                      type: "section2",
-                      payload: { numeroPianiTotali: e.target.value },
+                    setFormLocale({
+                      ...formLocale,
+                      section2: {
+                        ...formLocale.section2,
+                        numeroPianiTotali: e.target.value,
+                      },
                     })
                   }
                   className={`col-span-3 ${
@@ -232,11 +205,15 @@ const Section2 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                 <Label className="mb-2">Piani seminterrati/interrati</Label>
                 <Select
                   onValueChange={(value) =>
-                    dispatch({
-                      type: "section2",
-                      payload: { pianiSeminterrati: value },
+                    setFormLocale({
+                      ...formLocale,
+                      section2: {
+                        ...formLocale.section2,
+                        pianiSeminterrati: value,
+                      },
                     })
                   }
+                  value={formLocale.section2.pianiSeminterrati}
                   defaultValue="no"
                 >
                   <SelectTrigger>
@@ -254,11 +231,15 @@ const Section2 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                 </Label>
                 <Select
                   onValueChange={(value) =>
-                    dispatch({
-                      type: "section2",
-                      payload: { pianoPiuBasso: value },
+                    setFormLocale({
+                      ...formLocale,
+                      section2: {
+                        ...formLocale.section2,
+                        pianoPiuBasso: value,
+                      },
                     })
                   }
+                  value={formLocale.section2.pianoPiuBasso}
                   defaultValue="seminterrato"
                 >
                   <SelectTrigger>
@@ -280,11 +261,14 @@ const Section2 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                 </Label>
                 <Input
                   type="number"
-                  value={formState.section2.numeroPianiAttività}
+                  value={formLocale.section2.numeroPianiAttività}
                   onChange={(e) =>
-                    dispatch({
-                      type: "section2",
-                      payload: { numeroPianiAttività: e.target.value },
+                    setFormLocale({
+                      ...formLocale,
+                      section2: {
+                        ...formLocale.section2,
+                        numeroPianiAttività: e.target.value,
+                      },
                     })
                   }
                   className={`col-span-3 ${
@@ -298,11 +282,15 @@ const Section2 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                 <Label className="mb-2">Intero fabbricato assicurato</Label>
                 <Select
                   onValueChange={(value) =>
-                    dispatch({
-                      type: "section2",
-                      payload: { fabbricatoAssicurato: value },
+                    setFormLocale({
+                      ...formLocale,
+                      section2: {
+                        ...formLocale.section2,
+                        fabbricatoAssicurato: value,
+                      },
                     })
                   }
+                  value={formLocale.section2.fabbricatoAssicurato}
                   defaultValue="no"
                 >
                   <SelectTrigger>
@@ -318,11 +306,15 @@ const Section2 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                 <Label className="mb-2">Struttura antisismica</Label>
                 <Select
                   onValueChange={(value) =>
-                    dispatch({
-                      type: "section2",
-                      payload: { strutturaAntisismica: value },
+                    setFormLocale({
+                      ...formLocale,
+                      section2: {
+                        ...formLocale.section2,
+                        strutturaAntisismica: value,
+                      },
                     })
                   }
+                  value={formLocale.section2.strutturaAntisismica}
                   defaultValue="no"
                 >
                   <SelectTrigger>
@@ -346,11 +338,16 @@ const Section2 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                 <Select
                   onValueChange={(value) => {
                     setEventiNegliUltimi10Anni(value);
-                    dispatch({
-                      type: "section2",
-                      payload: { eventiNegliUltimi10Anni: value },
+                    console.log("Value:", value);
+                    setFormLocale({
+                      ...formLocale,
+                      section2: {
+                        ...formLocale.section2,
+                        eventiNegliUltimi10Anni: value,
+                      },
                     });
                   }}
+                  value={eventiNegliUltimi10Anni}
                   defaultValue="no"
                 >
                   <SelectTrigger>
@@ -365,7 +362,10 @@ const Section2 = ({ errors }: { errors: { [key: string]: string | null } }) => {
             </div>
             {eventiNegliUltimi10Anni === "si" && (
               <div className="flex flex-col col-span-3">
-                <DataTable />
+                <DataTable
+                  setFormLocale={setFormLocale}
+                  formLocale={formLocale}
+                />
               </div>
             )}
           </div>
@@ -381,11 +381,15 @@ const Section2 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                 <Select
                   onValueChange={(value) => {
                     setMigliorieApportate(value);
-                    dispatch({
-                      type: "section2",
-                      payload: { migliorieApportate: value },
+                    setFormLocale({
+                      ...formLocale,
+                      section2: {
+                        ...formLocale.section2,
+                        migliorieApportate: value,
+                      },
                     });
                   }}
+                  value={formLocale.section2.migliorieApportate}
                   defaultValue="no"
                 >
                   <SelectTrigger>
@@ -400,11 +404,12 @@ const Section2 = ({ errors }: { errors: { [key: string]: string | null } }) => {
               {migliorieApportate === "si" && (
                 <Input
                   type="text"
-                  value={formState.section2.descrizioneMigliorieApportate}
+                  value={formLocale.section2.descrizioneMigliorieApportate}
                   onChange={(e) =>
-                    dispatch({
-                      type: "section2",
-                      payload: {
+                    setFormLocale({
+                      ...formLocale,
+                      section2: {
+                        ...formLocale.section2,
                         descrizioneMigliorieApportate: e.target.value,
                       },
                     })

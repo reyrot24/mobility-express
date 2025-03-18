@@ -8,11 +8,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
-import { useForm } from "../FormContext";
 
-const Section5 = ({ errors }: { errors: { [key: string]: string | null } }) => {
-  const [presenzaCorsi, setPresenzaCorsi] = useState("");
-  const { formState, dispatch } = useForm();
+const Section5 = ({
+  errors,
+  setFormLocale,
+  formLocale,
+}: {
+  errors: { [key: string]: string | null };
+  setFormLocale: any;
+  formLocale: any;
+}) => {
+  const [presenzaCorsi, setPresenzaCorsi] = useState(
+    formLocale.section5.corsiAcqua
+  );
 
   return (
     <section className="w-full items-center bg-background2 px-[5%] rounded-xl">
@@ -31,11 +39,26 @@ const Section5 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                 <Select
                   onValueChange={(value) => {
                     setPresenzaCorsi(value);
-                    dispatch({
-                      type: "section5",
-                      payload: { corsiAcqua: value },
-                    });
+                    value === "no"
+                      ? setFormLocale({
+                          ...formLocale,
+                          section5: {
+                            ...formLocale.section5,
+                            corsiAcqua: value,
+                            corsiAcquaNome: "",
+                            corsiAcquaDistanza: "",
+                            corsiAcquaDislivello: "",
+                          },
+                        })
+                      : setFormLocale({
+                          ...formLocale,
+                          section5: {
+                            ...formLocale.section5,
+                            corsiAcqua: value,
+                          },
+                        });
                   }}
+                  value={formLocale.section5.corsiAcqua}
                   defaultValue="no"
                 >
                   <SelectTrigger>
@@ -53,11 +76,14 @@ const Section5 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                     <Label className="mb-2">Nome</Label>
                     <Input
                       type="text"
-                      value={formState.section5.corsiAcquaNome}
+                      value={formLocale.section5.corsiAcquaNome}
                       onChange={(e) =>
-                        dispatch({
-                          type: "section5",
-                          payload: { corsiAcquaNome: e.target.value },
+                        setFormLocale({
+                          ...formLocale,
+                          section5: {
+                            ...formLocale.section5,
+                            corsiAcquaNome: e.target.value,
+                          },
                         })
                       }
                       className={`col-span-3 ${
@@ -69,11 +95,14 @@ const Section5 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                     <Label className="mb-2">Distanza</Label>
                     <Input
                       type="number"
-                      value={formState.section5.corsiAcquaDistanza}
+                      value={formLocale.section5.corsiAcquaDistanza}
                       onChange={(e) =>
-                        dispatch({
-                          type: "section5",
-                          payload: { corsiAcquaDistanza: e.target.value },
+                        setFormLocale({
+                          ...formLocale,
+                          section5: {
+                            ...formLocale.section5,
+                            corsiAcquaDistanza: e.target.value,
+                          },
                         })
                       }
                       className={`col-span-3 ${
@@ -88,11 +117,14 @@ const Section5 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                     <Label className="mb-2">Dislivello</Label>
                     <Input
                       type="number"
-                      value={formState.section5.corsiAcquaDislivello}
+                      value={formLocale.section5.corsiAcquaDislivello}
                       onChange={(e) =>
-                        dispatch({
-                          type: "section5",
-                          payload: { corsiAcquaDislivello: e.target.value },
+                        setFormLocale({
+                          ...formLocale,
+                          section5: {
+                            ...formLocale.section5,
+                            corsiAcquaDislivello: e.target.value,
+                          },
                         })
                       }
                       className={`col-span-3 ${
@@ -116,11 +148,15 @@ const Section5 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                 </Label>
                 <Select
                   onValueChange={(value) => {
-                    dispatch({
-                      type: "section5",
-                      payload: { scaffaliSuolo: value },
+                    setFormLocale({
+                      ...formLocale,
+                      section5: {
+                        ...formLocale.section5,
+                        scaffaliSuolo: value,
+                      },
                     });
                   }}
+                  value={formLocale.section5.scaffaliSuolo}
                   defaultValue="no"
                 >
                   <SelectTrigger>
@@ -136,11 +172,15 @@ const Section5 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                 <Label className="mb-2">Scaffalature non controventate</Label>
                 <Select
                   onValueChange={(value) => {
-                    dispatch({
-                      type: "section5",
-                      payload: { scaffalatureControventate: value },
+                    setFormLocale({
+                      ...formLocale,
+                      section5: {
+                        ...formLocale.section5,
+                        scaffalatureControventate: value,
+                      },
                     });
                   }}
+                  value={formLocale.section5.scaffalatureControventate}
                   defaultValue="no"
                 >
                   <SelectTrigger>
@@ -163,11 +203,15 @@ const Section5 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                 <Label className="mb-2">Superiore a 11.000.000 €</Label>
                 <Select
                   onValueChange={(value) => {
-                    dispatch({
-                      type: "section5",
-                      payload: { superA11Mil: value },
+                    setFormLocale({
+                      ...formLocale,
+                      section5: {
+                        ...formLocale.section5,
+                        superA11Mil: value,
+                      },
                     });
                   }}
+                  value={formLocale.section5.superA11Mil}
                   defaultValue="no"
                 >
                   <SelectTrigger>

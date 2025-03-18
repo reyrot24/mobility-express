@@ -1,6 +1,5 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { useForm } from "../FormContext";
 
 const checkboxes = [
   "Strutture in Calcestruzzo gettato",
@@ -9,17 +8,26 @@ const checkboxes = [
   "Strutture in Muratura / Altro",
 ];
 
-const Section3 = ({ errors }: { errors: { [key: string]: string | null } }) => {
-  const { formState, dispatch } = useForm();
-
+const Section3 = ({
+  errors,
+  setFormLocale,
+  formLocale,
+}: {
+  errors: { [key: string]: string | null };
+  setFormLocale: any;
+  formLocale: any;
+}) => {
   const handleCheckboxChange = (label: string) => {
-    const updatedStrutture = formState.section3.strutture.includes(label)
-      ? formState.section3.strutture.filter((item) => item !== label) // Remove if already selected
-      : [...formState.section3.strutture, label]; // Add if not selected
+    const updatedStrutture = formLocale.section3.strutture.includes(label)
+      ? formLocale.section3.strutture.filter((item: any) => item !== label) // Remove if already selected
+      : [...formLocale.section3.strutture, label]; // Add if not selected
 
-    dispatch({
-      type: "section3",
-      payload: { strutture: updatedStrutture },
+    setFormLocale({
+      ...formLocale,
+      section3: {
+        ...formLocale.section3,
+        strutture: updatedStrutture,
+      },
     });
   };
 
@@ -39,7 +47,7 @@ const Section3 = ({ errors }: { errors: { [key: string]: string | null } }) => {
             <div key={label} className="flex items-center space-x-2">
               <Checkbox
                 id={label}
-                checked={formState.section3.strutture.includes(label)}
+                checked={formLocale.section3.strutture.includes(label)}
                 onCheckedChange={() => handleCheckboxChange(label)}
               />
               <Label

@@ -7,10 +7,16 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { useForm } from "../FormContext";
 
-const Section4 = ({ errors }: { errors: { [key: string]: string | null } }) => {
-  const { formState, dispatch } = useForm();
+const Section4 = ({
+  errors,
+  setFormLocale,
+  formLocale,
+}: {
+  errors: { [key: string]: string | null };
+  setFormLocale: any;
+  formLocale: any;
+}) => {
   return (
     <section className="w-full items-center bg-background2 px-[5%] rounded-xl">
       <div className="">
@@ -33,16 +39,19 @@ const Section4 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                   <TableCell>
                     <Input
                       type="number"
+                      min="1"
+                      step=".01"
                       className={`col-span-3 w-40 ${
                         errors.fabbricato ? "border-red-500 border-2" : ""
                       }`}
-                      min="1"
-                      step=".01"
-                      value={formState.section4.fabbricato}
+                      value={formLocale.section4.fabbricato}
                       onChange={(e) =>
-                        dispatch({
-                          type: "section4",
-                          payload: { fabbricato: e.target.value },
+                        setFormLocale({
+                          ...formLocale,
+                          section4: {
+                            ...formLocale.section4,
+                            fabbricato: e.target.value,
+                          },
                         })
                       }
                     />
@@ -61,11 +70,14 @@ const Section4 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                       }`}
                       min="1"
                       step=".01"
-                      value={formState.section4.macchinari}
+                      value={formLocale.section4.macchinari}
                       onChange={(e) =>
-                        dispatch({
-                          type: "section4",
-                          payload: { macchinari: e.target.value },
+                        setFormLocale({
+                          ...formLocale,
+                          section4: {
+                            ...formLocale.section4,
+                            macchinari: e.target.value,
+                          },
                         })
                       }
                     />
@@ -82,11 +94,14 @@ const Section4 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                       }`}
                       min="1"
                       step=".01"
-                      value={formState.section4.terreni}
+                      value={formLocale.section4.terreni}
                       onChange={(e) =>
-                        dispatch({
-                          type: "section4",
-                          payload: { terreni: e.target.value },
+                        setFormLocale({
+                          ...formLocale,
+                          section4: {
+                            ...formLocale.section4,
+                            terreni: e.target.value,
+                          },
                         })
                       }
                     />

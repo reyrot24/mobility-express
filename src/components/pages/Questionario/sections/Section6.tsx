@@ -132,6 +132,34 @@ const Section6 = ({ errors }: { errors: { [key: string]: string | null } }) => {
               del preventivo.
             </p>
           </div>
+          <div className="flex items-center gap-4">
+            <Checkbox
+              className={`col-span-3 mt-2 mb-2 ml-2 ${
+                errors.checkboxAutorizzazionePreventivo
+                  ? "border-red-500 border-2"
+                  : ""
+              }`}
+              checked={formState.section6.checkboxAutorizzazionePreventivo}
+              onCheckedChange={() =>
+                dispatch({
+                  type: "section6",
+                  payload: {
+                    checkboxAutorizzazionePreventivo:
+                      !formState.section6.checkboxAutorizzazionePreventivo,
+                  },
+                })
+              }
+            />
+            <p>
+              Autorizzo ALCA BROKER S.R.L. (iscritta alla Sezione B del RUI n.
+              B000514026) a formulare un preventivo assicurativo personalizzato
+              sulla base delle informazioni da me fornite, analizzando le mie
+              esigenze assicurative, richiedendo offerte alle compagnie e
+              fornendomi consulenza sui prodotti più adatti. Sono consapevole
+              che tale preventivo non costituisce vincolo alla sottoscrizione di
+              una polizza.
+            </p>
+          </div>
           {/* Opzionale */}
           <div className="flex items-center gap-4">
             <Checkbox

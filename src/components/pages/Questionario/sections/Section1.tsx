@@ -143,6 +143,9 @@ const Section1 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                   </DialogTrigger>
                   <DialogContent aria-describedby="">
                     <DialogTitle>Ricerca P.IVA</DialogTitle>
+                    <DialogDescription>
+                      Seleziona la tua ragione sociale
+                    </DialogDescription>
                     <SearchPIVA
                       risultati={risultati}
                       onSelect={handleSelectCompany}
@@ -154,8 +157,6 @@ const Section1 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                         </Button>
                       </DialogClose>
                     </DialogFooter>
-
-                    <DialogDescription>Description goes here</DialogDescription>
                   </DialogContent>
                 </Dialog>
               </div>
@@ -229,9 +230,7 @@ const Section1 = ({ errors }: { errors: { [key: string]: string | null } }) => {
               />
             </div>
             <div className="py-2 flex flex-col">
-              <Label className="mb-2">
-                Altri Codici Ateco (sep. da virgola):
-              </Label>
+              <Label className="mb-2">Ulteriori ATECO Secondari</Label>
               <Input
                 type="text"
                 value={formState.section1.altriCodiciAteco}
@@ -248,7 +247,7 @@ const Section1 = ({ errors }: { errors: { [key: string]: string | null } }) => {
               />
             </div>
             <div className="py-2 flex flex-col">
-              <Label className="mb-2">Telefono</Label>
+              <Label className="mb-2">Cellulare</Label>
               <Input
                 type="number"
                 value={formState.section1.telefono}

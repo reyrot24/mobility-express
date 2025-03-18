@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -22,10 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useForm } from "../FormContext";
 
 export interface RowData {
-  id: number;
   date: string;
   amount: number;
   type: string;
@@ -33,17 +31,25 @@ export interface RowData {
 }
 
 // Initialize 5 rows, first row enabled, others disabled
-const initialData: RowData[] = Array.from({ length: 5 }, (_, index) => ({
-  id: index,
+const initialData: RowData[] = Array.from({ length: 5 }, (_) => ({
   date: "",
   amount: 0,
   type: "",
-  disabled: index !== 0, // First row enabled, others disabled
+  disabled: true, // First row enabled, others disabled
 }));
 
-const DataTable: React.FC = () => {
-  const [data, setData] = useState<RowData[]>(initialData);
-  const { dispatch } = useForm();
+const DataTable = ({
+  setFormLocale,
+  formLocale,
+}: {
+  setFormLocale: any;
+  formLocale: any;
+}) => {
+  const [data, setData] = useState<RowData[]>(
+    formLocale?.section2?.eventiNegliUltimi10AnniArray.length !== 0
+      ? formLocale.section2.eventiNegliUltimi10AnniArray
+      : initialData
+  );
 
   const columns: ColumnDef<RowData>[] = [
     {
@@ -120,11 +126,27 @@ const DataTable: React.FC = () => {
 
   // Toggle disabled state
   const toggleRowDisabled = (index: number) => {
-    setData((prev) =>
-      prev.map((row, i) =>
+    setData((prev) => {
+      const newData = prev.map((row, i) =>
         i === index ? { ...row, disabled: !row.disabled } : row
-      )
-    );
+      );
+
+      // Filtra solo le righe attive
+      const enabledRows = newData.filter((row) => !row.disabled);
+
+      // Aggiorna il form locale con solo le righe attive
+      setFormLocale((prev: any) => ({
+        ...prev,
+        section2: {
+          ...prev.section2,
+          eventiNegliUltimi10AnniArray: enabledRows,
+        },
+      }));
+
+      console.log("Saving Rows after toggle:", enabledRows);
+
+      return newData; // ✅ Aggiorna lo stato correttamente
+    });
   };
 
   // Update row data
@@ -134,12 +156,15 @@ const DataTable: React.FC = () => {
         i === index ? { ...row, [key]: value } : row
       );
       const enabledRows = newData.filter((row) => !row.disabled);
-      dispatch({
-        type: "section2",
-        payload: {
+
+      setFormLocale((prev: any) => ({
+        ...prev,
+        section2: {
+          ...prev.section2,
           eventiNegliUltimi10AnniArray: enabledRows,
         },
-      });
+      }));
+
       console.log("Saving Rows:", enabledRows);
 
       return newData; // ✅ Ensure state is correctly updated
@@ -195,3 +220,8 @@ const DataTable: React.FC = () => {
 };
 
 export default DataTable;
+
+/*Problemi da aggiustare:
+sembra che quando clicco no, ci sono ancora i dati dell'array della tabella.
+Devo mettere l'errore che controlla se un campo è abilitato e non c'è niente dentro
+*/
