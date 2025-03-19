@@ -31,7 +31,7 @@ const Ubicazioni = () => {
   const handleAddUbicazione = () => {
     const nuovaUbicazione = {
       // Genera un ID univoco
-      id: Math.floor(Math.random() * 100),
+      id: Math.floor(Math.random() * 100) + Math.floor(Math.random() * 100),
       section2: {
         indirizzoCompleto: "",
         annoCostruzione: "",
@@ -132,7 +132,7 @@ const Ubicazioni = () => {
       errors.numeroPianiAttività =
         "Numero di piani su cui si sviluppa l’attività non può essere vuoto";
       hasErrors = true;
-    } //QUI MODIFiCARE
+    }
     if (
       formLocale.section2.eventiNegliUltimi10Anni === "si" &&
       formLocale.section2.eventiNegliUltimi10AnniArray.length === 0
@@ -147,24 +147,29 @@ const Ubicazioni = () => {
 
       // Controlla se almeno una riga è selezionata (disabled: false)
       const righeSelezionate = eventiArray.filter((row: any) => !row.disabled);
-      console.log("righe selezionate:", righeSelezionate);
-
-      // Se nessuna riga è selezionata, errore
+      /* console.log("righe selezionate:", righeSelezionate); */
       if (righeSelezionate.length === 0) {
         errors.eventiNegliUltimi10Anni =
           "Devi selezionare almeno una riga nella tabella eventi passati.";
         hasErrors = true;
       } else {
-        // Controlla se tra le righe selezionate nessuna ha almeno un campo compilato
-        const rigaValida = righeSelezionate.some(
-          (row: any) => row.date.trim() !== "" || row.type.trim() !== ""
-        );
-
-        if (!rigaValida) {
-          errors.eventiNegliUltimi10Anni =
-            "Se selezioni una riga, almeno un campo deve essere compilato.";
-          hasErrors = true;
-        }
+        // Controlla che ogni riga selezionata abbia almeno 'date' e 'type' compilati
+        righeSelezionate.forEach((row: any, index: any) => {
+          if (!row.date.trim()) {
+            errors[
+              `eventiNegliUltimi10AnniArray_${index}_date`
+            ] = `La data è obbligatoria per la riga attivata n° ${index + 1}`;
+            hasErrors = true;
+          }
+          if (!row.type.trim()) {
+            errors[
+              `eventiNegliUltimi10AnniArray_${index}_type`
+            ] = `La tipologia è obbligatoria per la riga attivata n° ${
+              index + 1
+            }`;
+            hasErrors = true;
+          }
+        });
       }
     }
     if (
@@ -237,10 +242,23 @@ const Ubicazioni = () => {
       return; // If validation fails, do nothing
     }
 
+    const eventiFiltrati =
+      formLocale.section2.eventiNegliUltimi10AnniArray.filter(
+        (row: any) => !row.disabled
+      );
+
+    const nuovoFormLocale = {
+      ...formLocale,
+      section2: {
+        ...formLocale.section2,
+        eventiNegliUltimi10AnniArray: eventiFiltrati,
+      },
+    };
+
     if (selectedUbicazione.id === formLocale.id) {
       dispatch({
         type: "UPDATE_UBICAZIONE",
-        payload: { id: selectedUbicazione.id, data: formLocale },
+        payload: { id: selectedUbicazione.id, data: nuovoFormLocale },
       });
     }
 
@@ -248,8 +266,8 @@ const Ubicazioni = () => {
     setIsNewUbicazione(false);
     setSelectedUbicazione(null);
   };
-  console.log("Form state: ", formState.ubicazioni);
-  console.log("Form locale: ", formLocale);
+  /* console.log("Form state: ", formState.ubicazioni);
+  console.log("Form locale: ", formLocale); */
 
   return (
     <section className="w-full items-center bg-background2 px-[5%] rounded-xl">

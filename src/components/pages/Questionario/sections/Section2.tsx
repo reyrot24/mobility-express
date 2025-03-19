@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DataTable from "../utils/datagrid";
 
 const Section2 = ({
@@ -22,7 +22,34 @@ const Section2 = ({
   const [eventiNegliUltimi10Anni, setEventiNegliUltimi10Anni] = useState(
     formLocale.section2.eventiNegliUltimi10Anni
   );
-  const [migliorieApportate, setMigliorieApportate] = useState("");
+  const [migliorieApportate, setMigliorieApportate] = useState(
+    formLocale.section2.migliorieApportate
+  );
+
+  useEffect(() => {
+    if (formLocale.section2.eventiNegliUltimi10Anni === "no") {
+      setFormLocale((prev: any) => ({
+        ...prev,
+        section2: {
+          ...prev.section2,
+          eventiNegliUltimi10AnniArray: [],
+        },
+      }));
+    }
+  }, [formLocale.section2.eventiNegliUltimi10Anni]);
+
+  useEffect(() => {
+    if (formLocale.section2.migliorieApportate === "no") {
+      setFormLocale((prev: any) => ({
+        ...prev,
+        section2: {
+          ...prev.section2,
+          descrizioneMigliorieApportate: "",
+        },
+      }));
+    }
+  }, [formLocale.section2.migliorieApportate]);
+
   return (
     <section className="w-full items-center bg-background2 px-[5%] rounded-xl">
       <div>
@@ -338,7 +365,6 @@ const Section2 = ({
                 <Select
                   onValueChange={(value) => {
                     setEventiNegliUltimi10Anni(value);
-                    console.log("Value:", value);
                     setFormLocale({
                       ...formLocale,
                       section2: {
@@ -361,7 +387,13 @@ const Section2 = ({
               </div>
             </div>
             {eventiNegliUltimi10Anni === "si" && (
-              <div className="flex flex-col col-span-3">
+              <div
+                className={`col-span-3 flex flex-col ${
+                  errors.eventiNegliUltimi10Anni
+                    ? "border-red-500 border-2"
+                    : ""
+                }`}
+              >
                 <DataTable
                   setFormLocale={setFormLocale}
                   formLocale={formLocale}

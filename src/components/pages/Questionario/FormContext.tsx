@@ -114,13 +114,10 @@ const formReducer = (state: FormState, action: Action): FormState => {
     case "UPDATE_UBICAZIONE":
       return {
         ...state,
-        ubicazioni: state.ubicazioni.map(
-          (ubicazione) => (
-            console.log(ubicazione),
-            ubicazione.id === action.payload.id
-              ? { ...ubicazione, ...action.payload.data }
-              : ubicazione
-          )
+        ubicazioni: state.ubicazioni.map((ubicazione) =>
+          ubicazione.id === action.payload.id
+            ? { ...ubicazione, ...action.payload.data }
+            : ubicazione
         ),
       };
     case "DELETE_UBICAZIONE":

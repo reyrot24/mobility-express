@@ -124,6 +124,10 @@ const DataTable = ({
     getCoreRowModel: getCoreRowModel(),
   });
 
+  const isRowEmpty = (row: RowData) => {
+    return row.date === "" && row.amount === 0 && row.type === "";
+  };
+
   // Toggle disabled state
   const toggleRowDisabled = (index: number) => {
     setData((prev) => {
@@ -143,7 +147,7 @@ const DataTable = ({
         },
       }));
 
-      console.log("Saving Rows after toggle:", enabledRows);
+      /* console.log("Saving Rows after toggle:", enabledRows); */
 
       return newData; // ✅ Aggiorna lo stato correttamente
     });
@@ -155,7 +159,9 @@ const DataTable = ({
       const newData = prev.map((row, i) =>
         i === index ? { ...row, [key]: value } : row
       );
-      const enabledRows = newData.filter((row) => !row.disabled);
+      const enabledRows = newData.filter(
+        (row) => !row.disabled && !isRowEmpty(row)
+      );
 
       setFormLocale((prev: any) => ({
         ...prev,
@@ -165,7 +171,7 @@ const DataTable = ({
         },
       }));
 
-      console.log("Saving Rows:", enabledRows);
+      /* console.log("Saving Rows:", enabledRows); */
 
       return newData; // ✅ Ensure state is correctly updated
     });
@@ -220,8 +226,3 @@ const DataTable = ({
 };
 
 export default DataTable;
-
-/*Problemi da aggiustare:
-sembra che quando clicco no, ci sono ancora i dati dell'array della tabella.
-Devo mettere l'errore che controlla se un campo è abilitato e non c'è niente dentro
-*/
