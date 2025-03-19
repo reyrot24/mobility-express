@@ -279,7 +279,7 @@ const Ubicazioni = () => {
       </div>
       <div className="flex flex-col gap-16 mb-8">
         {formState.ubicazioni.map((ubicazione) => (
-          <div className="flex flex-row gap-16 rounded p-4">
+          <div className="flex flex-row gap-16 rounded p-4" key={ubicazione.id}>
             <div className="italic text-md text-orange">
               {ubicazione.section2.indirizzoCompleto}
             </div>

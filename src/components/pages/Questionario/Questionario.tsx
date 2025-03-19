@@ -11,7 +11,7 @@ import HelpButton from "./utils/helpButton";
 import Ubicazioni from "./sections/Ubicazioni";
 
 const QuestionarioContent = () => {
-  const { formState } = useForm();
+  const { formState, dispatch } = useForm();
   const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
 
   const { idUid } = useParams();
@@ -106,10 +106,36 @@ const QuestionarioContent = () => {
     // If no errors, clear them and proceed with saving
     setErrors({}); // ✅ Clear errors before saving
     const data = {
+      id: idUid,
       data: formState,
     };
+
+    /* InviaForm(data) */
+
     console.log("Saving form data:", data);
   };
+
+  /* async function InviaForm(data) {
+    try {
+      const options = {
+        method: "POST",
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+        body: JSON.stringify({ id: idUid, data: data }),
+      };
+
+      const response = await fetch(
+        "https://devops.mobilityexpress.it/api/getQuestCat",
+        options
+      );
+      const responseData = await response.json();
+      if (responseData.status === 0) {
+        navigate("/");
+        return;
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  } */
 
   async function CheckIDuid() {
     try {
@@ -124,9 +150,14 @@ const QuestionarioContent = () => {
         options
       );
       const responseData = await response.json();
+      //Controllo stringa vuota in data per vedere se inserire
       if (responseData.status === 0) {
         navigate("/");
         return;
+      }
+
+      if (responseData.data !== null) {
+        dispatch({ type: "SET_FORM", payload: responseData.data });
       }
     } catch (err) {
       console.log(err);

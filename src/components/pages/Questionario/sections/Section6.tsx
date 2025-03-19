@@ -132,7 +132,7 @@ const Section6 = ({ errors }: { errors: { [key: string]: string | null } }) => {
               del preventivo.
             </p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-start gap-4">
             <Checkbox
               className={`col-span-3 mt-2 mb-2 ml-2 ${
                 errors.checkboxAutorizzazionePreventivo

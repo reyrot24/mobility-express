@@ -94,6 +94,7 @@ type ActionType =
   | "section4"
   | "section5"
   | "section6"
+  | "SET_FORM"
   | "ADD_UBICAZIONE"
   | "UPDATE_UBICAZIONE"
   | "DELETE_UBICAZIONE";
@@ -106,6 +107,8 @@ const formReducer = (state: FormState, action: Action): FormState => {
       return { ...state, section1: { ...state.section1, ...action.payload } };
     case "section6":
       return { ...state, section6: { ...state.section6, ...action.payload } };
+    case "SET_FORM": // 🔥 Imposta l'intero form con i dati dell'API
+      return { ...state, ...action.payload };
     case "ADD_UBICAZIONE":
       return {
         ...state,
@@ -139,27 +142,63 @@ const FormContext = createContext<{
   dispatch: React.Dispatch<Action>;
 } | null>(null);
 
+const initialData = {
+  section1: {
+    //id: '', id vuoto alla primo salvataggio
+    cfPiva: "",
+    ragioneSociale: "",
+    sedeLegale: "",
+    dataCostituzione: "",
+    codiceAteco: "",
+    altriCodiciAteco: "",
+    telefono: "",
+    email: "",
+    nominativoRiferimento: "",
+  },
+  section6: {
+    checkboxTrattamentoDatiPersonali: true,
+    checkboxAutorizzazionePreventivo: true,
+    checkboxComunicazioniCommerciali: true,
+  },
+  ubicazioni: [
+    /* {
+      id: Math.floor(Math.random() * 100) + Math.floor(Math.random() * 100),
+      section2: {
+        indirizzoCompleto: "",
+        annoCostruzione: "",
+        annoRistrutturazione: "",
+        fabbricato: "proprieta",
+        superficieTotale: "",
+        superficieCoperta: "",
+        numeroPianiTotali: "",
+        pianiSeminterrati: "no",
+        pianoPiuBasso: "seminterrato",
+        numeroPianiAttività: "",
+        fabbricatoAssicurato: "no",
+        strutturaAntisismica: "no",
+        eventiNegliUltimi10Anni: "no",
+        eventiNegliUltimi10AnniArray: [],
+        migliorieApportate: "no",
+        descrizioneMigliorieApportate: "",
+      },
+      section3: { strutture: [] },
+      section4: { fabbricato: "", macchinari: "", terreni: "" },
+      section5: {
+        corsiAcqua: "no",
+        corsiAcquaNome: "",
+        corsiAcquaDistanza: "",
+        corsiAcquaDislivello: "",
+        scaffaliSuolo: "no",
+        scaffalatureControventate: "no",
+        superA11Mil: "no",
+      },
+    }, */
+  ],
+};
+
 // Context Provider Component
 export const FormProvider = ({ children }: { children: ReactNode }) => {
-  const [formState, dispatch] = useReducer(formReducer, {
-    section1: {
-      cfPiva: "",
-      ragioneSociale: "",
-      sedeLegale: "",
-      dataCostituzione: "",
-      codiceAteco: "",
-      altriCodiciAteco: "",
-      telefono: "",
-      email: "",
-      nominativoRiferimento: "",
-    },
-    section6: {
-      checkboxTrattamentoDatiPersonali: true,
-      checkboxAutorizzazionePreventivo: true,
-      checkboxComunicazioniCommerciali: true,
-    },
-    ubicazioni: [],
-  });
+  const [formState, dispatch] = useReducer(formReducer, initialData);
 
   return (
     <FormContext.Provider value={{ formState, dispatch }}>
