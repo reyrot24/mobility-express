@@ -16,7 +16,7 @@ const HelpButton = () => {
   const [chiamami, setChiamami] = useState(false);
 
   return (
-    <div className="z-40 right-8 bottom-24 fixed">
+    <div className="z-40 left-8 bottom-8 fixed">
       <Dialog>
         <DialogTrigger asChild>
           <Button variant="outline" size="icon">

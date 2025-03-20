@@ -102,35 +102,34 @@ const Ubicazioni = () => {
 
     //SECTION 2
     if (!formLocale.section2.indirizzoCompleto.trim()) {
-      errors.indirizzoCompleto = "Indirizzo completo non può essere vuoto";
+      errors.indirizzoCompleto = "Indirizzo completo è obbligatorio";
       hasErrors = true;
     }
     if (!formLocale.section2.annoCostruzione.trim()) {
       errors.annoCostruzione =
-        "Anno di costruzione del fabbricato non può essere vuoto";
+        "Anno di costruzione del fabbricato è obbligatorio";
       hasErrors = true;
     }
     if (!formLocale.section2.annoRistrutturazione.trim()) {
       errors.annoRistrutturazione =
-        "Anno di ristrutturazione antisismica non può essere vuoto";
+        "Anno di ristrutturazione antisismica è obbligatorio";
       hasErrors = true;
     }
     if (!formLocale.section2.superficieTotale.trim()) {
-      errors.superficieTotale = "Superficie Totale non può essere vuoto";
+      errors.superficieTotale = "Superficie Totale è obbligatoria";
       hasErrors = true;
     }
     if (!formLocale.section2.superficieCoperta.trim()) {
-      errors.superficieCoperta =
-        "Superficie Coperta in pianta non può essere vuoto";
+      errors.superficieCoperta = "Superficie Coperta in pianta è obbligatoria";
       hasErrors = true;
     }
     if (!formLocale.section2.numeroPianiTotali.trim()) {
-      errors.numeroPianiTotali = "Numero piani totali non può essere vuoto";
+      errors.numeroPianiTotali = "Numero piani totali è obbligatorio";
       hasErrors = true;
     }
     if (!formLocale.section2.numeroPianiAttività.trim()) {
       errors.numeroPianiAttività =
-        "Numero di piani su cui si sviluppa l’attività non può essere vuoto";
+        "Numero di piani su cui si sviluppa l’attività è obbligatorio";
       hasErrors = true;
     }
     if (
@@ -189,41 +188,38 @@ const Ubicazioni = () => {
 
     //SECTION 4
     if (!formLocale.section4.fabbricato.trim()) {
-      errors.fabbricato =
-        "Somma assicurata del fabbricato non può essere vuoto";
+      errors.fabbricato = "Somma assicurata del fabbricato è obbligatoria";
       hasErrors = true;
     }
     if (!formLocale.section4.macchinari.trim()) {
       errors.macchinari =
-        "Somma assicurata dei macchinari e altro non può essere vuoto";
+        "Somma assicurata dei macchinari e altro è obbligatoria";
       hasErrors = true;
     }
     if (!formLocale.section4.terreni.trim()) {
-      errors.terreni = "Somma assicurata dei terreni non può essere vuoto";
+      errors.terreni = "Somma assicurata dei terreni è obbligatoria";
       hasErrors = true;
     }
 
     //SECTION 5
     if (formLocale.section5.corsiAcqua === "si") {
       if (!formLocale.section5.corsiAcquaNome.trim()) {
-        errors.corsiAcquaNome = "Nome corsi d'acqua non può essere vuoto";
+        errors.corsiAcquaNome = "Nome corsi d'acqua è obbligatorio";
         hasErrors = true;
       }
       if (!formLocale.section5.corsiAcquaDistanza.trim()) {
-        errors.corsiAcquaDistanza =
-          "Distanza corsi d'acqua non può essere vuoto";
+        errors.corsiAcquaDistanza = "Distanza corsi d'acqua è obbligatoria";
         hasErrors = true;
       }
       if (!formLocale.section5.corsiAcquaDislivello.trim()) {
-        errors.corsiAcquaDislivello =
-          "Dislivello corsi d'acqua non può essere vuoto";
+        errors.corsiAcquaDislivello = "Dislivello corsi d'acqua è obbligatorio";
         hasErrors = true;
       }
     }
     setErrors(errors);
 
     if (hasErrors) {
-      let errorMessage = "Please fix the following errors:\n\n";
+      let errorMessage = "Ci sono questi errori nel form:\n\n";
       for (const key in errors) {
         if (errors[key]) {
           errorMessage += `${errors[key]}\n`;

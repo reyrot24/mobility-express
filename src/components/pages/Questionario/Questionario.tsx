@@ -9,10 +9,13 @@ import { validatePIVA, validateTelefono } from "./utils/validationFunctions";
 import { useNavigate, useParams } from "react-router-dom";
 import HelpButton from "./utils/helpButton";
 import Ubicazioni from "./sections/Ubicazioni";
+import { RingSpinnerOverlay } from "react-spinner-overlay";
 
 const QuestionarioContent = () => {
   const { formState, dispatch } = useForm();
   const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
+
+  const [loadingSpinner, setLoadingSpinner] = useState(false);
 
   const { idUid } = useParams();
   const navigate = useNavigate();
@@ -23,7 +26,7 @@ const QuestionarioContent = () => {
 
     //SECTION 1
     if (!formState.section1.cfPiva.trim()) {
-      errors.cfPiva = "CF / PIVA is required";
+      errors.cfPiva = "CF / PIVA è obbligatoria";
       hasErrors = true;
     } else {
       const piva = validatePIVA(formState.section1.cfPiva);
@@ -33,38 +36,44 @@ const QuestionarioContent = () => {
       }
     }
     if (!formState.section1.ragioneSociale.trim()) {
-      errors.ragioneSociale = "Ragione Sociale is required";
+      errors.ragioneSociale = "Ragione Sociale è obbligatoria";
       hasErrors = true;
     }
     if (!formState.section1.sedeLegale.trim()) {
-      errors.sedeLegale = "Sede Legale is required";
+      errors.sedeLegale = "Sede Legale è obbligatoria";
       hasErrors = true;
     }
     if (!formState.section1.dataCostituzione) {
-      errors.dataCostituzione = "Data Costituzione is required";
+      errors.dataCostituzione = "Data Costituzione è obbligatoria";
       hasErrors = true;
     }
     if (!formState.section1.codiceAteco.trim()) {
-      errors.codiceAteco = "Codice Ateco is required";
+      errors.codiceAteco = "Codice Ateco è obbligatorio";
       hasErrors = true;
     }
     if (!formState.section1.telefono.trim()) {
-      errors.telefono = "Telefono is required";
+      errors.telefono = "Cellulare è obbligatorio";
       hasErrors = true;
     } else {
       const isPhoneValid = validateTelefono(formState.section1.telefono);
       if (!isPhoneValid) {
         errors.telefono =
-          "Il numero di telefono deve essere composto da almeno 9 numeri.";
+          "Il numero di cellulare deve essere composto da almeno 9 numeri.";
         hasErrors = true;
       }
     }
+    //Controllo che le ubicazioni sono obbligatorie
     if (!formState.section1.email.trim()) {
-      errors.email = "Email is required";
+      errors.email = "Email è obbligatoria";
       hasErrors = true;
     }
     if (!formState.section1.nominativoRiferimento.trim()) {
-      errors.nominativoRiferimento = "Nominativo Riferimento is required";
+      errors.nominativoRiferimento = "Nominativo Riferimento è obbligatorio";
+      hasErrors = true;
+    }
+
+    if (formState.ubicazioni.length === 0) {
+      errors.nominativoRiferimento = "Compilare almeno un'ubicazione";
       hasErrors = true;
     }
 
@@ -83,7 +92,7 @@ const QuestionarioContent = () => {
     setErrors(errors);
 
     if (hasErrors) {
-      let errorMessage = "Please fix the following errors:\n\n";
+      let errorMessage = "Ci sono questi errori nel form:\n\n";
       for (const key in errors) {
         if (errors[key]) {
           errorMessage += `${errors[key]}\n`;
@@ -103,39 +112,37 @@ const QuestionarioContent = () => {
       return; // If validation fails, do nothing
     }
 
-    // If no errors, clear them and proceed with saving
     setErrors({}); // ✅ Clear errors before saving
     const data = {
       id: idUid,
       data: formState,
     };
-
-    /* InviaForm(data) */
-
-    console.log("Saving form data:", data);
+    setLoadingSpinner(true);
+    InviaForm(data);
+    setLoadingSpinner(false);
+    /* console.log("Saving form data:", data); */
   };
 
-  /* async function InviaForm(data) {
+  async function InviaForm(data: any) {
     try {
       const options = {
         method: "POST",
         headers: { "Content-Type": "application/json; charset=utf-8" },
-        body: JSON.stringify({ id: idUid, data: data }),
+        body: JSON.stringify(data),
       };
 
       const response = await fetch(
-        "https://devops.mobilityexpress.it/api/getQuestCat",
+        "https://devops.mobilityexpress.it/api/getSaveCat",
         options
       );
       const responseData = await response.json();
-      if (responseData.status === 0) {
-        navigate("/");
-        return;
-      }
+      console.log(responseData);
+      toast.success(responseData.message + " con successo");
     } catch (err) {
+      toast.error("Errore nell'invio del form");
       console.log(err);
     }
-  } */
+  }
 
   async function CheckIDuid() {
     try {
@@ -157,7 +164,7 @@ const QuestionarioContent = () => {
       }
 
       if (responseData.data !== null) {
-        dispatch({ type: "SET_FORM", payload: responseData.data });
+        dispatch({ type: "SET_FORM", payload: responseData.data.data });
       }
     } catch (err) {
       console.log(err);
@@ -171,6 +178,11 @@ const QuestionarioContent = () => {
   return (
     <main>
       <Navbar />
+      <RingSpinnerOverlay
+        loading={loadingSpinner}
+        color="#FF6B01"
+        /* overlayColor="233044ea" */
+      />
       <div className="px-[5%] pt-20 md:pt-42 md:pt-20 pb-18 md:pb-20 md:pb-25 bg-background1 h-full">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold md:mb-2 md:text-5xl lg:text-6xl">
