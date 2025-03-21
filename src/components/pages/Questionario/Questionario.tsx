@@ -168,7 +168,7 @@ const QuestionarioContent = () => {
       if (responseData.data !== null) {
         dispatch({ type: "SET_FORM", payload: responseData.data.data });
       }
-      if (responseData.numeroTelefono) {
+      if (responseData.numeroRiferimento) {
         setNumeroTelefono(responseData.numeroRiferimento);
       }
 
