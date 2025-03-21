@@ -15,6 +15,8 @@ const QuestionarioContent = () => {
   const { formState, dispatch } = useForm();
   const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
 
+  const [numeroTelefono, setNumeroTelefono] = useState("");
+
   const [loadingSpinner, setLoadingSpinner] = useState(false);
 
   const { idUid } = useParams();
@@ -166,6 +168,11 @@ const QuestionarioContent = () => {
       if (responseData.data !== null) {
         dispatch({ type: "SET_FORM", payload: responseData.data.data });
       }
+      if (responseData.numeroTelefono) {
+        setNumeroTelefono(responseData.numeroRiferimento);
+      }
+
+      //NUmero riferimento
     } catch (err) {
       console.log(err);
     }
@@ -201,7 +208,7 @@ const QuestionarioContent = () => {
               Salva
             </Button>
           </div>
-          <SectionHelp />
+          <SectionHelp numeroTelefono={numeroTelefono} />
         </div>
       </div>
     </main>
