@@ -7,9 +7,9 @@ import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { validatePIVA, validateTelefono } from "./utils/validationFunctions";
 import { useNavigate, useParams } from "react-router-dom";
-import HelpButton from "./utils/helpButton";
 import Ubicazioni from "./sections/Ubicazioni";
 import { RingSpinnerOverlay } from "react-spinner-overlay";
+import SectionHelp from "./sections/SectionHelp";
 
 const QuestionarioContent = () => {
   const { formState, dispatch } = useForm();
@@ -201,6 +201,7 @@ const QuestionarioContent = () => {
               Salva
             </Button>
           </div>
+          <SectionHelp />
         </div>
       </div>
     </main>
@@ -210,7 +211,6 @@ const QuestionarioContent = () => {
 const Questionario = () => (
   <FormProvider>
     <QuestionarioContent />
-    <HelpButton />
   </FormProvider>
 );
 
