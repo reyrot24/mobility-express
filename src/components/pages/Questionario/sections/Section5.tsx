@@ -73,7 +73,7 @@ const Section5 = ({
               {presenzaCorsi === "si" && (
                 <>
                   <div className="py-2 flex flex-col">
-                    <Label className="mb-2">Nome</Label>
+                    <Label className="mb-2">Nome *</Label>
                     <Input
                       type="text"
                       value={formLocale.section5.corsiAcquaNome}
@@ -92,7 +92,7 @@ const Section5 = ({
                     />
                   </div>
                   <div className="py-2 flex flex-col">
-                    <Label className="mb-2">Distanza</Label>
+                    <Label className="mb-2">Distanza *</Label>
                     <Input
                       type="number"
                       value={formLocale.section5.corsiAcquaDistanza}
@@ -114,7 +114,7 @@ const Section5 = ({
                     />
                   </div>
                   <div className="py-2 flex flex-col">
-                    <Label className="mb-2">Dislivello</Label>
+                    <Label className="mb-2">Dislivello *</Label>
                     <Input
                       type="number"
                       value={formLocale.section5.corsiAcquaDislivello}

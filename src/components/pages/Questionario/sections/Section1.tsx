@@ -110,7 +110,7 @@ const Section1 = ({ errors }: { errors: { [key: string]: string | null } }) => {
           </h1>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="py-2 flex flex-col">
-              <Label className="mb-2">CF / PIVA</Label>
+              <Label className="mb-2">CF / PIVA *</Label>
               <div className="grid grid-cols-4 gap-4">
                 <Input
                   type="text"
@@ -162,7 +162,7 @@ const Section1 = ({ errors }: { errors: { [key: string]: string | null } }) => {
               </div>
             </div>
             <div className="py-2 flex flex-col">
-              <Label className="mb-2">Ragione Sociale</Label>
+              <Label className="mb-2">Ragione Sociale *</Label>
               <Input
                 type="text"
                 value={formState.section1.ragioneSociale}
@@ -179,7 +179,7 @@ const Section1 = ({ errors }: { errors: { [key: string]: string | null } }) => {
               />
             </div>
             <div className="py-2 flex flex-col">
-              <Label className="mb-2">Sede Legale</Label>
+              <Label className="mb-2">Sede Legale *</Label>
               <Input
                 type="text"
                 value={formState.section1.sedeLegale}
@@ -196,7 +196,7 @@ const Section1 = ({ errors }: { errors: { [key: string]: string | null } }) => {
               />
             </div>
             <div className="py-2 flex flex-col">
-              <Label className="mb-2">Data Costituzione</Label>
+              <Label className="mb-2">Data Costituzione *</Label>
               <Input
                 type="date"
                 value={formState.section1.dataCostituzione}
@@ -213,7 +213,7 @@ const Section1 = ({ errors }: { errors: { [key: string]: string | null } }) => {
               />
             </div>
             <div className="py-2 flex flex-col">
-              <Label className="mb-2">Codice Ateco</Label>
+              <Label className="mb-2">Codice Ateco *</Label>
               <Input
                 type="text"
                 value={formState.section1.codiceAteco}
@@ -240,14 +240,10 @@ const Section1 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                     payload: { altriCodiciAteco: e.target.value },
                   })
                 }
-                className={`col-span-3 ${
-                  errors.altriCodiciAteco ? "border-red-500 border-2" : ""
-                }`}
-                required
               />
             </div>
             <div className="py-2 flex flex-col">
-              <Label className="mb-2">Cellulare</Label>
+              <Label className="mb-2">Cellulare *</Label>
               <Input
                 type="number"
                 value={formState.section1.telefono}
@@ -264,7 +260,7 @@ const Section1 = ({ errors }: { errors: { [key: string]: string | null } }) => {
               />
             </div>
             <div className="py-2 flex flex-col">
-              <Label className="mb-2">Email</Label>
+              <Label className="mb-2">Email *</Label>
               <Input
                 type="email"
                 value={formState.section1.email}
@@ -281,7 +277,7 @@ const Section1 = ({ errors }: { errors: { [key: string]: string | null } }) => {
               />
             </div>
             <div className="py-2 flex flex-col">
-              <Label className="mb-2">Nominativo Riferimento</Label>
+              <Label className="mb-2">Nominativo Riferimento *</Label>
               <Input
                 type="text"
                 value={formState.section1.nominativoRiferimento}

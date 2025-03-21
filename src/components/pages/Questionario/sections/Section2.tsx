@@ -61,7 +61,7 @@ const Section2 = ({
             <h2 className="italic text-md text-orange">Ubicazione:</h2>
             <div className="grid grid-cols-1 md:grid-cols-3  gap-4">
               <div className="py-2 flex flex-col">
-                <Label className="mb-2">Indirizzo completo</Label>
+                <Label className="mb-2">Indirizzo completo *</Label>
                 <Input
                   type="text"
                   value={formLocale.section2.indirizzoCompleto}
@@ -82,7 +82,7 @@ const Section2 = ({
               </div>
               <div className="py-2 flex flex-col">
                 <Label className="mb-2">
-                  Anno di costruzione del fabbricato
+                  Anno di costruzione del fabbricato *
                 </Label>
                 <Input
                   type="number"
@@ -119,10 +119,6 @@ const Section2 = ({
                       },
                     })
                   }
-                  className={`col-span-3 ${
-                    errors.annoRistrutturazione ? "border-red-500 border-2" : ""
-                  }`}
-                  required
                   min="1900"
                 />
               </div>
@@ -152,7 +148,7 @@ const Section2 = ({
               </div>
               <div className="py-2 flex flex-col">
                 <Label className="mb-2">
-                  Superficie totale (area coperta + scoperta in mq)
+                  Superficie totale (area coperta + scoperta in mq) *
                 </Label>
                 <Input
                   type="number"
@@ -176,7 +172,7 @@ const Section2 = ({
               </div>
               <div className="py-2 flex flex-col">
                 <Label className="mb-2">
-                  Superficie coperta in pianta (mq)
+                  Superficie coperta in pianta (mq) *
                 </Label>
                 <Input
                   type="number"
@@ -207,7 +203,7 @@ const Section2 = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="py-2 flex flex-col">
                 <Label className="mb-2">
-                  Numero piani totali (fuori terra)
+                  Numero piani totali (fuori terra) *
                 </Label>
                 <Input
                   type="number"
@@ -284,7 +280,7 @@ const Section2 = ({
               </div>
               <div className="py-2 flex flex-col">
                 <Label className="mb-2">
-                  Numero di piani su cui si sviluppa l’attività
+                  Numero di piani su cui si sviluppa l’attività *
                 </Label>
                 <Input
                   type="number"
@@ -446,7 +442,9 @@ const Section2 = ({
                       },
                     })
                   }
-                  className="col-span-1 md:col-span-2 my-2"
+                  className={`col-span-1 md:col-span-2 my-2 ${
+                    errors.migliorieApportate ? "border-red-500 border-2" : ""
+                  }`}
                   required
                 />
               )}

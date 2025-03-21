@@ -29,7 +29,7 @@ const Section4 = ({
               <TableHeader>
                 <TableRow>
                   <TableHead>Bene</TableHead>
-                  <TableHead>Somma Assicurata (€)</TableHead>
+                  <TableHead>Somma Assicurata (€) *</TableHead>
                   <TableHead>Forma di Copertura</TableHead>
                 </TableRow>
               </TableHeader>

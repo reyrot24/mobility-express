@@ -110,11 +110,6 @@ const Ubicazioni = () => {
         "Anno di costruzione del fabbricato è obbligatorio";
       hasErrors = true;
     }
-    if (!formLocale.section2.annoRistrutturazione.trim()) {
-      errors.annoRistrutturazione =
-        "Anno di ristrutturazione antisismica è obbligatorio";
-      hasErrors = true;
-    }
     if (!formLocale.section2.superficieTotale.trim()) {
       errors.superficieTotale = "Superficie Totale è obbligatoria";
       hasErrors = true;
@@ -268,7 +263,7 @@ const Ubicazioni = () => {
   return (
     <section className="w-full items-center bg-background2 px-[5%] rounded-xl">
       <div className="flex flex-row justify-between items-center gap-4 mb-4">
-        <h1 className="font-bold py-4 text-xl">Ubicazioni</h1>
+        <h1 className="font-bold py-4 text-xl">Ubicazioni *</h1>
         <Button onClick={handleAddUbicazione}>
           <Plus />
         </Button>
@@ -300,6 +295,7 @@ const Ubicazioni = () => {
           if (!isOpen && isNewUbicazione) {
             handleDeleteUbicazione(formLocale.id); // Rimuove l'ubicazione se è nuova
           }
+          setErrors({});
           setOpenModale(isOpen);
         }}
       >

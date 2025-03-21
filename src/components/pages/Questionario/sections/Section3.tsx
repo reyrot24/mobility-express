@@ -36,7 +36,7 @@ const Section3 = ({
       <div className="grid grid-cols- mb-8">
         <div className="flex flex-col gap-4 mb-4">
           <h1 className="font-bold py-4 text-xl">
-            Sezione 3: Dati Tecnici del Fabbricato
+            Sezione 3: Dati Tecnici del Fabbricato *
           </h1>
           {errors.strutture && (
             <span className="text-red-500 text-sm">
