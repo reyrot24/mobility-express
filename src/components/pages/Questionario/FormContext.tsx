@@ -62,7 +62,7 @@ type FormState = {
       numeroPianiTotali: string;
       pianiSeminterrati: string;
       pianoPiuBasso: string;
-      numeroPianiAttività: string;
+      numeroPianiAttivita: string;
       fabbricatoAssicurato: string;
       strutturaAntisismica: string;
       eventiNegliUltimi10Anni: string;

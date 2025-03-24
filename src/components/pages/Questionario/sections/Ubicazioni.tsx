@@ -42,7 +42,7 @@ const Ubicazioni = () => {
         numeroPianiTotali: "",
         pianiSeminterrati: "no",
         pianoPiuBasso: "seminterrato",
-        numeroPianiAttività: "",
+        numeroPianiAttivita: "",
         fabbricatoAssicurato: "no",
         strutturaAntisismica: "no",
         eventiNegliUltimi10Anni: "no",
