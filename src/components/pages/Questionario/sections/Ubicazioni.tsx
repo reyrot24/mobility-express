@@ -262,11 +262,11 @@ const Ubicazioni = () => {
 
   return (
     <section className="w-full items-center bg-background2 px-[5%] rounded-xl">
-      <div className="flex flex-row justify-between items-center gap-4 mb-4">
-        <h1 className="font-bold py-4 text-xl">Ubicazioni *</h1>
+      <div className="flex flex-row  items-center gap-4 mb-4">
         <Button onClick={handleAddUbicazione}>
           <Plus />
         </Button>
+        <h1 className="font-bold py-4 text-xl">Aggiungi Ubicazioni *</h1>
       </div>
       <div className="flex flex-col gap-16 mb-8">
         {formState.ubicazioni.map((ubicazione) => (
