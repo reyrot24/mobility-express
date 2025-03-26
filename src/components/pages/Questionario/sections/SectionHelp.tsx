@@ -2,30 +2,45 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { useParams } from "react-router-dom";
+import { validateTelefono } from "../utils/validationFunctions";
 
 const SectionHelp = ({ numeroTelefono }: { numeroTelefono: any }) => {
-  const [numeroUtente, setNumeroUtente] = useState<any>();
+  const { idUid } = useParams();
+
+  const [numeroUtente, setNumeroUtente] = useState("");
+  const [nominativo, setNominativo] = useState("");
 
   async function sendPhoneNumber() {
     try {
       console.log(numeroUtente);
-      /* const options = {
+      console.log(nominativo);
+      console.log(idUid);
+
+      const options = {
         method: "POST",
         headers: {
           "Content-Type": "application/json; charset=utf-8",
         },
         body: JSON.stringify({
-          numeroTelefono: numeroUtente,
+          numero: numeroUtente,
+          nominativo: nominativo,
+          idUID: idUid,
         }),
-      }; */
+      };
 
-      /*  const response = await fetch(
-        "https://devops.mobilityexpress.it/api/csSearch",
+      const response = await fetch(
+        "https://devops.mobilityexpress.it/api/getCallMeCat",
         options
       );
-      const responseData = await response.json(); */
-      toast.success("Numero inviato. Ti contatteremo a breve");
+      const responseData = await response.json();
+      if (responseData.status === 0) {
+        toast.error(responseData.message);
+      } else {
+        toast.success(responseData.message);
+      }
       setNumeroUtente("");
+      setNominativo("");
     } catch (err) {
       console.log(err);
     }
@@ -38,7 +53,14 @@ const SectionHelp = ({ numeroTelefono }: { numeroTelefono: any }) => {
       </div>
       <div className="flex flex-col gap-4 items-center mt-8">
         <div className="flex gap-4 items-center">
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-4 flex-col md:flex-row">
+            <Input
+              type="text"
+              className="w-60"
+              placeholder="Inserire il nominativo"
+              value={nominativo}
+              onChange={(e) => setNominativo(e.target.value)}
+            />
             <Input
               type="text"
               className="w-60"
@@ -46,7 +68,12 @@ const SectionHelp = ({ numeroTelefono }: { numeroTelefono: any }) => {
               value={numeroUtente}
               onChange={(e) => setNumeroUtente(e.target.value)}
             />
-            <Button onClick={sendPhoneNumber}>Chiamami</Button>
+            <Button
+              disabled={!(validateTelefono(numeroUtente) && nominativo)}
+              onClick={sendPhoneNumber}
+            >
+              Chiamami
+            </Button>
           </div>
         </div>
         oppure
