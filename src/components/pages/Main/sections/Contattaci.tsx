@@ -194,6 +194,14 @@ export const Contattaci = (props: Contact5Props) => {
             </div>
             {/*  <Recaptcha siteKey="6LdEmoIqAAAAAGSf5nsJgjLMsWtu7_UCIKSC-opI" /> */}
           </form>
+          <Button
+            disabled={
+              loading || userPreferences.rawData?.purposes?.["2"] === false
+            }
+            type="submit"
+          >
+            Invia
+          </Button>
         </ConsentAwareWrapper>
       </div>
       <div className="flex flex-col items-end">
@@ -201,14 +209,6 @@ export const Contattaci = (props: Contact5Props) => {
           ref={recaptcha}
           sitekey="6LdEmoIqAAAAAGSf5nsJgjLMsWtu7_UCIKSC-opI"
         /> */}
-        <Button
-          disabled={
-            loading || userPreferences.rawData?.purposes?.["2"] === false
-          }
-          type="submit"
-        >
-          Invia
-        </Button>
       </div>
     </section>
   );
