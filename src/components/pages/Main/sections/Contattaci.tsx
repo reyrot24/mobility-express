@@ -49,6 +49,12 @@ export const Contattaci = (props: Contact5Props) => {
 
   const recaptcha = useRef<ReCAPTCHA>(null);
 
+  console.log(
+    import.meta.env.VITE_EMAIL_SERVICE_ID,
+    import.meta.env.VITE_EMAIL_TEMPLATE_ID,
+    import.meta.env.VITE_EMAIL_PUBLIC_KEY
+  );
+
   const onSubmit = (data: IFormInput) => {
     setLoading(true);
 
