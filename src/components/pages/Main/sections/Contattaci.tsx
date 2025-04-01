@@ -16,6 +16,7 @@ import TerminiDiServizio from "../../Legali/TerminiDiServizio";
 import emailjs from "@emailjs/browser";
 import { useForm } from "react-hook-form";
 import ReCAPTCHA from "react-google-recaptcha";
+import { ConsentAwareWrapper, useIubenda } from "@/lib/iubenda";
 
 type Props = {
   heading: string;
@@ -49,20 +50,12 @@ export const Contattaci = (props: Contact5Props) => {
 
   const recaptcha = useRef<ReCAPTCHA>(null);
 
-  console.log(
-    import.meta.env.VITE_EMAIL_SERVICE_ID,
-    import.meta.env.VITE_EMAIL_TEMPLATE_ID,
-    import.meta.env.VITE_EMAIL_PUBLIC_KEY
-  );
-
   const onSubmit = (data: IFormInput) => {
-    setLoading(true);
-
     const captchaValue = recaptcha.current?.getValue();
     if (!captchaValue) {
       alert("Verifica il reCAPTCHA!");
-      setLoading(false);
     } else {
+      setLoading(true);
       const templateParams = {
         ...data,
         "g-recaptcha-response": captchaValue,
@@ -78,24 +71,32 @@ export const Contattaci = (props: Contact5Props) => {
           )
           .then(() => {
             reset();
+            recaptcha.current?.reset();
             setLoading(false);
             alert(
               "Email inviata con successo. A breve riceverà un'email di conferma!"
             );
+          })
+          .catch((error) => {
+            setLoading(false);
+            console.error("Errore nell'invio dell'email:", error);
+            alert("Si è verificato un errore durante l'invio dell'email.");
           });
       } else {
         setLoading(false);
+        recaptcha.current?.reset();
         alert("Accetta la Privacy!");
       }
     }
   };
+  const { userPreferences } = useIubenda();
 
   return (
     <section
       className="px-[5%] pt-18 md:pt-20 md:pt-25 pb-18 md:pb-20 md:pb-25 bg-background2"
       id="Contattaci"
     >
-      <div className="container grid grid-cols-1 items-start gap-y-12 md:grid-flow-row md:grid-cols-2 md:gap-x-12 lg:grid-flow-col lg:gap-x-20 lg:gap-y-16">
+      <div className="container grid grid-cols-1 items-start gap-y-12 md:grid-flow-row md:grid-cols-2 md:gap-x-12  lg:gap-x-20 lg:gap-y-16">
         <div>
           <div className="mb-6 md:mb-8">
             <h2 className="mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl">
@@ -119,89 +120,95 @@ export const Contattaci = (props: Contact5Props) => {
             </div>
           </div>
         </div>
-        <form
-          className="grid grid-cols-1 grid-rows-[auto_auto] gap-6"
-          onSubmit={handleSubmit(onSubmit)}
-        >
-          <div className="grid w-full items-center">
-            <Label htmlFor="name" className="mb-2">
-              Nome
-            </Label>
-            <Input
-              type="text"
-              placeholder="Nome"
-              id="user_name"
-              {...register("user_name", { required: true })}
-            />
-          </div>
-
-          <div className="grid w-full items-center">
-            <Label htmlFor="email" className="mb-2">
-              Email
-            </Label>
-            <Input
-              type="email"
-              placeholder="Email"
-              id="user_email"
-              {...register("user_email", { required: true })}
-            />
-          </div>
-
-          <div className="grid w-full items-center">
-            <Label htmlFor="message" className="mb-2">
-              Messaggio
-            </Label>
-            <Textarea
-              id="message"
-              placeholder="Il tuo messaggio..."
-              className="min-h-[11.25rem] overflow-auto"
-              {...register("message", { required: true })}
-            />
-          </div>
-
-          <div className="mb-3 flex items-center space-x-2 text-sm md:mb-4">
-            <Checkbox
-              id="terms"
-              checked={acceptTerms}
-              onCheckedChange={setAcceptTerms}
-            />
-            <div>
-              <Label htmlFor="terms" className="cursor-pointer ">
-                Accetto i
+        <ConsentAwareWrapper requiredGdprPurposes={["functionality"]}>
+          <form
+            className="grid grid-cols-1 grid-rows-[auto_auto] gap-6"
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <div className="grid w-full items-center">
+              <Label htmlFor="name" className="mb-2">
+                Nome
               </Label>
+              <Input
+                type="text"
+                placeholder="Nome"
+                id="user_name"
+                {...register("user_name", { required: true })}
+              />
             </div>
-            <div>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <p className="font-semibold underline decoration-text cursor-pointer hover:decoration-whiteHover underline-offset-1 hover:text-whiteHover ">
-                    Termini di Servizi
-                  </p>
-                </DialogTrigger>
-                <DialogContent className="h-[500px] overflow-auto no-scrollbar">
-                  <TerminiDiServizio />
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button type="button" variant="default">
-                        Close
-                      </Button>
-                    </DialogClose>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-          {/*  <Recaptcha siteKey="6LdEmoIqAAAAAGSf5nsJgjLMsWtu7_UCIKSC-opI" /> */}
-          <ReCAPTCHA
-            ref={recaptcha}
-            sitekey="6LdEmoIqAAAAAGSf5nsJgjLMsWtu7_UCIKSC-opI"
-          />
 
-          <div>
-            <Button disabled={loading} type="submit">
-              Invia
-            </Button>
-          </div>
-        </form>
+            <div className="grid w-full items-center">
+              <Label htmlFor="email" className="mb-2">
+                Email
+              </Label>
+              <Input
+                type="email"
+                placeholder="Email"
+                id="user_email"
+                {...register("user_email", { required: true })}
+              />
+            </div>
+
+            <div className="grid w-full items-center">
+              <Label htmlFor="message" className="mb-2">
+                Messaggio
+              </Label>
+              <Textarea
+                id="message"
+                placeholder="Il tuo messaggio..."
+                className="min-h-[11.25rem] overflow-auto"
+                {...register("message", { required: true })}
+              />
+            </div>
+
+            <div className="mb-3 flex items-center space-x-2 text-sm md:mb-4">
+              <Checkbox
+                id="terms"
+                checked={acceptTerms}
+                onCheckedChange={setAcceptTerms}
+              />
+              <div>
+                <Label htmlFor="terms" className="cursor-pointer ">
+                  Accetto i
+                </Label>
+              </div>
+              <div>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <p className="font-semibold underline decoration-text cursor-pointer hover:decoration-whiteHover underline-offset-1 hover:text-whiteHover ">
+                      Termini di Servizi
+                    </p>
+                  </DialogTrigger>
+                  <DialogContent className="h-[500px] overflow-auto no-scrollbar">
+                    <TerminiDiServizio />
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button type="button" variant="default">
+                          Close
+                        </Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
+            {/*  <Recaptcha siteKey="6LdEmoIqAAAAAGSf5nsJgjLMsWtu7_UCIKSC-opI" /> */}
+          </form>
+        </ConsentAwareWrapper>
+      </div>
+      <div className="flex flex-col items-end">
+        <ReCAPTCHA
+          ref={recaptcha}
+          sitekey="6LdEmoIqAAAAAGSf5nsJgjLMsWtu7_UCIKSC-opI"
+        />
+        <Button
+          disabled={
+            loading || userPreferences.rawData?.purposes?.["2"] === false
+          }
+          type="submit"
+        >
+          Invia
+        </Button>
       </div>
     </section>
   );

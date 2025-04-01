@@ -27,7 +27,7 @@ const Privacy = () => {
           Il sito web offre contenuti di tipo informativo e, talvolta,
           interattivo. Durante la navigazione del sito Alca Broker srl potrà,
           quindi, acquisire informazioni sul visitatore, nei seguenti modi: DATI
-          DI NAVIGAZIONE I sistemi informatici e le procedure software preposte
+          DI NAVIGAZIONE: I sistemi informatici e le procedure software preposte
           al funzionamento di questo sito web acquisiscono, nel corso del loro
           normale esercizio, alcuni dati personali la cui trasmissione è
           implicita nell'uso dei protocolli di comunicazione di Internet. In
@@ -59,7 +59,7 @@ const Privacy = () => {
       <div className="my-4">
         <h1 className="text-md font-semibold mb-2">FINALITÀ DEL TRATTAMENTO</h1>{" "}
         <p>
-          Finalità Base giuridica Fornire il bene e/o il servizio richiesto
+          Finalità Base giuridica: Fornire il bene e/o il servizio richiesto
           dall'utente, gestire i contratti perfezionati dall'utente, espletare i
           relativi adempimenti amministrativi, contabili, fiscali e legali,
           nonché evadere le richieste inoltrate dall'utente. I trattamenti posti

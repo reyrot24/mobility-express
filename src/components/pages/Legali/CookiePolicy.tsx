@@ -32,17 +32,18 @@ const CookiePolicy = () => {
         </h1>
         <p>
           <h2 className="text-base font-semibold my-4">Cookie Tecnici</h2>{" "}
-          Questi cookie sono essenziali per il funzionamento del Sito e non
-          richiedono il consenso dell'utente. Senza questi cookie, il Sito
-          potrebbe non funzionare correttamente.
+          Questi cookie sono essenziali per il funzionamento del Sito. Senza
+          questi cookie, il Sito potrebbe non funzionare correttamente.
           <ul className="list-disc ml-8">
             <li>
               Cookie di Navigazione: Necessari per il corretto funzionamento del
               Sito.
             </li>
             <li>
-              Cookie di Funzionalità: Permettono al Sito di ricordare le scelte
-              effettuate dall'utente (come la lingua o la regione).
+              Cookie di Funzionalità: Questi strumenti di tracciamento abilitano
+              semplici interazioni e funzionalità che ti permettono di accedere
+              a determinate risorse del nostro servizio e ti consentono di
+              comunicare più facilmente con noi.
             </li>
           </ul>
           <h2 className="text-base font-semibold my-4">
@@ -84,17 +85,10 @@ const CookiePolicy = () => {
         <h1 className="text-md font-semibold  mb-2">COME GESTIRE I COOKIE</h1>
         <p>
           Puoi decidere di consentire o meno l'impostazione dei cookie
-          modificando le impostazioni del tuo browser. La maggior parte dei
+          modificando il widget di Iubenda. Inoltre, La maggior parte dei
           browser consente di controllare i cookie attraverso le proprie
           impostazioni. Tuttavia, disabilitare i cookie potrebbe influenzare
-          negativamente l'esperienza di navigazione sul Sito. Ecco i link alle
-          guide per la gestione dei cookie nei principali browser:{" "}
-          <ul className="list-disc ml-8">
-            <li>Google Chrome</li>
-            <li>Mozilla Firefox</li>
-            <li>Safari</li>
-            <li>Internet Explorer</li>
-          </ul>
+          negativamente l'esperienza di navigazione sul Sito.
         </p>
       </div>
       <div className="my-4">
