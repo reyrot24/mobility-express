@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, ReactNode, useContext, useReducer } from "react";
+import { createContext, ReactNode, useContext, useReducer } from "react";
 
 import IubendaBanner, {
   BannerVersion,
