@@ -197,10 +197,10 @@ export const Contattaci = (props: Contact5Props) => {
         </ConsentAwareWrapper>
       </div>
       <div className="flex flex-col items-end">
-        <ReCAPTCHA
+        {/* <ReCAPTCHA
           ref={recaptcha}
           sitekey="6LdEmoIqAAAAAGSf5nsJgjLMsWtu7_UCIKSC-opI"
-        />
+        /> */}
         <Button
           disabled={
             loading || userPreferences.rawData?.purposes?.["2"] === false
