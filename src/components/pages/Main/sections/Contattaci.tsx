@@ -15,8 +15,7 @@ import {
 import TerminiDiServizio from "../../Legali/TerminiDiServizio";
 import emailjs from "@emailjs/browser";
 import { useForm } from "react-hook-form";
-import ReCAPTCHA from "react-google-recaptcha";
-import { ConsentAwareWrapper, useIubenda } from "@/lib/iubenda";
+import { ConsentAwareWrapper } from "@/lib/iubenda";
 
 type Props = {
   heading: string;
@@ -48,55 +47,46 @@ export const Contattaci = (props: Contact5Props) => {
 
   const { register, handleSubmit, reset } = useForm<IFormInput>();
 
-  const recaptcha = useRef<ReCAPTCHA>(null);
-
   const onSubmit = (data: IFormInput) => {
-    const captchaValue = recaptcha.current?.getValue();
-    if (!captchaValue) {
-      alert("Verifica il reCAPTCHA!");
-    } else {
-      setLoading(true);
-      const templateParams = {
-        ...data,
-        "g-recaptcha-response": captchaValue,
-      };
+    setLoading(true);
+    const templateParams = {
+      ...data,
+    };
 
-      if (acceptTerms) {
-        emailjs
-          .send(
-            import.meta.env.VITE_EMAIL_SERVICE_ID,
-            import.meta.env.VITE_EMAIL_TEMPLATE_ID,
-            templateParams,
-            import.meta.env.VITE_EMAIL_PUBLIC_KEY
-          )
-          .then(() => {
-            reset();
-            recaptcha.current?.reset();
-            setLoading(false);
-            alert(
-              "Email inviata con successo. A breve riceverà un'email di conferma!"
-            );
-          })
-          .catch((error) => {
-            setLoading(false);
-            console.error("Errore nell'invio dell'email:", error);
-            alert("Si è verificato un errore durante l'invio dell'email.");
-          });
-      } else {
-        setLoading(false);
-        recaptcha.current?.reset();
-        alert("Accetta la Privacy!");
-      }
+    if (acceptTerms) {
+      emailjs
+        .send(
+          import.meta.env.VITE_EMAIL_SERVICE_ID,
+          import.meta.env.VITE_EMAIL_TEMPLATE_ID,
+          templateParams,
+          import.meta.env.VITE_EMAIL_PUBLIC_KEY
+        )
+        .then(() => {
+          reset();
+
+          setLoading(false);
+          alert(
+            "Email inviata con successo. A breve riceverà un'email di conferma!"
+          );
+        })
+        .catch((error) => {
+          setLoading(false);
+          console.error("Errore nell'invio dell'email:", error);
+          alert("Si è verificato un errore durante l'invio dell'email.");
+        });
+    } else {
+      setLoading(false);
+
+      alert("Accetta la Privacy!");
     }
   };
-  const { userPreferences } = useIubenda();
 
   return (
     <section
       className="px-[5%] pt-18 md:pt-20 md:pt-25 pb-18 md:pb-20 md:pb-25 bg-background2"
       id="Contattaci"
     >
-      <div className="container grid grid-cols-1 items-start gap-y-12 md:grid-flow-row md:grid-cols-2 md:gap-x-12  lg:gap-x-20 lg:gap-y-16">
+      <div className="container grid grid-cols-1 items-start gap-y-12 md:grid-flow-row md:grid-cols-2 md:gap-x-12 lg:grid-flow-col lg:gap-x-20 lg:gap-y-16">
         <div>
           <div className="mb-6 md:mb-8">
             <h2 className="mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl">
@@ -193,22 +183,14 @@ export const Contattaci = (props: Contact5Props) => {
               </div>
             </div>
             {/*  <Recaptcha siteKey="6LdEmoIqAAAAAGSf5nsJgjLMsWtu7_UCIKSC-opI" /> */}
+
+            <div>
+              <Button disabled={loading} type="submit">
+                Invia
+              </Button>
+            </div>
           </form>
-          <Button
-            disabled={
-              loading || userPreferences.rawData?.purposes?.["2"] === false
-            }
-            type="submit"
-          >
-            Invia
-          </Button>
         </ConsentAwareWrapper>
-      </div>
-      <div className="flex flex-col items-end">
-        {/* <ReCAPTCHA
-          ref={recaptcha}
-          sitekey="6LdEmoIqAAAAAGSf5nsJgjLMsWtu7_UCIKSC-opI"
-        /> */}
       </div>
     </section>
   );
