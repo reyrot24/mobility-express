@@ -47,7 +47,7 @@ const Testimonianze = (props: Testimonial3Props) => {
           {testimonianze.map((testimonianza: testimonianze, index) => (
             <div key={index} className="flex flex-col items-center text-center">
               <blockquote className="my-6 text-base font-bold leading-[1.4] md:my-8 md:text-md">
-                <span className="text-orange">"</span>
+                <span className="text-orange">" </span>
                 {testimonianza.testimonianza}
                 <span className="text-orange">"</span>
               </blockquote>
