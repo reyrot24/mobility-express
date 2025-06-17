@@ -1,7 +1,6 @@
 import "./App.css";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import Index from "./components/pages/Main";
-import Iscriviti from "./components/pages/Registrazione/Iscriviti";
 import { ThemeProvider } from "./components/dark-mode/theme-provider";
 import { ModeToggle } from "./components/dark-mode/mode-toggle";
 import Questionario from "./components/pages/Questionario/Questionario";
