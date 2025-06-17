@@ -13,7 +13,8 @@ function App() {
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/iscrizione" element={<Iscriviti />} />
+            {/*  <Route path="/iscrizione" element={<Iscriviti />} /> */}{" "}
+            {/* // ! Change when iscriviti api is online */}
             <Route
               path="/questionario-catastrofale/:idUid"
               element={<Questionario />}

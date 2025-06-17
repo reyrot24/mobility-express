@@ -124,12 +124,12 @@ export const Navbar = (props: Navbar1Props) => {
           </motion.div>
         </div>
         <div className="hidden lg:flex lg:gap-4">
-          <Link to="/iscrizione">
+          {/* <Link to="/iscrizione">
             <Button className="w-full" variant="outlineToggle">
               Iscriviti
             </Button>
-          </Link>
-
+          </Link> */}{" "}
+          {/* // ! Uncomment when the iscrivi api is finised */}
           <a
             href="https://tidycal.com/sviluppo/introduzione-mobility-express"
             rel="noopener noreferrer"
