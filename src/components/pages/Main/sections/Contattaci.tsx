@@ -65,21 +65,6 @@ export const Contact5Defaults: Contact5Props = {
   description:
     "Contattaci attraverso uno di questi canali o vienici a trovare.",
   email: "sviluppo@alcabroker.it",
-  phone: "+39 081 529 70 45",
+  phone: "+39 081 8283736",
   address: "Via Vittoria Colonna 14 - 80121 Napoli (NA)",
 };
-
-//registrazioni@mobilityexpress.it
-/*
-emailjs.send("service_id", "template_id", {
-  to_name: "Mario Rossi",
-  from_name: "La Tua Azienda",
-  message: "Grazie per esserti registrato!",
-  subject: "Benvenuto nella nostra piattaforma" // Oggetto fisso
-}, "user_id")
-.then((response) => {
-  console.log("Email inviata con successo!", response.status, response.text);
-})
-.catch((error) => {
-  console.error("Errore nell'invio dell'email:", error);
-}); */
