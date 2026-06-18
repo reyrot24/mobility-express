@@ -33,7 +33,7 @@ export const FAQs = (props: Faq1Props) => {
       className="px-[5%] pt-18 md:pt-20 md:pt-25 pb-18 md:pb-20 md:pb-25 bg-background1 "
       id="FAQs"
     >
-      <div className="container ">
+      <div className="container">
         <div className="mb-12 text-left md:mb-18 lg:mb-20">
           <h2 className="mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl">
             {heading}

@@ -65,6 +65,6 @@ export const Contact5Defaults: Contact5Props = {
   description:
     "Contattaci attraverso uno di questi canali o vienici a trovare.",
   email: "sviluppo@alcabroker.it",
-  phone: "+39 081 8283736",
+  phone: "+39  081 17 67 67 09",
   address: "Via Vittoria Colonna 14 - 80121 Napoli (NA)",
 };
