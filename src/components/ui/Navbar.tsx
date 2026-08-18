@@ -3,7 +3,7 @@ import { useTheme } from "../dark-mode/theme-provider";
 import { logos } from "@/constants/images";
 
 const Navbar = () => {
-  const { theme } = useTheme();
+  const { effectiveTheme } = useTheme();
   return (
     <nav className="w-full grid grid-cols-3 border-b border-orange bg-background1 top-0 fixed z-50 min-h-16 ">
       <div className="flex justify-start items-center">
@@ -12,7 +12,7 @@ const Navbar = () => {
         </a>
       </div>
       <a href="/" className="flex justify-center items-center">
-        {theme === "light" ? (
+        {effectiveTheme === "light" ? (
           <img
             src={logos.logoLight.src}
             alt={logos.logoLight.alt}

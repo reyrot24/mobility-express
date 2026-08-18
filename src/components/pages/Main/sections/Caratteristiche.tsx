@@ -28,7 +28,7 @@ export const Caratteristiche = (props: Layout221Props) => {
     ...Layout221Defaults,
     ...props,
   } as Props;
-  const { theme } = useTheme();
+  const { effectiveTheme } = useTheme();
 
   return (
     <section
@@ -58,7 +58,7 @@ export const Caratteristiche = (props: Layout221Props) => {
               {features.map((feature, index) => (
                 <div key={index}>
                   <div className="mb-3 md:mb-4">
-                    {theme === "light" ? (
+                    {effectiveTheme === "light" ? (
                       <img
                         src={feature.icon.src}
                         className="size-12"

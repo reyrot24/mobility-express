@@ -2,8 +2,9 @@ import "./App.css";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import Index from "./components/pages/Main";
 import { ThemeProvider } from "./components/dark-mode/theme-provider";
-import { ModeToggle } from "./components/dark-mode/mode-toggle";
+import { FloatingWhatsApp } from "./components/ui/FloatingWhatsApp";
 import Questionario from "./components/pages/Questionario/Questionario";
+import { ModeToggle } from "./components/dark-mode/mode-toggle";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
               element={<Questionario />}
             />
           </Routes>
+          <FloatingWhatsApp />
           <ModeToggle />
         </ThemeProvider>
       </Router>

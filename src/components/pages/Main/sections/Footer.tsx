@@ -54,13 +54,13 @@ export const Footer = (props: Footer4Props) => {
     ...Footer4Defaults,
     ...props,
   } as Props;
-  const { theme } = useTheme();
+  const { effectiveTheme } = useTheme();
   return (
     <footer className="px-[5%] pt-18 md:pt-20 md:pt-25 pb-10 bg-background1">
       <div className="container">
         <div className="grid grid-cols-1 items-center justify-center justify-items-center gap-x-[4vw] gap-y-12 pb-12 md:pb-18 lg:flex lg:justify-between lg:gap-y-4 lg:pb-20">
           <a href="/" className="lg:justify-self-start">
-            {theme === "light" ? (
+            {effectiveTheme === "light" ? (
               <img
                 src={logos.logoLight.src}
                 alt={logos.logoLight.alt}
@@ -70,7 +70,7 @@ export const Footer = (props: Footer4Props) => {
               <img
                 src={logos.logoDark.src}
                 alt={logos.logoDark.alt}
-                className="w-28"
+                className="w-24"
               />
             )}
           </a>

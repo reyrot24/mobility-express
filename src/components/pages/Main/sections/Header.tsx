@@ -33,6 +33,13 @@ export const Header = (props: Header62Props) => {
           >
             <Button>Prenota un consulto</Button>
           </a>
+          <a
+            href="https://wa.me/393773937469?text=Ciao%2C%20sono%20un%20subagente%2C%20vorrei%20vedere%20la%20piattaforma"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <Button className="bg-green-600 text-white hover:bg-green-700">Scrivici su WhatsApp</Button>
+          </a>
         </div>
       </div>
     </section>

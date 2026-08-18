@@ -13,12 +13,18 @@ type ThemeProviderState = {
   setTheme: (theme: Theme) => void;
 };
 
-const initialState: ThemeProviderState = {
-  theme: "system",
-  setTheme: () => null,
+type ThemeProviderStateExtended = ThemeProviderState & {
+  effectiveTheme: "light" | "dark";
 };
 
-const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
+const initialState: ThemeProviderStateExtended = {
+  theme: "system",
+  setTheme: () => null,
+  effectiveTheme: "light",
+};
+
+const ThemeProviderContext =
+  createContext<ThemeProviderStateExtended>(initialState);
 
 export function ThemeProvider({
   children,
@@ -27,33 +33,59 @@ export function ThemeProvider({
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme,
   );
+
+  const getEffectiveTheme = (): "light" | "dark" => {
+    if (theme === "system") {
+      if (typeof window === "undefined") return "light";
+      return window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    }
+    return theme;
+  };
 
   useEffect(() => {
     const root = window.document.documentElement;
 
     root.classList.remove("light", "dark");
 
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
+    const applied = getEffectiveTheme();
+    root.classList.add(applied);
 
-      root.classList.add(systemTheme);
-      return;
+    // If theme is 'system', listen for changes and update root class accordingly
+    let mql: MediaQueryList | null = null;
+    const handleChange = (e: MediaQueryListEvent) => {
+      if (theme === "system") {
+        const newApplied = e.matches ? "dark" : "light";
+        root.classList.remove("light", "dark");
+        root.classList.add(newApplied);
+      }
+    };
+
+    if (theme === "system" && typeof window !== "undefined") {
+      mql = window.matchMedia("(prefers-color-scheme: dark)");
+      if (mql.addEventListener) mql.addEventListener("change", handleChange);
+      else if (mql.addListener) mql.addListener(handleChange as any);
     }
 
-    root.classList.add(theme);
+    return () => {
+      if (mql) {
+        if (mql.removeEventListener)
+          mql.removeEventListener("change", handleChange);
+        else if (mql.removeListener) mql.removeListener(handleChange as any);
+      }
+    };
   }, [theme]);
 
-  const value = {
+  const value: ThemeProviderStateExtended = {
     theme,
     setTheme: (theme: Theme) => {
       localStorage.setItem(storageKey, theme);
       setTheme(theme);
     },
+    effectiveTheme: getEffectiveTheme(),
   };
 
   return (
