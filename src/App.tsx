@@ -4,6 +4,7 @@ import Index from "./components/pages/Main";
 import { ThemeProvider } from "./components/dark-mode/theme-provider";
 import { FloatingWhatsApp } from "./components/ui/FloatingWhatsApp";
 import Questionario from "./components/pages/Questionario/Questionario";
+import PrezzoGiusto from "./components/pages/PrezzoGiusto/PrezzoGiusto";
 import { ModeToggle } from "./components/dark-mode/mode-toggle";
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
               path="/questionario-catastrofale/"
               element={<Questionario />}
             />
+            <Route path="/prezzo-giusto/*" element={<PrezzoGiusto />} />
           </Routes>
           <FloatingWhatsApp />
           <ModeToggle />

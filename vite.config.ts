@@ -11,4 +11,10 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    // Backend Express (npm run server) per "Il prezzo giusto per te"
+    proxy: {
+      "/api": "http://localhost:3001",
+    },
+  },
 });
