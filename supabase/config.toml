@@ -1,0 +1,11 @@
+# Configurazione minima per la Supabase CLI (npx supabase ...).
+
+project_id = "mob-exp-website"
+
+# Il form pubblico, devops (webhook) e pg_cron chiamano l'API senza una sessione Supabase:
+# la verifica del JWT la fa la funzione sulle rotte che la richiedono.
+[functions.api]
+verify_jwt = false
+# Il codice è in JavaScript: senza questa riga la CLI cerca index.ts
+entrypoint = "./functions/api/index.js"
+import_map = "./functions/api/deno.json"

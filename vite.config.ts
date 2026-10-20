@@ -12,9 +12,12 @@ export default defineConfig({
     },
   },
   server: {
-    // Backend Express (npm run server) per "Il prezzo giusto per te"
+    // Edge Function "api" in locale (npm run api:dev) per "Il prezzo giusto per te"
     proxy: {
-      "/api": "http://localhost:3001",
+      "/api": {
+        target: "http://localhost:54321",
+        rewrite: (path) => `/functions/v1${path}`,
+      },
     },
   },
 });

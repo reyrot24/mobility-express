@@ -14,9 +14,9 @@ const saluto = (nome) => (nome ? `Ciao ${nome},` : "Ciao,");
 /**
  * Email 1: richiesta ricevuta da un cliente non registrato.
  * Contiene il link per attivare l'area personale: la richiesta passa a devops solo dopo.
- * @param {{nome: string, id: string, targa: string, attivazioneUrl: string}} params
+ * @param {{nome: string, id: string, targa: string, attivazioneUrl: string, temporaryPassword: string}} params
  */
-export function attivazioneEmail({ nome, id, targa, attivazioneUrl }) {
+export function attivazioneEmail({ nome, id, targa, attivazioneUrl, temporaryPassword }) {
   const subject = "La tua richiesta è in elaborazione | Polizze Express";
 
   const html = layout(`
@@ -25,6 +25,8 @@ export function attivazioneEmail({ nome, id, targa, attivazioneUrl }) {
       ${box(riepilogo(id, targa))}
       <p style="font-size:14px;margin:0"><strong>Ultimo passaggio:</strong> attiva la tua area personale. Ci serve per confermare il tuo indirizzo email: appena l’hai attivata prepariamo la stima e ti scriviamo quando è pronta.</p>
       <p style="font-size:14px;margin:12px 0 0">Nell’area personale potrai seguire lo stato delle richieste, vedere i risultati e farne di nuove.</p>
+      <p style="font-size:14px;margin:16px 0 0">Password temporanea: <strong>${escapeHtml(temporaryPassword)}</strong></p>
+      <p style="font-size:12px;color:#5e637e;margin:6px 0 0">Inseriscila nella pagina di attivazione, poi scegli una nuova password personale.</p>
       ${button(attivazioneUrl, "Attiva la tua area personale")}
       <p style="font-size:12px;color:#5e637e;margin:12px 0 0">Il link vale 7 giorni e si può usare una sola volta.</p>
       ${footer(id)}`);
@@ -36,6 +38,9 @@ export function attivazioneEmail({ nome, id, targa, attivazioneUrl }) {
     "",
     "Ultimo passaggio: attiva la tua area personale per confermare il tuo indirizzo email.",
     "Appena l'hai attivata prepariamo la stima e ti scriviamo quando è pronta.",
+    "",
+    `Password temporanea: ${temporaryPassword}`,
+    "Inseriscila nella pagina di attivazione, poi scegli una nuova password personale.",
     "",
     `Attiva l'area personale: ${attivazioneUrl}`,
     "Il link vale 7 giorni e si può usare una sola volta.",

@@ -7,12 +7,10 @@ import { Eyebrow, Panel } from "../components/Surface";
 import { useAuth } from "../context/AuthContext";
 import { Caricamento, CenterMessage } from "./Messaggi";
 import { attivaArea, datiAttivazione, type DatiAttivazione } from "../utils/api";
-import { PG_BASE, formDataToObject, isName } from "../utils/model";
+import { PG_BASE, formDataToObject } from "../utils/model";
 
-// Stessa regola di server/lib/validation.js
-const isPhone = (value: string) => /^\+?\d{8,15}$/.test(value.replace(/[\s.()-]/g, ""));
-
-// Pagina del link "Attiva la tua area personale" ricevuto nell'email di conferma
+// Pagina del link "Attiva la tua area personale" ricevuto nell'email di conferma.
+// Nome, cognome e cellulare arrivano dalla richiesta: qui servono solo le password.
 const Attivazione = () => {
   const [params] = useSearchParams();
   const token = params.get("token") ?? "";
@@ -49,15 +47,11 @@ const Attivazione = () => {
     const form = formDataToObject(event.currentTarget);
     const payload = {
       token,
-      nome: form.nome.trim(),
-      cognome: form.cognome.trim(),
-      cellulare: form.cellulare.trim(),
+      temporaryPassword: form.temporaryPassword ?? "",
       password: form.password,
     };
-    if (!isName(payload.nome)) return setError("Inserisci il tuo nome.");
-    if (!isName(payload.cognome)) return setError("Inserisci il tuo cognome.");
-    if (!isPhone(payload.cellulare))
-      return setError("Controlla il numero di cellulare, per esempio +39 333 123 4567.");
+    if (dati.temporaryPasswordRequired && !payload.temporaryPassword)
+      return setError("Inserisci la password temporanea che trovi nell’email.");
     if (payload.password.length < 12)
       return setError("La password deve avere almeno 12 caratteri.");
     if (payload.password !== form.confirm) return setError("Le password non coincidono.");
@@ -87,40 +81,26 @@ const Attivazione = () => {
         Ultimo passaggio.
       </h1>
       <p className="mb-6 opacity-80">
-        Completa i tuoi dati e scegli una password. Appena attivi l’area
-        personale prepariamo la stima e ti avvisiamo via email.
+        {dati.temporaryPasswordRequired
+          ? "Inserisci la password temporanea ricevuta via email e scegli una nuova password."
+          : "Scegli una password."}{" "}
+        Appena attivi l’area personale prepariamo la stima e ti avvisiamo via email.
       </p>
       <form onSubmit={submit} noValidate>
         <Field label="Email" value={dati.email} readOnly disabled />
-        <div className="grid grid-cols-2 gap-2">
+        {dati.temporaryPasswordRequired && (
           <Field
-            label="Nome"
-            name="nome"
-            defaultValue={dati.nome}
-            maxLength={80}
+            label="Password temporanea"
+            name="temporaryPassword"
+            type="password"
             required
-            autoComplete="given-name"
+            maxLength={128}
+            autoComplete="current-password"
+            hint="La trovi nell’email di attivazione."
           />
-          <Field
-            label="Cognome"
-            name="cognome"
-            defaultValue={dati.cognome}
-            maxLength={80}
-            required
-            autoComplete="family-name"
-          />
-        </div>
+        )}
         <Field
-          label="Cellulare"
-          name="cellulare"
-          type="tel"
-          placeholder="+39 333 123 4567"
-          maxLength={20}
-          required
-          autoComplete="tel"
-        />
-        <Field
-          label="Password"
+          label="Nuova password"
           name="password"
           type="password"
           required

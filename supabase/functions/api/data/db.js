@@ -70,15 +70,17 @@ const hashToken = (token) => createHash("sha256").update(token).digest("hex");
 /** Crea un link di attivazione per l'email e restituisce il token in chiaro (solo per l'email). */
 export async function createActivation(email) {
   const token = randomBytes(32).toString("base64url");
+  const temporaryPassword = randomBytes(18).toString("base64url");
   unwrap(
     await db().from("attivazioni").insert({
       token_hash: hashToken(token),
+      temporary_password_hash: createHash("sha256").update(temporaryPassword).digest("hex"),
       email,
       expires_at: new Date(Date.now() + ACTIVATION_TTL_MS).toISOString(),
     }),
     "creazione attivazione"
   );
-  return token;
+  return { token, temporaryPassword };
 }
 
 /** Attivazione valida (non usata, non scaduta) oppure null. */
@@ -86,7 +88,7 @@ export async function findActivation(token) {
   const row = unwrap(
     await db()
       .from("attivazioni")
-      .select("token_hash, email, expires_at, used_at")
+      .select("token_hash, temporary_password_hash, email, expires_at, used_at")
       .eq("token_hash", hashToken(token))
       .maybeSingle(),
     "lettura attivazione"
@@ -151,7 +153,7 @@ export async function findUltimaRichiestaInAttesa(email) {
   return unwrap(
     await db()
       .from("richieste")
-      .select("nome, cognome, referral_id")
+      .select("nome, cognome, cellulare, referral_id")
       .eq("email", email.toLowerCase())
       .is("user_id", null)
       .order("created_at", { ascending: false })
@@ -174,16 +176,67 @@ export async function linkRichiesteInAttesa(email, userId) {
   );
 }
 
-/** Richieste da inviare a devops (es. server riavviato prima dell'invio). */
+// Un invio a devops dura al massimo il timeout dell'API (15 s): oltre questa soglia
+// la prenotazione è di un'esecuzione interrotta e la richiesta può essere ripresa.
+const INVIO_SCADUTO_MS = 2 * 60 * 1000;
+const invioScaduto = () => new Date(Date.now() - INVIO_SCADUTO_MS).toISOString();
+
+/**
+ * Prenota l'invio a devops, così due esecuzioni della funzione non inviano la stessa richiesta.
+ * @returns {Promise<object|null>} la richiesta prenotata, null se già inviata o in invio altrove
+ */
+export async function prenotaInvio(id) {
+  const rows = unwrap(
+    await db()
+      .from("richieste")
+      .update({ invio_avviato_at: new Date().toISOString() })
+      .eq("id", id)
+      .eq("stato", "in_elaborazione")
+      .is("inviata_devops_at", null)
+      .or(`invio_avviato_at.is.null,invio_avviato_at.lt."${invioScaduto()}"`)
+      .select(),
+    "prenotazione invio"
+  );
+  return rows[0] ?? null;
+}
+
+/** Richieste da inviare a devops mai partite o con un invio interrotto. */
 export async function listRichiesteDaInviare() {
   return unwrap(
     await db()
       .from("richieste")
-      .select()
+      .select("id")
       .eq("stato", "in_elaborazione")
-      .is("inviata_devops_at", null),
+      .is("inviata_devops_at", null)
+      .or(`invio_avviato_at.is.null,invio_avviato_at.lt."${invioScaduto()}"`),
     "lettura richieste da inviare"
   );
+}
+
+/** Richieste in errore mai arrivate a devops. Con `dovuteEntro` solo quelle con un tentativo previsto entro quella data. */
+export async function listRichiesteDaRitentare(dovuteEntro = null) {
+  let query = db()
+    .from("richieste")
+    .select("id")
+    .eq("stato", "errore")
+    .is("inviata_devops_at", null)
+    .not("user_id", "is", null);
+  if (dovuteEntro) query = query.lte("prossimo_tentativo_at", dovuteEntro);
+  return unwrap(await query, "lettura richieste da ritentare");
+}
+
+/** Rimette in elaborazione una richiesta in errore. false se nel frattempo l'ha presa un altro tentativo. */
+export async function riprendiRichiestaInErrore(id) {
+  const rows = unwrap(
+    await db()
+      .from("richieste")
+      .update({ stato: "in_elaborazione", errore: null, invio_avviato_at: null })
+      .eq("id", id)
+      .eq("stato", "errore")
+      .select("id"),
+    "ripresa richiesta in errore"
+  );
+  return rows.length > 0;
 }
 
 export async function updateRichiesta(id, changes) {

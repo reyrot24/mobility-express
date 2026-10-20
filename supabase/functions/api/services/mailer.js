@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 import { config } from "../config.js";
 
-// Senza SMTP configurato (sviluppo) le email vengono stampate in console invece di essere inviate.
+// Senza SMTP configurato (sviluppo) le email vengono stampate nei log invece di essere inviate.
 const transporter = config.smtp.host
   ? nodemailer.createTransport({
       host: config.smtp.host,
@@ -14,7 +14,7 @@ const transporter = config.smtp.host
   : nodemailer.createTransport({ jsonTransport: true });
 
 if (!config.smtp.host)
-  console.warn("[mailer] SMTP_HOST non impostato: le email saranno solo stampate in console.");
+  console.warn("[mailer] SMTP_HOST non impostato: le email saranno solo stampate nei log.");
 
 /**
  * Invia un'email.
@@ -38,15 +38,4 @@ export async function sendMail({ to, subject, html, text, replyTo }) {
   const previewUrl = nodemailer.getTestMessageUrl(info);
   if (previewUrl) console.log(`[mailer] anteprima: ${previewUrl}`);
   return info.messageId;
-}
-
-/** Verifica la connessione SMTP all'avvio, senza bloccare il server. */
-export async function verifyMailer() {
-  if (!config.smtp.host) return;
-  try {
-    await transporter.verify();
-    console.log("[mailer] connessione SMTP verificata");
-  } catch (error) {
-    console.error("[mailer] SMTP non raggiungibile:", error.message);
-  }
 }

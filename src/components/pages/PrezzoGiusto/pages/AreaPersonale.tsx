@@ -23,7 +23,14 @@ import {
   type Richiesta,
 } from "../utils/account";
 import { STATUS_LABELS, estimateLabel } from "../utils/estimate";
-import { PG_BASE, formDataToObject, isName, type QuoteRequest } from "../utils/model";
+import {
+  PG_BASE,
+  formDataToObject,
+  isName,
+  isPhone,
+  normalizePhone,
+  type QuoteRequest,
+} from "../utils/model";
 
 type Tab = "richieste" | "nuova" | "dati" | "polizze";
 
@@ -255,16 +262,21 @@ const NuovaRichiesta = ({
 
   return (
     <div className="mx-auto max-w-xl">
-      {!(isName(profilo.nome) && isName(profilo.cognome)) ? (
+      {!(isName(profilo.nome) && isName(profilo.cognome) && isPhone(profilo.cellulare)) ? (
         <Notice>
-          Completa nome e cognome nella sezione “I miei dati” prima di fare una
-          nuova richiesta.
+          Completa nome, cognome e cellulare nella sezione “I miei dati” prima
+          di fare una nuova richiesta.
         </Notice>
       ) : (
         <QuoteForm
           onSubmit={submit}
           referentName={activeRef.name}
-          customer={{ firstName: profilo.nome, lastName: profilo.cognome, email }}
+          customer={{
+            firstName: profilo.nome,
+            lastName: profilo.cognome,
+            phone: profilo.cellulare,
+            email,
+          }}
         />
       )}
     </div>
@@ -291,11 +303,11 @@ const IMieiDati = ({
     const next = {
       nome: data.nome.trim(),
       cognome: data.cognome.trim(),
-      cellulare: data.cellulare.replace(/[\s.()-]/g, ""),
+      cellulare: normalizePhone(data.cellulare),
     };
     if (!isName(next.nome)) return setError("Inserisci il tuo nome.");
     if (!isName(next.cognome)) return setError("Inserisci il tuo cognome.");
-    if (!/^\+?\d{8,15}$/.test(next.cellulare))
+    if (!isPhone(next.cellulare))
       return setError("Controlla il numero di cellulare, per esempio +39 333 123 4567.");
     setBusy(true);
     setError("");

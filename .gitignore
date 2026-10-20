@@ -25,4 +25,6 @@ dist-ssr
 
 # Backend
 .env
-server/.env
+
+# Supabase CLI (dati locali)
+supabase/.temp/

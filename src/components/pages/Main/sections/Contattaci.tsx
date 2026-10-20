@@ -58,7 +58,7 @@ export const Contattaci = (props: Contact5Props) => {
       </div>
       <div className="mt-8 flex justify-center">
         <a
-          href="https://wa.me/393773937469?text=Ciao%2C%20sono%20un%20subagente%2C%20vorrei%20vedere%20la%20piattaforma"
+          href="https://wa.me/393773887286?text=Ciao%2C%20sono%20un%20subagente%2C%20vorrei%20vedere%20la%20piattaforma"
           rel="noopener noreferrer"
           target="_blank"
         >

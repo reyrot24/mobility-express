@@ -37,6 +37,7 @@ export type Referente = {
 export type QuoteInput = {
   firstName: string;
   lastName: string;
+  phone: string;
   plate: string;
   streetType: string;
   street: string;
@@ -96,6 +97,7 @@ export const formDataToObject = (form: HTMLFormElement) =>
 const QUOTE_FIELDS: (keyof QuoteInput)[] = [
   "firstName",
   "lastName",
+  "phone",
   "plate",
   "streetType",
   "street",
@@ -108,6 +110,10 @@ const QUOTE_FIELDS: (keyof QuoteInput)[] = [
 // Stessa regola di server/lib/validation.js
 export const isName = (value: string) =>
   value.length >= 1 && value.length <= 80 && /^[\p{L}][\p{L}\s'’.-]*$/u.test(value);
+
+// Cellulare con prefisso internazionale facoltativo. Stessa regola di server/lib/validation.js
+export const normalizePhone = (value: string) => value.replace(/[\s.()-]/g, "");
+export const isPhone = (value: string) => /^\+?\d{8,15}$/.test(normalizePhone(value));
 
 const flag = (value: unknown) => value === true || value === "on";
 
@@ -122,6 +128,9 @@ export function validateQuote(input: Record<string, unknown>): QuoteRequest {
 
   if (!isName(data.firstName)) throw new Error("Inserisci il tuo nome.");
   if (!isName(data.lastName)) throw new Error("Inserisci il tuo cognome.");
+  data.phone = normalizePhone(data.phone);
+  if (!isPhone(data.phone))
+    throw new Error("Controlla il numero di cellulare, per esempio +39 333 123 4567.");
   if (!/^[A-Z]{2}\d{3}[A-Z]{2}$/.test(data.plate))
     throw new Error(
       "Inserisci la targa nel formato AB123CD. Per targhe speciali rivolgiti al referente.",

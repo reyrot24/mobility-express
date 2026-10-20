@@ -1,4 +1,5 @@
-import { randomUUID } from "node:crypto";
+import { Buffer } from "node:buffer";
+import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { config } from "../config.js";
 import { findReferente } from "../data/referenti.js";
 import {
@@ -14,12 +15,16 @@ import {
   insertRichiesta,
   linkRichiesteInAttesa,
   listRichiesteDaInviare,
+  listRichiesteDaRitentare,
   logEmail,
+  prenotaInvio,
   releaseActivation,
+  riprendiRichiestaInErrore,
   saveRisultato,
   updateRichiesta,
 } from "../data/db.js";
 import { recordChoices } from "../lib/consensi.js";
+import { inBackground } from "../lib/http.js";
 import { sendMail } from "./mailer.js";
 import { inviaAPiattaforma } from "./piattaforma.js";
 import { DEMO_ESTIMATE, parseStima } from "./stima.js";
@@ -67,7 +72,8 @@ export const toResponse = (r) => ({
 
 /**
  * Salva la richiesta e avvisa il cliente.
- * - Cliente registrato (o in sessione): richiesta collegata all'account, email 2, invio a devops.
+ * - Cliente registrato (o in sessione): richiesta collegata all'account, invio a devops
+ *   ed email 2 solo se devops la accetta.
  * - Cliente non registrato: richiesta salvata solo in "richieste", email 1 con il link
  *   per attivare l'area personale. Devops viene contattato solo dopo l'attivazione.
  * @param {object} data dati validati del form
@@ -92,6 +98,7 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null) {
     email,
     nome: profilo?.nome || data.nome,
     cognome: profilo?.cognome || data.cognome,
+    cellulare: profilo?.cellulare || data.cellulare,
     targa: data.targa,
     tipo_strada: data.tipoStrada,
     strada: data.strada,
@@ -106,23 +113,10 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null) {
   if (duplicate) return toResponse(richiesta);
 
   if (userId) {
-    await sendAndLog({
-      tipo: "richiesta_ricevuta",
-      userId,
-      richiestaId: richiesta.id,
-      message: {
-        to: email,
-        ...richiestaRicevutaEmail({
-          nome: richiesta.nome,
-          id: richiesta.id,
-          targa: richiesta.targa,
-          accessoUrl: accessoUrl(),
-        }),
-      },
-    });
+    // L'email di conferma parte da inviaADevops, solo se devops accetta la richiesta
     inviaInBackground(richiesta.id);
   } else {
-    const token = await createActivation(email);
+    const { token, temporaryPassword } = await createActivation(email);
     await sendAndLog({
       tipo: "attivazione",
       userId: null,
@@ -134,6 +128,7 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null) {
           id: richiesta.id,
           targa: richiesta.targa,
           attivazioneUrl: attivazioneUrl(token),
+          temporaryPassword,
         }),
       },
     });
@@ -148,33 +143,38 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null) {
 export async function datiAttivazione(token) {
   const activation = await findActivation(token);
   if (!activation) return null;
-  const ultima = await findUltimaRichiestaInAttesa(activation.email);
   return {
     email: activation.email,
-    nome: ultima?.nome ?? "",
-    cognome: ultima?.cognome ?? "",
+    temporaryPasswordRequired: Boolean(activation.temporary_password_hash),
   };
 }
 
 /**
- * Attiva l'area personale: crea utente e profilo, collega le richieste in attesa
- * e le invia a devops.
+ * Attiva l'area personale: crea utente e profilo con i dati dell'ultima richiesta,
+ * collega le richieste in attesa e le invia a devops.
  * @returns {Promise<{email: string, alreadyRegistered: boolean}|null>} null se il link non è valido
  */
-export async function attivaArea(token, { nome, cognome, cellulare, password }) {
+export async function attivaArea(token, { password, temporaryPassword }) {
   const activation = await findActivation(token);
-  if (!activation || !(await claimActivation(token))) return null;
+  if (!activation) return null;
+  if (activation.temporary_password_hash) {
+    const providedHash = createHash("sha256").update(temporaryPassword ?? "").digest();
+    const storedHash = Buffer.from(activation.temporary_password_hash, "hex");
+    if (storedHash.length !== providedHash.length || !timingSafeEqual(providedHash, storedHash))
+      throw new Error("PASSWORD_TEMPORANEA_NON_VALIDA");
+  }
+  if (!(await claimActivation(token))) return null;
 
   let result;
   try {
-    // Il referente dell'ultima richiesta diventa il referente del profilo
+    // Dati e referente dell'ultima richiesta diventano quelli del profilo
     const ultima = await findUltimaRichiestaInAttesa(activation.email);
     result = await createUser({
       email: activation.email,
       password,
-      nome,
-      cognome,
-      cellulare,
+      nome: ultima?.nome ?? "",
+      cognome: ultima?.cognome ?? "",
+      cellulare: ultima?.cellulare ?? "",
       referralId: ultima?.referral_id ?? null,
     });
   } catch (err) {
@@ -189,24 +189,29 @@ export async function attivaArea(token, { nome, cognome, cellulare, password }) 
 
 // ───────────── 3. Invio a devops ─────────────
 
-// Richieste in invio in questo processo: evita di inviare due volte la stessa.
-const inCorso = new Set();
+// Attese tra un tentativo fallito e il successivo. Esauriti i tentativi la richiesta
+// resta in errore: si ritenta chiamando /interno/tentativi con {"tutte": true}.
+const ATTESE_TENTATIVI_MS = [1, 5, 15, 60, 180, 360, 720, 1440].map((min) => min * 60 * 1000);
 
+// Senza URL di devops ogni tentativo fallirebbe: inutile consumarli.
+const devopsRaggiungibile = () => Boolean(config.externalApi.url) || config.simulateDevops;
+
+/** Invia dopo aver risposto al browser. Se la funzione si interrompe, riprende pg_cron. */
 function inviaInBackground(id) {
-  if (inCorso.has(id)) return;
-  inCorso.add(id);
-  inviaADevops(id)
-    .catch((err) => console.error(`[richieste] invio ${id} a devops non riuscito:`, err.message))
-    .finally(() => inCorso.delete(id));
+  inBackground(
+    inviaADevops(id).catch((err) =>
+      console.error(`[richieste] invio ${id} a devops non riuscito:`, err.message)
+    )
+  );
 }
 
 /**
  * Invia la richiesta a devops con i dati del form e il codice referente.
- * Il risultato arriva dopo, quando devops chiama POST /api/devops/risultati.
+ * Il risultato arriva dopo, quando devops chiama POST /devops/risultati.
  */
 async function inviaADevops(id) {
-  const richiesta = await getRichiesta(id);
-  if (!richiesta || richiesta.stato !== "in_elaborazione" || richiesta.inviata_devops_at) return;
+  const richiesta = await prenotaInvio(id);
+  if (!richiesta) return;
   const profilo = richiesta.user_id ? await getProfilo(richiesta.user_id) : null;
 
   try {
@@ -217,7 +222,7 @@ async function inviaADevops(id) {
       nome: richiesta.nome,
       cognome: richiesta.cognome,
       email: richiesta.email,
-      cellulare: profilo?.cellulare || null,
+      cellulare: profilo?.cellulare || richiesta.cellulare || null,
       targa: richiesta.targa,
       tipo_strada: richiesta.tipo_strada,
       strada: richiesta.strada,
@@ -227,38 +232,76 @@ async function inviaADevops(id) {
       indirizzo: indirizzo(richiesta),
       referral_id: richiesta.referral_id,
     });
-    await updateRichiesta(richiesta.id, {
-      inviata_devops_at: new Date().toISOString(),
-      errore: null,
-    });
   } catch (err) {
-    // TODO: ritentare automaticamente le richieste in errore
-    await updateRichiesta(richiesta.id, { stato: "errore", errore: err.message });
+    const tentativi = (richiesta.tentativi_devops ?? 0) + 1;
+    const attesa = ATTESE_TENTATIVI_MS[tentativi - 1];
+    await updateRichiesta(richiesta.id, {
+      stato: "errore",
+      errore: err.message,
+      invio_avviato_at: null,
+      tentativi_devops: tentativi,
+      prossimo_tentativo_at: attesa ? new Date(Date.now() + attesa).toISOString() : null,
+    });
     throw err;
   }
+  // Fuori dal try: se questo aggiornamento fallisce la richiesta non va reinviata
+  await updateRichiesta(richiesta.id, {
+    inviata_devops_at: new Date().toISOString(),
+    errore: null,
+    prossimo_tentativo_at: null,
+  });
+
+  // Arriviamo qui solo se devops ha risposto con status 1: in caso di errore nessuna email
+  await sendAndLog({
+    tipo: "richiesta_ricevuta",
+    userId: richiesta.user_id,
+    richiestaId: richiesta.id,
+    message: {
+      to: richiesta.email,
+      ...richiestaRicevutaEmail({
+        nome: richiesta.nome,
+        id: richiesta.id,
+        targa: richiesta.targa,
+        accessoUrl: accessoUrl(),
+      }),
+    },
+  });
 
   // Il ricontatto parte solo per richieste confermate (cliente registrato o attivato)
   if (richiesta.consensi.callback.granted) await notifyReferente(richiesta);
 
   if (config.simulateDevops) {
     console.warn(`[richieste] devops simulato: risultato dimostrativo per ${richiesta.id} tra 2 secondi.`);
-    setTimeout(
-      () =>
-        registraRisultato({ richiesta_id: richiesta.id, referral_id: richiesta.referral_id }, DEMO_ESTIMATE)
-          .catch((err) => console.error("[richieste] risultato simulato non salvato:", err.message)),
-      2000
-    ).unref();
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await registraRisultato(
+      { richiesta_id: richiesta.id, referral_id: richiesta.referral_id },
+      DEMO_ESTIMATE
+    ).catch((err) => console.error("[richieste] risultato simulato non salvato:", err.message));
   }
 }
 
 /**
- * All'avvio riprende le richieste confermate ma non ancora inviate a devops
- * (server riavviato a metà). Con una sola istanza non c'è rischio di doppio invio.
+ * Chiamata ogni minuto da pg_cron: ritenta le richieste in errore il cui tentativo è dovuto
+ * e invia quelle mai partite o rimaste a metà (funzione interrotta durante l'invio).
+ * @param {boolean} tutte true per ritentare subito tutte le richieste in errore
  */
-export async function riprendiRichiestePendenti() {
-  const pendenti = await listRichiesteDaInviare();
-  if (pendenti.length) console.log(`[richieste] invio a devops ${pendenti.length} richieste in sospeso`);
-  for (const r of pendenti) inviaInBackground(r.id);
+export async function elaboraTentativi(tutte = false) {
+  if (devopsRaggiungibile()) {
+    const inErrore = await listRichiesteDaRitentare(tutte ? null : new Date().toISOString());
+    for (const r of inErrore) await riprendiRichiestaInErrore(r.id);
+  } else {
+    console.warn("[richieste] EXTERNAL_API_URL non impostato: le richieste in errore non vengono ritentate.");
+  }
+
+  const daInviare = await listRichiesteDaInviare();
+  if (daInviare.length) console.log(`[richieste] invio a devops di ${daInviare.length} richieste`);
+  await Promise.all(
+    daInviare.map((r) =>
+      inviaADevops(r.id).catch((err) =>
+        console.error(`[richieste] invio ${r.id} a devops non riuscito:`, err.message)
+      )
+    )
+  );
 }
 
 // ───────────── 4. Risultato da devops ─────────────

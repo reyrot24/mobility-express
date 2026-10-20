@@ -159,16 +159,16 @@ export const Navbar = (props: Navbar1Props) => {
 
 export const Navbar1Defaults: Navbar1Props = {
   navLinks: [
-    { title: "Home", url: "#Home" },
-    { title: "Caratteristiche", url: "#Caratteristiche" },
-    { title: "FAQs", url: "#FAQs" },
+    { title: "Home", url: "/#Home" },
+    { title: "Caratteristiche", url: "/#Caratteristiche" },
+    { title: "FAQs", url: "/#FAQs" },
     {
       title: "Testimonianze",
-      url: "#Testimonianze",
+      url: "/#Testimonianze",
     },
     {
       title: "Contattaci",
-      url: "#Contattaci",
+      url: "/#Contattaci",
     },
   ],
   buttons: [

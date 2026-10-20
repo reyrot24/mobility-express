@@ -1,8 +1,9 @@
 import type { QuoteRequest } from "./model";
 import type { Consents, RequestStatus } from "./estimate";
 
-// In sviluppo Vite inoltra /api al server Express (vedi vite.config.ts).
-// In produzione impostare VITE_PG_API_URL con l'indirizzo del server.
+// API: Edge Function "api" di Supabase (supabase/functions/api).
+// In produzione VITE_PG_API_URL = https://<progetto>.supabase.co/functions/v1/api.
+// In sviluppo Vite inoltra /api alla funzione locale (vedi vite.config.ts).
 const API_BASE = import.meta.env.VITE_PG_API_URL ?? "/api";
 
 export type RichiestaResponse = {
@@ -53,6 +54,7 @@ export const richiediStima = (
     {
       nome: data.firstName,
       cognome: data.lastName,
+      cellulare: data.phone,
       referral_id: referralId,
       targa: data.plate,
       tipoStrada: data.streetType,
@@ -76,7 +78,10 @@ export const richiediRicontatto = (id: string, token: string) =>
     bearer(token)
   );
 
-export type DatiAttivazione = { email: string; nome: string; cognome: string };
+export type DatiAttivazione = {
+  email: string;
+  temporaryPasswordRequired: boolean;
+};
 
 /** Dati per precompilare il form di attivazione dell'area personale. */
 export async function datiAttivazione(token: string): Promise<DatiAttivazione> {
@@ -96,12 +101,10 @@ export async function datiAttivazione(token: string): Promise<DatiAttivazione> {
   return data as DatiAttivazione;
 }
 
-/** Attiva l'area personale: crea l'account con i dati e la password scelti dal cliente. */
+/** Attiva l'area personale: crea l'account con i dati della richiesta e la password scelta. */
 export const attivaArea = (payload: {
   token: string;
-  nome: string;
-  cognome: string;
-  cellulare: string;
+  temporaryPassword: string;
   password: string;
 }) => post<{ email: string; alreadyRegistered: boolean }>("/account/attivazione", payload);
 

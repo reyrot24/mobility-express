@@ -9,12 +9,12 @@ import {
   type QuoteRequest,
 } from "../utils/model";
 
-type Customer = { firstName: string; lastName: string; email: string };
+type Customer = { firstName: string; lastName: string; phone: string; email: string };
 
 type Props = {
   onSubmit: (data: QuoteRequest, idempotencyKey: string) => Promise<void>;
   referentName?: string;
-  /** Cliente in sessione: nome, cognome ed email non vengono richiesti di nuovo */
+  /** Cliente in sessione: nome, cognome, cellulare ed email non vengono richiesti di nuovo */
   customer?: Customer;
 };
 
@@ -82,6 +82,7 @@ export const QuoteForm = ({ onSubmit, referentName, customer }: Props) => {
             · <span className="break-all">{customer.email}</span>
           </p>
         ) : (
+          <>
           <div className="grid grid-cols-2 gap-2">
             <Field
               label="Nome"
@@ -100,6 +101,16 @@ export const QuoteForm = ({ onSubmit, referentName, customer }: Props) => {
               autoComplete="family-name"
             />
           </div>
+          <Field
+            label="Cellulare"
+            name="phone"
+            type="tel"
+            placeholder="+39 333 123 4567"
+            maxLength={20}
+            required
+            autoComplete="tel"
+          />
+          </>
         )}
 
         <Field label="Targa del veicolo">
