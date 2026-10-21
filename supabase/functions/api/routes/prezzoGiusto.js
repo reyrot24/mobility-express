@@ -1,4 +1,4 @@
-import { getRequestUser, InvalidSessionError, requireUser } from "../lib/auth.js";
+import { getRequestUser, InvalidSessionError, isDebug, requireUser } from "../lib/auth.js";
 import { json, readJson } from "../lib/http.js";
 import { rateLimit } from "../lib/rateLimit.js";
 import { validateRichiesta } from "../lib/validation.js";
@@ -21,7 +21,7 @@ export async function nuovaRichiesta(req) {
     if (error) return json(400, { message: error });
 
     const key = req.headers.get("Idempotency-Key")?.slice(0, 100) || undefined;
-    return json(202, await creaRichiesta(data, key, user));
+    return json(202, await creaRichiesta(data, key, user, { debug: isDebug(req) }));
   } catch (err) {
     if (err instanceof InvalidSessionError) throw err;
     console.error("[prezzo-giusto] richiesta non salvata:", err.message);

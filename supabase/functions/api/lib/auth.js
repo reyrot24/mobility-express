@@ -1,4 +1,5 @@
 import { createHash, timingSafeEqual } from "node:crypto";
+import { config } from "../config.js";
 import { supabase } from "../services/supabase.js";
 
 export class InvalidSessionError extends Error {}
@@ -31,6 +32,17 @@ export async function requireUser(req) {
 
 const digest = (value) => createHash("sha256").update(value).digest();
 
+const sameSecret = (value, secret) =>
+  Boolean(secret) && timingSafeEqual(digest(value ?? ""), digest(secret));
+
 /** Verifica "Authorization: Bearer <segreto>" a tempo costante. */
-export const hasBearerSecret = (req, secret) =>
-  Boolean(secret) && timingSafeEqual(digest(bearerToken(req) ?? ""), digest(secret));
+export const hasBearerSecret = (req, secret) => sameSecret(bearerToken(req), secret);
+
+/** Verifica "X-API-Key: <segreto>" a tempo costante. */
+export const hasApiKey = (req, secret) => sameSecret(req.headers.get("X-API-Key"), secret);
+
+/**
+ * Modalità debug (solo per test, es. da Postman): header "X-Debug: <CRON_SECRET>".
+ * La risposta aspetta devops e ne include la risposta.
+ */
+export const isDebug = (req) => sameSecret(req.headers.get("X-Debug"), config.cronSecret);

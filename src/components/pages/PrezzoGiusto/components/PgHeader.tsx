@@ -20,8 +20,12 @@ export const PgHeader = () => {
       <Brand />
       <nav
         aria-label="Navigazione Il prezzo giusto per te"
-        className="flex items-center gap-8 text-xs font-medium"
+        className="flex items-center gap-4 text-xs font-medium md:gap-8"
       >
+        {/* Torna al form mantenendo il referente attivo */}
+        <Link to={PG_BASE} className="hover:text-orangeHover">
+          Richiedi una stima
+        </Link>
         <Link
           to={`${PG_BASE}/come-funziona`}
           className="hidden hover:text-orangeHover md:block"

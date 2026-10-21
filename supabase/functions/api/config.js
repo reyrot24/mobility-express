@@ -48,7 +48,7 @@ export const config = {
     timeoutMs: Number(env("EXTERNAL_API_TIMEOUT_MS") ?? 15000),
   },
 
-  // Devops chiama POST /devops/risultati con "Authorization: Bearer <segreto>"
+  // Devops chiama POST /devops/risultati con "X-API-Key: <segreto>"
   devopsWebhook: {
     secret: env("DEVOPS_WEBHOOK_SECRET"),
   },

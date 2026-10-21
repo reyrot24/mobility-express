@@ -1,16 +1,15 @@
 import { config } from "../config.js";
-import { hasBearerSecret } from "../lib/auth.js";
+import { hasApiKey, hasBearerSecret, isDebug } from "../lib/auth.js";
 import { inBackground, json, readJson } from "../lib/http.js";
 import { elaboraTentativi, registraRisultato } from "../services/richieste.js";
 
 // POST /devops/risultati
 // Devops invia il risultato di una richiesta: salviamo il prezzo e avvisiamo il cliente.
-// Autorizzazione: "Authorization: Bearer <DEVOPS_WEBHOOK_SECRET>".
+// Autorizzazione: "X-API-Key: <DEVOPS_WEBHOOK_SECRET>".
 // TODO: adattare la lettura del JSON quando devops avrà definito il formato.
 export async function risultati(req) {
   if (!config.devopsWebhook.secret) return json(503, { message: "Webhook non configurato." });
-  if (!hasBearerSecret(req, config.devopsWebhook.secret))
-    return json(401, { message: "Non autorizzato." });
+  if (!hasApiKey(req, config.devopsWebhook.secret)) return json(401, { message: "Non autorizzato." });
 
   const body = await readJson(req);
   console.log("[devops] risultato ricevuto:", JSON.stringify(body));
@@ -28,9 +27,11 @@ export async function risultati(req) {
 // POST /interno/tentativi
 // Chiamato ogni minuto da pg_cron (migrazione 20261020000000) con "Authorization: Bearer <CRON_SECRET>".
 // Con {"tutte": true} ritenta subito tutte le richieste in errore, es. dopo aver sistemato devops.
+// Con "X-Debug" aspetta gli invii e restituisce la risposta di devops per ogni richiesta (per id).
 export async function tentativi(req) {
   if (!hasBearerSecret(req, config.cronSecret)) return json(401, { message: "Non autorizzato." });
   const body = await readJson(req);
+  if (isDebug(req)) return json(200, { rispostaDevops: await elaboraTentativi(body?.tutte === true) });
   // Si risponde subito: pg_net non aspetta la fine degli invii
   inBackground(
     elaboraTentativi(body?.tutte === true).catch((err) =>

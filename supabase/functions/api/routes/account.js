@@ -1,4 +1,4 @@
-import { requireUser } from "../lib/auth.js";
+import { isDebug, requireUser } from "../lib/auth.js";
 import { json, readJson } from "../lib/http.js";
 import { rateLimit } from "../lib/rateLimit.js";
 import { validateAttivazione } from "../lib/validation.js";
@@ -37,7 +37,7 @@ export async function attiva(req) {
   const { data, error } = validateAttivazione(await readJson(req));
   if (error) return json(400, { message: error });
   try {
-    const result = await attivaArea(data.token, data);
+    const result = await attivaArea(data.token, data, { debug: isDebug(req) });
     if (!result) return json(404, LINK_NON_VALIDO);
     return json(201, result);
   } catch (err) {
