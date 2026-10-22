@@ -126,8 +126,9 @@ export function validateQuote(input: Record<string, unknown>): QuoteRequest {
   data.email = data.email.toLowerCase();
   data.houseNumber = data.houseNumber.toUpperCase();
 
-  if (!isName(data.firstName)) throw new Error("Inserisci il tuo nome.");
-  if (!isName(data.lastName)) throw new Error("Inserisci il tuo cognome.");
+  // Nome e cognome sono facoltativi: il cliente li completa in "I miei dati"
+  if (data.firstName && !isName(data.firstName)) throw new Error("Controlla il nome.");
+  if (data.lastName && !isName(data.lastName)) throw new Error("Controlla il cognome.");
   data.phone = normalizePhone(data.phone);
   if (!isPhone(data.phone))
     throw new Error("Controlla il numero di cellulare, per esempio +39 333 123 4567.");

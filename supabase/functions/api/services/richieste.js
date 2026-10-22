@@ -246,8 +246,9 @@ async function inviaADevops(id) {
     risposta = await inviaAPiattaforma({
       richiesta_id: richiesta.id,
       data_richiesta: richiesta.created_at,
-      nome: richiesta.nome,
-      cognome: richiesta.cognome,
+      // Il profilo ha la precedenza: nome e cognome si possono completare dopo la richiesta
+      nome: profilo?.nome || richiesta.nome,
+      cognome: profilo?.cognome || richiesta.cognome,
       email: richiesta.email,
       cellulare: profilo?.cellulare || richiesta.cellulare || null,
       targa: richiesta.targa,
@@ -301,7 +302,7 @@ async function inviaADevops(id) {
     console.warn(`[richieste] devops simulato: risultato dimostrativo per ${richiesta.id} tra 2 secondi.`);
     await new Promise((resolve) => setTimeout(resolve, 2000));
     await registraRisultato(
-      { richiesta_id: richiesta.id, referral_id: richiesta.referral_id },
+      { richiestaId: richiesta.id, referral_id: richiesta.referral_id },
       DEMO_ESTIMATE
     ).catch((err) => console.error("[richieste] risultato simulato non salvato:", err.message));
   }
@@ -337,7 +338,7 @@ export async function elaboraTentativi(tutte = false) {
  * @returns {Promise<"salvato"|"gia_registrato"|"non_trovata">}
  */
 export async function registraRisultato(body, estimateOverride) {
-  const richiesta = await getRichiesta(String(body?.richiesta_id ?? ""));
+  const richiesta = await getRichiesta(String(body?.richiestaId ?? ""));
   if (!richiesta || !richiesta.user_id) return "non_trovata";
   if (["completata", "non_disponibile"].includes(richiesta.stato)) return "gia_registrato";
 
@@ -345,12 +346,8 @@ export async function registraRisultato(body, estimateOverride) {
   if (estimate)
     await saveRisultato({
       richiesta_id: richiesta.id,
-      prezzo_min: estimate.min,
-      prezzo_max: estimate.max,
-      valuta: estimate.currency,
-      fonte: estimate.referenceSource ?? null,
-      demo: estimate.demo,
-      dettagli: body,
+      compagnia: estimate.company,
+      prezzo: estimate.min,
     });
   await updateRichiesta(richiesta.id, {
     stato: estimate ? "completata" : "non_disponibile",
