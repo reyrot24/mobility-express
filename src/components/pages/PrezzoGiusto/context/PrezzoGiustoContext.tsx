@@ -16,11 +16,14 @@ type PrezzoGiustoState = {
   current: Quote | null;
   findRef: (id: string) => Referente | undefined;
   setActiveRef: (ref: Referente) => void;
-  /** referralId: codice referente da usare al posto di quello del link (area personale) */
+  /**
+   * area: richiesta dall'area personale, va all'account in sessione con il suo codice referente.
+   * Senza area (form pubblico) conta l'email inserita, anche se nel browser c'è una sessione aperta.
+   */
   submitQuote: (
     data: QuoteRequest,
     idempotencyKey: string,
-    referralId?: string | null
+    area?: { referralId: string | null }
   ) => Promise<Quote>;
 };
 
@@ -41,11 +44,13 @@ export const PrezzoGiustoProvider = ({ children }: { children: React.ReactNode }
   async function submitQuote(
     data: QuoteRequest,
     idempotencyKey: string,
-    referralId?: string | null
+    area?: { referralId: string | null }
   ) {
-    const ref = referralId ? { ...activeRef, id: referralId } : { ...activeRef };
-    // Se il cliente è in sessione la richiesta va al suo account
-    const result = await richiediStima(data, ref.id, idempotencyKey, session?.access_token);
+    const ref = area?.referralId ? { ...activeRef, id: area.referralId } : { ...activeRef };
+    // Il token di sessione solo dall'area personale: con il token il server usa l'email
+    // dell'account e ignora quella del form
+    const token = area ? session?.access_token : undefined;
+    const result = await richiediStima(data, ref.id, idempotencyKey, token);
     const quote: Quote = {
       ...data,
       id: result.id,

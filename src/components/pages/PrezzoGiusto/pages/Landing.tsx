@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useMemo } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { QuoteForm } from "../components/QuoteForm";
 import { RefPerson } from "../components/Referente";
 import { ReferenteDialog } from "../components/Dialogs";
@@ -13,10 +13,13 @@ import { PG_BASE, type QuoteRequest } from "../utils/model";
 
 const Landing = () => {
   const { activeRef, findRef, setActiveRef, submitQuote } = usePrezzoGiusto();
-  // Codice referente dal link di devops: /prezzo-giusto/<codice>
-  const { codice: refId } = useParams();
+  // Codice referente dal link di devops: /prezzo-giusto/<codice> oppure /prezzo-giusto?referral_id=<codice>
+  const { codice } = useParams();
+  const [searchParams] = useSearchParams();
+  const refId = codice ?? (searchParams.get("referral_id")?.trim() || undefined);
   const navigate = useNavigate();
-  const linkedRef = refId ? findRef(refId) : undefined;
+  // findRef crea un nuovo oggetto a ogni chiamata: senza useMemo l'effetto sotto si ripeterebbe a ogni render
+  const linkedRef = useMemo(() => (refId ? findRef(refId) : undefined), [refId, findRef]);
 
   useEffect(() => {
     if (linkedRef) setActiveRef(linkedRef);

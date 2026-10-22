@@ -1,7 +1,8 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Field, FormError, selectClassName } from "./Field";
+import { Field, FormError, PhoneField, selectClassName } from "./Field";
 import { Choices } from "./Choices";
+import { ComuneCap } from "./ComuneCap";
 import {
   ROAD_TYPES,
   formDataToObject,
@@ -28,11 +29,19 @@ const residenceLabel = "mb-1 text-[11px] font-medium opacity-80";
 export const QuoteForm = ({ onSubmit, referentName, customer }: Props) => {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  // Campi obbligatori compilati e privacy accettata: solo allora il pulsante si abilita
   const [ready, setReady] = useState(false);
+  // Cambia dopo un invio dall'area personale: i campi tornano vuoti, anche quelli controllati
+  const [formKey, setFormKey] = useState(0);
+  const formRef = useRef<HTMLFormElement>(null);
   const lock = useRef(false);
   // Stessa chiave per i tentativi ripetuti dello stesso invio: il server non duplica la richiesta
   const idempotencyKey = useRef(crypto.randomUUID());
+
+  // Campi obbligatori compilati e privacy accettata: solo allora il pulsante si abilita
+  const checkReady = useCallback(
+    () => setReady(formRef.current?.checkValidity() ?? false),
+    []
+  );
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -52,7 +61,7 @@ export const QuoteForm = ({ onSubmit, referentName, customer }: Props) => {
       await onSubmit(data, idempotencyKey.current);
       idempotencyKey.current = crypto.randomUUID();
       if (customer) {
-        form.reset();
+        setFormKey((k) => k + 1);
         setReady(false);
       }
     } catch (e) {
@@ -83,8 +92,10 @@ export const QuoteForm = ({ onSubmit, referentName, customer }: Props) => {
         Ricevi via email un intervallo indicativo per la RC auto.
       </p>
       <form
+        key={formKey}
+        ref={formRef}
         onSubmit={submit}
-        onChange={(e) => setReady(e.currentTarget.checkValidity())}
+        onChange={checkReady}
         noValidate
       >
         <Field label="Targa del veicolo">
@@ -149,29 +160,7 @@ export const QuoteForm = ({ onSubmit, referentName, customer }: Props) => {
               autoComplete="address-line2"
             />
           </div>
-          <div className="grid grid-cols-[minmax(0,1fr)_96px] gap-2">
-            <Field
-              label="Comune"
-              labelClassName={residenceLabel}
-              className="mb-0"
-              name="city"
-              placeholder="Es. Milano"
-              maxLength={80}
-              required
-              autoComplete="address-level2"
-            />
-            <Field
-              label="CAP"
-              labelClassName={residenceLabel}
-              className="mb-0"
-              name="zip"
-              placeholder="20100"
-              maxLength={5}
-              inputMode="numeric"
-              required
-              autoComplete="postal-code"
-            />
-          </div>
+          <ComuneCap onChange={checkReady} />
           <p className="mt-2 text-[11px] opacity-70">
             Senza numero civico? Inserisci SNC.
           </p>
@@ -202,15 +191,7 @@ export const QuoteForm = ({ onSubmit, referentName, customer }: Props) => {
             <span className="break-all">{customer.email}</span>
           </p>
         ) : (
-          <Field
-            label="Cellulare"
-            name="phone"
-            type="tel"
-            placeholder="+39 333 123 4567"
-            maxLength={20}
-            required
-            autoComplete="tel"
-          />
+          <PhoneField name="phone" onValueChange={checkReady} />
         )}
 
         <Choices referentName={referentName} />

@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { PageTitle } from "../components/PageTitle";
 import { PasswordForm } from "../components/PasswordForm";
 import { QuoteForm } from "../components/QuoteForm";
-import { Field, FormError } from "../components/Field";
+import { Field, FormError, PhoneField } from "../components/Field";
 import { Badge, DarkCard, EmptyState, Notice, Panel } from "../components/Surface";
 import { useAuth } from "../context/AuthContext";
 import { usePrezzoGiusto } from "../context/PrezzoGiustoContext";
@@ -361,7 +361,7 @@ const NuovaRichiesta = ({
 
   async function submit(data: QuoteRequest, idempotencyKey: string) {
     // Il codice del referente di provenienza viene inviato anche dalle richieste dell'area
-    await submitQuote(data, idempotencyKey, profilo?.referral_id);
+    await submitQuote(data, idempotencyKey, { referralId: profilo?.referral_id ?? null });
     toast.success("Richiesta inviata. Ti scriveremo appena la stima è pronta.");
     await onSent();
   }
@@ -420,7 +420,7 @@ const IMieiDati = ({
     if (next.nome && !isName(next.nome)) return setError("Controlla il nome.");
     if (next.cognome && !isName(next.cognome)) return setError("Controlla il cognome.");
     if (!isPhone(next.cellulare))
-      return setError("Controlla il numero di cellulare, per esempio +39 333 123 4567.");
+      return setError("Controlla il numero di cellulare: 9 o 10 cifre, per esempio 3331234567.");
     setBusy(true);
     setError("");
     try {
@@ -455,15 +455,7 @@ const IMieiDati = ({
             maxLength={80}
             autoComplete="family-name"
           />
-          <Field
-            label="Cellulare"
-            name="cellulare"
-            type="tel"
-            defaultValue={profilo.cellulare}
-            placeholder="+39 333 123 4567"
-            maxLength={20}
-            autoComplete="tel"
-          />
+          <PhoneField name="cellulare" defaultValue={profilo.cellulare} />
           <Field
             label="Email"
             value={email}

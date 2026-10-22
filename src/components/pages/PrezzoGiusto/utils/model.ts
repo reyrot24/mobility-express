@@ -131,7 +131,7 @@ export function validateQuote(input: Record<string, unknown>): QuoteRequest {
   if (data.lastName && !isName(data.lastName)) throw new Error("Controlla il cognome.");
   data.phone = normalizePhone(data.phone);
   if (!isPhone(data.phone))
-    throw new Error("Controlla il numero di cellulare, per esempio +39 333 123 4567.");
+    throw new Error("Controlla il numero di cellulare: 9 o 10 cifre, per esempio 3331234567.");
   if (!/^[A-Z]{2}\d{3}[A-Z]{2}$/.test(data.plate))
     throw new Error(
       "Inserisci la targa nel formato AB123CD. Per targhe speciali rivolgiti al referente.",

@@ -8,6 +8,7 @@ import { PG_BASE } from "../utils/model";
 const Inviata = () => {
   const { current: q } = usePrezzoGiusto();
   if (!q) return <NessunaRichiesta />;
+  const daAttivare = q.status === "in_attesa_attivazione";
 
   return (
     <Panel className="mx-auto my-8 max-w-lg">
@@ -16,21 +17,38 @@ const Inviata = () => {
       </div>
       <Eyebrow className="mb-3">Richiesta {q.id}</Eyebrow>
       <h1 className="mb-3 text-2xl font-bold tracking-tight">
-        La tua richiesta
-        <br />è in elaborazione.
+        {daAttivare ? (
+          <>
+            Ci sei quasi:
+            <br />
+            controlla la tua email.
+          </>
+        ) : (
+          <>
+            Richiesta ricevuta,
+            <br />
+            ci pensiamo noi.
+          </>
+        )}
       </h1>
-      {q.status === "in_attesa_attivazione" ? (
-        <p className="mb-5 opacity-80">
-          Ti abbiamo scritto a <strong className="break-all">{q.email}</strong>.
-          Apri l’email e <strong>attiva la tua area personale</strong>: è
-          l’ultimo passaggio, poi prepariamo la stima e ti avvisiamo quando è
-          pronta.
-        </p>
+      {daAttivare ? (
+        <>
+          <p className="mb-3 opacity-80">
+            Abbiamo inviato a <strong className="break-all">{q.email}</strong>{" "}
+            il link per attivare la tua area personale, insieme a una password
+            temporanea.
+          </p>
+          <p className="mb-5 opacity-80">
+            <strong>Attivala per confermare la richiesta</strong>: subito dopo
+            prepariamo la stima e ti scriviamo appena è pronta. Non trovi
+            l’email? Controlla anche nella cartella spam.
+          </p>
+        </>
       ) : (
         <p className="mb-5 opacity-80">
-          Ti abbiamo inviato una conferma a{" "}
-          <strong className="break-all">{q.email}</strong>. Appena la stima è
-          pronta ti scriviamo di nuovo e la trovi nella tua area personale.
+          Stiamo preparando la stima per il tuo veicolo. Ti scriveremo a{" "}
+          <strong className="break-all">{q.email}</strong> appena è pronta e
+          intanto puoi seguire la richiesta dalla tua area personale.
         </p>
       )}
       <div className="mb-6 rounded-lg bg-background2 p-3 text-[11px] leading-relaxed">
@@ -38,18 +56,18 @@ const Inviata = () => {
         <br />
         Referente: <strong className="text-xs">{q.ref.name}</strong>
         <br />
-        Ricontatto:{" "}
+        Ricontatto dal referente:{" "}
         <strong className="text-xs">
-          {q.consents.callback.granted ? "richiesto via email" : "non richiesto"}
+          {q.consents.callback.granted ? "richiesto" : "non richiesto"}
         </strong>
         <br />
-        Marketing:{" "}
+        Comunicazioni commerciali:{" "}
         <strong className="text-xs">
-          {q.consents.marketing.granted ? "consenso prestato" : "consenso non prestato"}
+          {q.consents.marketing.granted ? "accettate" : "non accettate"}
         </strong>
       </div>
       <div className="flex flex-col gap-3">
-        {q.status !== "in_attesa_attivazione" && (
+        {!daAttivare && (
           <Button asChild size="lg">
             <Link to={`${PG_BASE}/accesso`}>Vai alla tua area personale</Link>
           </Button>
