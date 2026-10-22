@@ -22,8 +22,6 @@
     "@radix-ui/react-slot": "^1.1.2",
     "@relume_io/relume-tailwind": "^0.4.0",
     "@relume_io/relume-ui": "^0.4.0",
-    "@sanity/client": "^6.21.3",
-    "@sanity/image-url": "^1.0.2",
     "@supabase/supabase-js": "^2.117.3",
     "@tailwindcss/typography": "^0.5.14",
     "@tanstack/react-table": "^8.21.2",

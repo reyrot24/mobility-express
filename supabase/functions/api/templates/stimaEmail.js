@@ -1,7 +1,8 @@
 import { ESTIMATE_DISCLAIMER, ESTIMATE_METHOD } from "../lib/consensi.js";
 import { button, escapeHtml, hr, layout } from "./layout.js";
 
-const range = (estimate) => `${estimate.min}–${estimate.max} €`;
+const range = (estimate) =>
+  estimate.min === estimate.max ? `${estimate.min} €` : `${estimate.min}–${estimate.max} €`;
 
 /**
  * Email al cliente con la stima orientativa.
@@ -20,7 +21,7 @@ export function stimaEmail({
 
   const estimateBlock = estimate
     ? `<div style="background:#fff5eb;border-radius:12px;padding:24px;margin:24px 0">
-        <span style="display:inline-block;padding:4px 10px;background:#fff0e3;border-radius:99px;font-size:12px;font-weight:600;color:#913900">Range indicativo${estimate.demo ? " · esempio dimostrativo" : ""}</span>
+        <span style="display:inline-block;padding:4px 10px;background:#fff0e3;border-radius:99px;font-size:12px;font-weight:600;color:#913900">${estimate.min === estimate.max ? "Prezzo indicativo" : "Range indicativo"}${estimate.demo ? " · esempio dimostrativo" : ""}</span>
         <div style="font-size:40px;font-weight:600;letter-spacing:-1.5px;margin-top:8px">${range(estimate)}<small style="font-size:15px;font-weight:400;color:#5e637e;letter-spacing:0"> / anno · indicativo</small></div>
         <p style="font-size:12px;color:#5e637e;margin:4px 0 0">Richiesta ${escapeHtml(id)} · veicolo ${escapeHtml(targa)}</p>
       </div>`
@@ -57,7 +58,7 @@ export function stimaEmail({
     subject,
     "",
     estimate
-      ? `Range indicativo per il veicolo ${targa}: ${range(estimate)} / anno.`
+      ? `${estimate.min === estimate.max ? "Prezzo" : "Range"} indicativo per il veicolo ${targa}: ${range(estimate)} / anno.`
       : `Al momento non è disponibile una stima per il veicolo ${targa}.`,
     "",
     ESTIMATE_DISCLAIMER,

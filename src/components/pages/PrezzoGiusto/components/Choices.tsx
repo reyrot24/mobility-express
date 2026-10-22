@@ -9,7 +9,7 @@ const boxClassName = "mt-0.5 size-4 flex-none accent-orange";
 export const Choices = ({ referentName }: { referentName?: string }) => (
   <div className="mb-4">
     <label className={checkClassName}>
-      <input name="privacy" type="checkbox" className={boxClassName} />
+      <input name="privacy" type="checkbox" required className={boxClassName} />
       <span className="opacity-90">
         Ho letto l’
         <PrivacyDialog

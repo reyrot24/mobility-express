@@ -34,8 +34,9 @@ export function validateRichiesta(body) {
   // Ricontatto e marketing: facoltativi, mai dedotti da altri campi
   if (!isOptionalBoolean(body?.ricontatto) || !isOptionalBoolean(body?.marketing))
     return { error: "Scelte di contatto non valide." };
-  if (!isName(data.nome)) return { error: "Inserisci il tuo nome." };
-  if (!isName(data.cognome)) return { error: "Inserisci il tuo cognome." };
+  // Nome e cognome sono facoltativi: il form pubblico non li chiede, il cliente li completa nell'area personale
+  if (data.nome && !isName(data.nome)) return { error: "Nome non valido." };
+  if (data.cognome && !isName(data.cognome)) return { error: "Cognome non valido." };
   if (!data.cellulare) return { error: "Controlla il numero di cellulare." };
   if (!REFERRAL_CODE.test(data.referralId)) return { error: "Link referral non valido." };
   if (!/^[A-Z]{2}\d{3}[A-Z]{2}$/.test(data.targa)) return { error: "Targa non valida." };

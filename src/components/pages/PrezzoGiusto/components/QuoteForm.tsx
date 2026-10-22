@@ -9,12 +9,17 @@ import {
   type QuoteRequest,
 } from "../utils/model";
 
-type Customer = { firstName: string; lastName: string; phone: string; email: string };
+type Customer = {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+};
 
 type Props = {
   onSubmit: (data: QuoteRequest, idempotencyKey: string) => Promise<void>;
   referentName?: string;
-  /** Cliente in sessione: nome, cognome, cellulare ed email non vengono richiesti di nuovo */
+  /** Cliente in sessione: cellulare ed email non vengono richiesti di nuovo. Nome e cognome si gestiscono in "I miei dati" */
   customer?: Customer;
 };
 
@@ -23,6 +28,8 @@ const residenceLabel = "mb-1 text-[11px] font-medium opacity-80";
 export const QuoteForm = ({ onSubmit, referentName, customer }: Props) => {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  // Campi obbligatori compilati e privacy accettata: solo allora il pulsante si abilita
+  const [ready, setReady] = useState(false);
   const lock = useRef(false);
   // Stessa chiave per i tentativi ripetuti dello stesso invio: il server non duplica la richiesta
   const idempotencyKey = useRef(crypto.randomUUID());
@@ -44,7 +51,10 @@ export const QuoteForm = ({ onSubmit, referentName, customer }: Props) => {
     try {
       await onSubmit(data, idempotencyKey.current);
       idempotencyKey.current = crypto.randomUUID();
-      if (customer) form.reset();
+      if (customer) {
+        form.reset();
+        setReady(false);
+      }
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -72,47 +82,11 @@ export const QuoteForm = ({ onSubmit, referentName, customer }: Props) => {
       <p className="mb-5 text-xs opacity-80">
         Ricevi via email un intervallo indicativo per la RC auto.
       </p>
-      <form onSubmit={submit} noValidate>
-        {customer ? (
-          <p className="mb-4 rounded-md bg-background2 p-3 text-xs">
-            Richiesta a nome di{" "}
-            <strong>
-              {customer.firstName} {customer.lastName}
-            </strong>{" "}
-            · <span className="break-all">{customer.email}</span>
-          </p>
-        ) : (
-          <>
-          <div className="grid grid-cols-2 gap-2">
-            <Field
-              label="Nome"
-              name="firstName"
-              placeholder="Mario"
-              maxLength={80}
-              required
-              autoComplete="given-name"
-            />
-            <Field
-              label="Cognome"
-              name="lastName"
-              placeholder="Rossi"
-              maxLength={80}
-              required
-              autoComplete="family-name"
-            />
-          </div>
-          <Field
-            label="Cellulare"
-            name="phone"
-            type="tel"
-            placeholder="+39 333 123 4567"
-            maxLength={20}
-            required
-            autoComplete="tel"
-          />
-          </>
-        )}
-
+      <form
+        onSubmit={submit}
+        onChange={(e) => setReady(e.currentTarget.checkValidity())}
+        noValidate
+      >
         <Field label="Targa del veicolo">
           <div className="relative">
             <b
@@ -214,6 +188,30 @@ export const QuoteForm = ({ onSubmit, referentName, customer }: Props) => {
             autoComplete="email"
           />
         )}
+        {customer ? (
+          <p className="mb-4 rounded-md bg-background2 p-3 text-xs">
+            Richiesta a nome di{" "}
+            {customer.firstName || customer.lastName ? (
+              <>
+                <strong>
+                  {customer.firstName} {customer.lastName}
+                </strong>{" "}
+                ·{" "}
+              </>
+            ) : null}
+            <span className="break-all">{customer.email}</span>
+          </p>
+        ) : (
+          <Field
+            label="Cellulare"
+            name="phone"
+            type="tel"
+            placeholder="+39 333 123 4567"
+            maxLength={20}
+            required
+            autoComplete="tel"
+          />
+        )}
 
         <Choices referentName={referentName} />
 
@@ -230,7 +228,7 @@ export const QuoteForm = ({ onSubmit, referentName, customer }: Props) => {
         <Button
           className="h-12 w-full text-sm font-bold"
           type="submit"
-          disabled={busy}
+          disabled={busy || !ready}
         >
           {busy ? "Invio in corso…" : "Ricevi la stima indicativa"}
         </Button>

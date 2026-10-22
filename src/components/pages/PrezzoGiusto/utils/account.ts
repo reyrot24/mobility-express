@@ -14,11 +14,7 @@ export type Profilo = {
 export type ProfiloModificabile = Pick<Profilo, "nome" | "cognome" | "cellulare">;
 
 export type Risultato = {
-  prezzo: number | null;
-  prezzo_min: number | null;
-  prezzo_max: number | null;
-  valuta: string;
-  demo: boolean;
+  prezzo: number;
 };
 
 export type Richiesta = {
@@ -37,7 +33,7 @@ export type Richiesta = {
 };
 
 const COLONNE =
-  "id, targa, tipo_strada, strada, civico, comune, cap, referral_id, stato, consensi, created_at, risultati(prezzo, prezzo_min, prezzo_max, valuta, demo)";
+  "id, targa, tipo_strada, strada, civico, comune, cap, referral_id, stato, consensi, created_at, risultati(prezzo)";
 
 const LOAD_ERROR = "Non riusciamo a caricare i tuoi dati. Ricarica la pagina tra qualche istante.";
 
@@ -85,10 +81,15 @@ export async function updateProfilo(userId: string, profilo: ProfiloModificabile
 export function estimateOf(r: Richiesta): Estimate | null {
   const res = r.risultati;
   if (!res) return null;
-  const min = res.prezzo_min ?? res.prezzo;
-  const max = res.prezzo_max ?? res.prezzo;
-  if (min === null || max === null) return null;
-  return { min, max, currency: "EUR", period: "year", basis: "", demo: res.demo };
+  // Prezzo puntuale: min e max coincidono
+  return {
+    min: res.prezzo,
+    max: res.prezzo,
+    currency: "EUR",
+    period: "year",
+    basis: "",
+    demo: false,
+  };
 }
 
 export const indirizzoOf = (r: Richiesta) =>
