@@ -8,6 +8,7 @@ import { PG_BASE } from "../utils/model";
 const Inviata = () => {
   const { current: q } = usePrezzoGiusto();
   if (!q) return <NessunaRichiesta />;
+  const daAttivare = q.status === "in_attesa_attivazione";
 
   return (
     <Panel className="mx-auto my-8 max-w-lg">
@@ -16,8 +17,19 @@ const Inviata = () => {
       </div>
       <Eyebrow className="mb-3">Richiesta {q.id}</Eyebrow>
       <h1 className="mb-3 text-2xl font-bold tracking-tight">
-        La tua richiesta
-        <br />è in elaborazione.
+        {daAttivare ? (
+          <>
+            Ci sei quasi:
+            <br />
+            controlla la tua email.
+          </>
+        ) : (
+          <>
+            Richiesta ricevuta,
+            <br />
+            ci pensiamo noi.
+          </>
+        )}
       </h1>
       {q.status === "in_attesa_attivazione" ? (
         <p className="mb-5 opacity-80">
@@ -28,9 +40,9 @@ const Inviata = () => {
         </p>
       ) : (
         <p className="mb-5 opacity-80">
-          Ti abbiamo inviato una conferma a{" "}
-          <strong className="break-all">{q.email}</strong>. Appena la stima è
-          pronta ti scriviamo di nuovo e la trovi nella tua area personale.
+          Stiamo preparando la stima per il tuo veicolo. Ti scriveremo a{" "}
+          <strong className="break-all">{q.email}</strong> appena è pronta e
+          intanto puoi seguire la richiesta dalla tua area personale.
         </p>
       )}
       <div className="mb-6 rounded-lg bg-background2 p-3 text-[11px] leading-relaxed">
@@ -38,14 +50,14 @@ const Inviata = () => {
         <br />
         Referente: <strong className="text-xs">{q.ref.name}</strong>
         <br />
-        Ricontatto:{" "}
+        Ricontatto dal referente:{" "}
         <strong className="text-xs">
-          {q.consents.callback.granted ? "richiesto via email" : "non richiesto"}
+          {q.consents.callback.granted ? "richiesto" : "non richiesto"}
         </strong>
 
       </div>
       <div className="flex flex-col gap-3">
-        {q.status !== "in_attesa_attivazione" && (
+        {!daAttivare && (
           <Button asChild size="lg">
             <Link to={`${PG_BASE}/accesso`}>Vai alla tua area personale</Link>
           </Button>
