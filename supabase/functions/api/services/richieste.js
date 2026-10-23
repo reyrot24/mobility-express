@@ -91,6 +91,8 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null, { 
   const userId = sessionUser?.id ?? (await findUserIdByEmail(email));
   // Per un cliente registrato usiamo i dati del profilo, non quelli digitati ora
   const profilo = userId ? await getProfilo(userId) : null;
+  // Cliente registrato: il referral è quello del link con cui ha attivato l'area (anche vuoto)
+  const referralId = (profilo ? profilo.referral_id : data.referralId) || null;
   const now = new Date().toISOString();
 
   const { richiesta, duplicate } = await insertRichiesta({
@@ -106,9 +108,9 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null, { 
     civico: data.civico,
     comune: data.comune,
     cap: data.cap,
-    referral_id: data.referralId,
+    referral_id: referralId,
     stato: userId ? "in_elaborazione" : "in_attesa_attivazione",
-    consensi: recordChoices(data, now),
+    consensi: recordChoices({ ...data, referralId }, now),
     idempotency_key: idempotencyKey ?? null,
   });
   if (duplicate) return toResponse(richiesta);
@@ -258,7 +260,8 @@ async function inviaADevops(id) {
       comune: richiesta.comune,
       cap: richiesta.cap,
       indirizzo: indirizzo(richiesta),
-      referral_id: richiesta.referral_id,
+      referral_id: richiesta.referral_id ?? "",
+      providerCode: "POLIZZAEXPRESS",
     });
   } catch (err) {
     const tentativi = (richiesta.tentativi_devops ?? 0) + 1;
@@ -326,6 +329,19 @@ export async function elaboraTentativi(tutte = false) {
   const daInviare = await listRichiesteDaInviare();
   if (daInviare.length) console.log(`[richieste] invio a devops di ${daInviare.length} richieste`);
   return risposteDevops(daInviare);
+}
+
+/**
+ * Rilancia subito una sola richiesta in errore (o mai partita), senza toccare le altre.
+ * @returns {Promise<Record<string, unknown>|null>} la risposta di devops per id,
+ *   null se la richiesta non esiste, non è collegata a un account o è già arrivata a devops
+ */
+export async function rilanciaRichiesta(id) {
+  const richiesta = await getRichiesta(id);
+  if (!richiesta?.user_id || richiesta.inviata_devops_at) return null;
+  if (!["errore", "in_elaborazione"].includes(richiesta.stato)) return null;
+  if (richiesta.stato === "errore") await riprendiRichiestaInErrore(id);
+  return { [id]: await rispostaDevops(id) };
 }
 
 // ───────────── 4. Risultato da devops ─────────────

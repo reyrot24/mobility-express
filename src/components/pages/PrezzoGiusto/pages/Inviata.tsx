@@ -56,7 +56,7 @@ const Inviata = () => {
         )}
         <Button asChild size="lg" variant="outline">
           {/* Stesso link del referente, così il codice resta associato */}
-          <Link to={`${PG_BASE}/${encodeURIComponent(q.ref.id)}`}>
+          <Link to={q.ref.id ? `${PG_BASE}/${encodeURIComponent(q.ref.id)}` : PG_BASE}>
             Fai un’altra richiesta
           </Link>
         </Button>

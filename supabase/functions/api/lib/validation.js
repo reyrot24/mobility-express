@@ -38,7 +38,9 @@ export function validateRichiesta(body) {
   if (data.nome && !isName(data.nome)) return { error: "Nome non valido." };
   if (data.cognome && !isName(data.cognome)) return { error: "Cognome non valido." };
   if (!data.cellulare) return { error: "Controlla il numero di cellulare." };
-  if (!REFERRAL_CODE.test(data.referralId)) return { error: "Link referral non valido." };
+  // Referral facoltativo: vuoto se il cliente non è arrivato da un link di devops
+  if (data.referralId && !REFERRAL_CODE.test(data.referralId))
+    return { error: "Link referral non valido." };
   if (!/^[A-Z]{2}\d{3}[A-Z]{2}$/.test(data.targa)) return { error: "Targa non valida." };
   if (!ROAD_TYPES.includes(data.tipoStrada)) return { error: "Tipo di strada non valido." };
   if (data.strada.length < 2 || data.strada.length > 120) return { error: "Indirizzo non valido." };

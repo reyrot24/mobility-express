@@ -360,8 +360,8 @@ const NuovaRichiesta = ({
   if (!profilo) return <Caricamento />;
 
   async function submit(data: QuoteRequest, idempotencyKey: string) {
-    // Il codice del referente di provenienza viene inviato anche dalle richieste dell'area
-    await submitQuote(data, idempotencyKey, profilo?.referral_id);
+    // Il codice del link di attivazione viene inviato anche dalle richieste dell'area (vuoto se non c'era)
+    await submitQuote(data, idempotencyKey, profilo?.referral_id ?? null);
     toast.success("Richiesta inviata. Ti scriveremo appena la stima è pronta.");
     await onSent();
   }

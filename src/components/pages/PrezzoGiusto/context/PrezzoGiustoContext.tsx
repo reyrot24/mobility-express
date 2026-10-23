@@ -16,7 +16,7 @@ type PrezzoGiustoState = {
   current: Quote | null;
   findRef: (id: string) => Referente | undefined;
   setActiveRef: (ref: Referente) => void;
-  /** referralId: codice referente da usare al posto di quello del link (area personale) */
+  /** referralId: codice referente del profilo (area personale), al posto di quello del link. Può essere vuoto */
   submitQuote: (
     data: QuoteRequest,
     idempotencyKey: string,
@@ -43,7 +43,7 @@ export const PrezzoGiustoProvider = ({ children }: { children: React.ReactNode }
     idempotencyKey: string,
     referralId?: string | null
   ) {
-    const ref = referralId ? { ...activeRef, id: referralId } : { ...activeRef };
+    const ref = referralId === undefined ? { ...activeRef } : { ...activeRef, id: referralId ?? "" };
     // Se il cliente è in sessione la richiesta va al suo account
     const result = await richiediStima(data, ref.id, idempotencyKey, session?.access_token);
     const quote: Quote = {
