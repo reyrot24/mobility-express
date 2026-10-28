@@ -9,7 +9,9 @@ import {
 import { useTheme } from "./theme-provider";
 
 export function ModeToggle() {
-  const { setTheme } = useTheme();
+  const { setTheme, forcedTheme } = useTheme();
+  // Con un tema imposto dalla pagina la scelta non avrebbe effetto
+  if (forcedTheme) return null;
 
   return (
     <div className="z-40 left-8 bottom-8 fixed">

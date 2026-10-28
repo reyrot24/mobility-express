@@ -25,8 +25,11 @@ const items: [keyof typeof icons, string][] = [
   ["user", "Il preventivo con il referente"],
 ];
 
-export const TrustStrip = () => (
-  <div className="border-y border-[#f0dccb] bg-background1 px-[5%] py-5 dark:border-white/10">
+export const TrustStrip = ({ style }: { style?: React.CSSProperties }) => (
+  <div
+    className="border-y border-[#f0dccb] bg-background1 px-[5%] py-5 dark:border-white/10"
+    style={style}
+  >
     <div className="flex flex-wrap items-center justify-center gap-4 md:justify-between md:gap-6">
       <span className="hidden text-[11px] opacity-70 lg:inline">
         UN’INDICAZIONE PER ORIENTARTI

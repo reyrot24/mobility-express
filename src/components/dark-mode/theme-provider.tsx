@@ -15,12 +15,17 @@ type ThemeProviderState = {
 
 type ThemeProviderStateExtended = ThemeProviderState & {
   effectiveTheme: "light" | "dark";
+  /** Tema imposto da una pagina (es. pagina personalizzata del referente): ignora la scelta dell'utente */
+  forcedTheme: "light" | "dark" | null;
+  setForcedTheme: (theme: "light" | "dark" | null) => void;
 };
 
 const initialState: ThemeProviderStateExtended = {
   theme: "system",
   setTheme: () => null,
   effectiveTheme: "light",
+  forcedTheme: null,
+  setForcedTheme: () => null,
 };
 
 const ThemeProviderContext =
@@ -35,8 +40,10 @@ export function ThemeProvider({
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme,
   );
+  const [forcedTheme, setForcedTheme] = useState<"light" | "dark" | null>(null);
 
   const getEffectiveTheme = (): "light" | "dark" => {
+    if (forcedTheme) return forcedTheme;
     if (theme === "system") {
       if (typeof window === "undefined") return "light";
       return window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -57,14 +64,14 @@ export function ThemeProvider({
     // If theme is 'system', listen for changes and update root class accordingly
     let mql: MediaQueryList | null = null;
     const handleChange = (e: MediaQueryListEvent) => {
-      if (theme === "system") {
+      if (theme === "system" && !forcedTheme) {
         const newApplied = e.matches ? "dark" : "light";
         root.classList.remove("light", "dark");
         root.classList.add(newApplied);
       }
     };
 
-    if (theme === "system" && typeof window !== "undefined") {
+    if (theme === "system" && !forcedTheme && typeof window !== "undefined") {
       mql = window.matchMedia("(prefers-color-scheme: dark)");
       if (mql.addEventListener) mql.addEventListener("change", handleChange);
       else if (mql.addListener) mql.addListener(handleChange as any);
@@ -77,7 +84,7 @@ export function ThemeProvider({
         else if (mql.removeListener) mql.removeListener(handleChange as any);
       }
     };
-  }, [theme]);
+  }, [theme, forcedTheme]);
 
   const value: ThemeProviderStateExtended = {
     theme,
@@ -86,6 +93,8 @@ export function ThemeProvider({
       setTheme(theme);
     },
     effectiveTheme: getEffectiveTheme(),
+    forcedTheme,
+    setForcedTheme,
   };
 
   return (

@@ -21,11 +21,13 @@ type Props = {
   referentName?: string;
   /** Cliente in sessione: cellulare ed email non vengono richiesti di nuovo. Nome e cognome si gestiscono in "I miei dati" */
   customer?: Customer;
+  /** Sfondo scelto dal referente nella sua pagina personalizzata */
+  style?: React.CSSProperties;
 };
 
 const residenceLabel = "mb-1 text-[11px] font-medium opacity-80";
 
-export const QuoteForm = ({ onSubmit, referentName, customer }: Props) => {
+export const QuoteForm = ({ onSubmit, referentName, customer, style }: Props) => {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   // Campi obbligatori compilati e privacy accettata: solo allora il pulsante si abilita
@@ -67,13 +69,14 @@ export const QuoteForm = ({ onSubmit, referentName, customer }: Props) => {
     <section
       className="rounded-xl border border-[#f0d6c0] border-t-4 border-t-orange bg-background1 p-5 shadow-[0_15px_45px_#040c5408] dark:border-white/10 dark:border-t-orange md:p-7"
       aria-label="Richiedi una stima indicativa RC auto"
+      style={style}
     >
       <div className="mb-2 flex items-center justify-between gap-2">
         <h2 className="text-xl font-bold tracking-tight">
           Una stima per orientarti.
         </h2>
         <span
-          className="grid size-9 place-items-center rounded-full border border-[#ffd4b1] bg-[#fff0e3] text-[#ac4300]"
+          className="grid size-9 place-items-center rounded-full border border-[#ffd4b1] bg-[#fff0e3] text-[var(--pg-accento-testo,#ac4300)]"
           aria-hidden="true"
         >
           ✓

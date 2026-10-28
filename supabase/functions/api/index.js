@@ -7,6 +7,12 @@ import { InvalidSessionError, SESSION_EXPIRED } from "./lib/auth.js";
 import { HttpError, json } from "./lib/http.js";
 import { attiva, cambiaPassword, leggiAttivazione } from "./routes/account.js";
 import { risultati, tentativi } from "./routes/devops.js";
+import {
+  eliminaPaginaDevops,
+  leggiPaginaDevops,
+  paginaPubblica,
+  salvaPaginaDevops,
+} from "./routes/pagine.js";
 import { nuovaRichiesta, ricontatto } from "./routes/prezzoGiusto.js";
 import { supabase } from "./services/supabase.js";
 
@@ -14,10 +20,14 @@ const routes = [
   ["GET", /^\/health$/, () => json(200, { ok: true })],
   ["POST", /^\/prezzo-giusto\/richieste$/, nuovaRichiesta],
   ["POST", /^\/prezzo-giusto\/richieste\/([^/]+)\/ricontatto$/, ricontatto],
+  ["GET", /^\/prezzo-giusto\/pagine\/([^/]+)$/, paginaPubblica],
   ["GET", /^\/account\/attivazione$/, leggiAttivazione],
   ["POST", /^\/account\/attivazione$/, attiva],
   ["POST", /^\/account\/password$/, cambiaPassword],
   ["POST", /^\/devops\/risultati$/, risultati],
+  ["GET", /^\/devops\/pagine\/([^/]+)$/, leggiPaginaDevops],
+  ["PUT", /^\/devops\/pagine\/([^/]+)$/, salvaPaginaDevops],
+  ["DELETE", /^\/devops\/pagine\/([^/]+)$/, eliminaPaginaDevops],
   ["POST", /^\/interno\/tentativi$/, tentativi],
 ];
 

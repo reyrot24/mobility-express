@@ -47,6 +47,19 @@ export const PaginaNonTrovata = () => (
   />
 );
 
+/** Mentre arriva la pagina personalizzata del referente: niente testi standard che poi cambiano. */
+export const PaginaInCaricamento = () => (
+  <div className="grid min-h-[65vh] place-items-center px-[5%]" role="status">
+    <div className="flex flex-col items-center gap-4">
+      <span
+        aria-hidden="true"
+        className="size-9 animate-spin rounded-full border-[3px] border-orange/25 border-t-orange"
+      />
+      <span className="text-xs opacity-70">Stiamo preparando la pagina…</span>
+    </div>
+  </div>
+);
+
 export const Caricamento = ({ label = "Caricamento…" }: { label?: string }) => (
   <p className="my-16 text-center text-xs opacity-70" role="status">
     {label}

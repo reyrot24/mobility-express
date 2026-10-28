@@ -102,9 +102,9 @@ export const ReferenteDialog = ({
 }) => (
   <InfoDialog title="Il valore di una persona." trigger={trigger}>
     <Contact referral={referral} />
-    <p className="pt-3">
-      {referral.name} ti accompagna dalla prima stima alla verifica delle
-      coperture.
+    <p className="whitespace-pre-line break-words pt-3">
+      {referral.intro ??
+        `${referral.name} ti accompagna dalla prima stima alla verifica delle coperture.`}
     </p>
   </InfoDialog>
 );

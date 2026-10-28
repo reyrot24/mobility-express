@@ -28,3 +28,6 @@ dist-ssr
 
 # Supabase CLI (dati locali)
 supabase/.temp/
+
+# Collection Postman con segreti e dati di test
+postman/*.local.postman_collection.json

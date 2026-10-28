@@ -1,5 +1,6 @@
 import type { QuoteRequest } from "./model";
 import type { Consents, RequestStatus } from "./estimate";
+import type { PaginaReferente } from "./pagina";
 
 // API: Edge Function "api" di Supabase (supabase/functions/api).
 // In produzione VITE_PG_API_URL = https://<progetto>.supabase.co/functions/v1/api.
@@ -111,3 +112,14 @@ export const attivaArea = (payload: {
 /** Nuova password: passa dal server, che toglie anche l'obbligo di cambio al primo accesso. */
 export const cambiaPassword = (password: string, token: string) =>
   post<{ ok: true }>("/account/password", { password }, bearer(token));
+
+/** Pagina personalizzata del referente. null se non l'ha configurata (404): si usa la pagina standard. */
+export async function leggiPagina(referralId: string): Promise<PaginaReferente | null> {
+  const response = await fetch(
+    `${API_BASE}/prezzo-giusto/pagine/${encodeURIComponent(referralId)}`
+  );
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error(`Pagina del referente non disponibile (${response.status}).`);
+  const data = await response.json();
+  return data.configurazione as PaginaReferente;
+}

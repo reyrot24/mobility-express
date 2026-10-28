@@ -26,6 +26,7 @@ import {
 import { recordChoices } from "../lib/consensi.js";
 import { inBackground } from "../lib/http.js";
 import { sendMail } from "./mailer.js";
+import { configurazioneEmail } from "./pagine.js";
 import { inviaAPiattaforma } from "./piattaforma.js";
 import { DEMO_ESTIMATE, parseStima } from "./stima.js";
 import { attivazioneEmail, richiestaRicevutaEmail } from "../templates/richiestaEmail.js";
@@ -121,6 +122,7 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null, { 
     inviaInBackground(richiesta.id);
   } else {
     const { token, temporaryPassword } = await createActivation(email);
+    const pagina = await configurazioneEmail(referralId);
     await sendAndLog({
       tipo: "attivazione",
       userId: null,
@@ -133,6 +135,7 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null, { 
           targa: richiesta.targa,
           attivazioneUrl: attivazioneUrl(token),
           temporaryPassword,
+          email: pagina?.email,
         }),
       },
     });
@@ -283,6 +286,7 @@ async function inviaADevops(id) {
   });
 
   // Arriviamo qui solo se devops ha risposto con status 1: in caso di errore nessuna email
+  const pagina = await configurazioneEmail(richiesta.referral_id);
   await sendAndLog({
     tipo: "richiesta_ricevuta",
     userId: richiesta.user_id,
@@ -294,6 +298,7 @@ async function inviaADevops(id) {
         id: richiesta.id,
         targa: richiesta.targa,
         accessoUrl: accessoUrl(),
+        email: pagina?.email,
       }),
     },
   });
@@ -346,6 +351,14 @@ export async function rilanciaRichiesta(id) {
 
 // ───────────── 4. Risultato da devops ─────────────
 
+/** Contatti del referente nell'email della stima: quelli della sua pagina, altrimenti quelli noti al server. */
+function referenteEmail(referralId, pagina) {
+  const noto = findReferente(referralId);
+  const r = pagina?.referente;
+  if (!r?.nome || (!r.telefono && !r.email)) return noto;
+  return { name: r.nome, phone: r.telefono ?? noto?.phone ?? "", email: r.email ?? noto?.email ?? "" };
+}
+
 /**
  * Risultato inviato da devops: salva il prezzo e avvisa il cliente via email.
  * Idempotente: se la richiesta ha già un risultato non invia una seconda email.
@@ -370,6 +383,7 @@ export async function registraRisultato(body, estimateOverride) {
     errore: null,
   });
 
+  const pagina = await configurazioneEmail(richiesta.referral_id);
   await sendAndLog({
     tipo: "stima",
     userId: richiesta.user_id,
@@ -380,9 +394,10 @@ export async function registraRisultato(body, estimateOverride) {
         id: richiesta.id,
         targa: richiesta.targa,
         estimate,
-        referente: findReferente(richiesta.referral_id),
+        referente: referenteEmail(richiesta.referral_id, pagina),
         callbackRequested: richiesta.consensi.callback.granted,
         areaUrl: accessoUrl(),
+        email: pagina?.email,
       }),
     },
   });

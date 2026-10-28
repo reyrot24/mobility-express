@@ -32,6 +32,9 @@ export type Referente = {
   channel: string;
   phone: string;
   email: string;
+  // Dalla pagina personalizzata del referente (utils/pagina.ts)
+  photo?: string;
+  intro?: string;
 };
 
 export type QuoteInput = {

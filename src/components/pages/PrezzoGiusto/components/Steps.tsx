@@ -18,8 +18,8 @@ const steps = [
   ],
 ];
 
-export const Steps = () => (
-  <section className="px-[5%] py-12 md:py-16">
+export const Steps = ({ style }: { style?: React.CSSProperties }) => (
+  <section className="px-[5%] py-12 md:py-16" style={style}>
     <div className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
       <div>
         <Eyebrow className="mb-3">Semplice, dall’inizio</Eyebrow>
@@ -39,7 +39,7 @@ export const Steps = () => (
           key={number}
           className="border-t border-[#e2e4ed] pt-5 dark:border-white/10"
         >
-          <span className="mb-3 block text-[11px] font-semibold text-[#af4300] dark:text-orange md:mb-5">
+          <span className="mb-3 block text-[11px] font-semibold text-[var(--pg-accento-testo,#af4300)] dark:text-orange md:mb-5">
             {number}
           </span>
           <h3 className="text-lg font-bold">{title}</h3>

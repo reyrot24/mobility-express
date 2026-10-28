@@ -1,0 +1,867 @@
+{
+	"info": {
+		"_postman_id": "e552818f-b388-4c95-9da4-4673ac09e408",
+		"name": "Prezzo giusto - Edge Function api",
+		"description": "Test della funzione Supabase 'api'. Compila i 'Current value' delle variabili segrete (webhook_secret, cron_secret) e le email di test prima di iniziare. referral_id vuoto = cliente arrivato senza link di devops.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://ddfrflequhjjsnuffyiz.supabase.co/functions/v1/api",
+			"type": "string"
+		},
+		{
+			"key": "supabase_url",
+			"value": "https://ddfrflequhjjsnuffyiz.supabase.co",
+			"type": "string"
+		},
+		{
+			"key": "publishable_key",
+			"value": "sb_publishable_fGwFUtCehG3zCao2U0lC9A_40MoQRQ-",
+			"type": "string"
+		},
+		{
+			"key": "referral_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "email_nuovo",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "email_registrato",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "password",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "token_attivazione",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "password_temporanea",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "richiesta_id",
+			"value": "ST-BB16C773",
+			"type": "string"
+		},
+		{
+			"key": "webhook_secret",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "cron_secret",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "pagina_id",
+			"value": "DEMO-STUDIO",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "0. Controllo",
+			"item": [
+				{
+					"name": "Health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Deve rispondere {\"ok\":true}."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "1. Cliente NON registrato",
+			"item": [
+				{
+					"name": "1.1 Nuova richiesta (cliente nuovo)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const r = pm.response.json();",
+									"if (r.id) pm.collectionVariables.set('richiesta_id', r.id);",
+									"pm.test('richiesta registrata (202)', () => pm.response.to.have.status(202));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Idempotency-Key",
+								"value": "{{$guid}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"cellulare\": \"+393331234567\",\n  \"referral_id\": \"{{referral_id}}\",\n  \"targa\": \"AB123CD\",\n  \"tipoStrada\": \"Via\",\n  \"strada\": \"Roma\",\n  \"civico\": \"10\",\n  \"comune\": \"Milano\",\n  \"cap\": \"20100\",\n  \"email\": \"{{email_nuovo}}\",\n  \"privacy\": true,\n  \"ricontatto\": false,\n  \"marketing\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/prezzo-giusto/richieste",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"prezzo-giusto",
+								"richieste"
+							]
+						},
+						"description": "Atteso 202 con stato 'in_attesa_attivazione' e l'email con link e password temporanea. Devops NON viene ancora chiamato."
+					},
+					"response": []
+				},
+				{
+					"name": "1.2 Dati attivazione",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/account/attivazione?token={{token_attivazione}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"account",
+								"attivazione"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "{{token_attivazione}}"
+								}
+							]
+						},
+						"description": "Copia il token dal link nell'email in token_attivazione. Atteso 200 con email e temporaryPasswordRequired."
+					},
+					"response": []
+				},
+				{
+					"name": "1.3 Attiva area personale",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Debug",
+								"value": "{{cron_secret}}",
+								"type": "text",
+								"description": "Debug: aspetta devops e mostra la sua risposta. Disattivalo per il comportamento normale."
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"{{token_attivazione}}\",\n  \"temporaryPassword\": \"{{password_temporanea}}\",\n  \"password\": \"{{password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/account/attivazione",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"account",
+								"attivazione"
+							]
+						},
+						"description": "Atteso 201. Da qui la richiesta passa a 'in_elaborazione' e parte l'invio a devops."
+					},
+					"response": []
+				},
+				{
+					"name": "1.4 Referral non valido (deve dare 400)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Idempotency-Key",
+								"value": "{{$guid}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"cellulare\": \"+393331234567\",\n  \"referral_id\": \"codice non valido!\",\n  \"targa\": \"AB123CD\",\n  \"tipoStrada\": \"Via\",\n  \"strada\": \"Roma\",\n  \"civico\": \"10\",\n  \"comune\": \"Milano\",\n  \"cap\": \"20100\",\n  \"email\": \"{{email_nuovo}}\",\n  \"privacy\": true,\n  \"ricontatto\": false,\n  \"marketing\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/prezzo-giusto/richieste",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"prezzo-giusto",
+								"richieste"
+							]
+						},
+						"description": "Atteso 400 'Link referral non valido.'. Con referral_id vuoto invece la richiesta è accettata."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Cliente registrato",
+			"item": [
+				{
+					"name": "2.1 Login (Supabase Auth)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('login riuscito', () => pm.response.to.have.status(200));",
+									"pm.collectionVariables.set('access_token', pm.response.json().access_token);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "apikey",
+								"value": "{{publishable_key}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{email_registrato}}\",\n  \"password\": \"{{password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{supabase_url}}/auth/v1/token?grant_type=password",
+							"host": [
+								"{{supabase_url}}"
+							],
+							"path": [
+								"auth",
+								"v1",
+								"token"
+							],
+							"query": [
+								{
+									"key": "grant_type",
+									"value": "password"
+								}
+							]
+						},
+						"description": "Salva access_token nelle variabili."
+					},
+					"response": []
+				},
+				{
+					"name": "2.2 Nuova richiesta (cliente registrato)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const r = pm.response.json();",
+									"if (r.id) pm.collectionVariables.set('richiesta_id', r.id);",
+									"pm.test('richiesta registrata (202)', () => pm.response.to.have.status(202));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Idempotency-Key",
+								"value": "{{$guid}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "X-Debug",
+								"value": "{{cron_secret}}",
+								"type": "text",
+								"description": "Debug: aspetta devops e mostra la sua risposta. Disattivalo per il comportamento normale."
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"cellulare\": \"+393331234567\",\n  \"referral_id\": \"{{referral_id}}\",\n  \"targa\": \"AB123CD\",\n  \"tipoStrada\": \"Via\",\n  \"strada\": \"Roma\",\n  \"civico\": \"10\",\n  \"comune\": \"Milano\",\n  \"cap\": \"20100\",\n  \"email\": \"{{email_registrato}}\",\n  \"privacy\": true,\n  \"ricontatto\": false,\n  \"marketing\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/prezzo-giusto/richieste",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"prezzo-giusto",
+								"richieste"
+							]
+						},
+						"description": "Atteso 202 con stato 'in_elaborazione': l'invio a devops parte subito."
+					},
+					"response": []
+				},
+				{
+					"name": "2.3 Chiedi ricontatto",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/prezzo-giusto/richieste/{{richiesta_id}}/ricontatto",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"prezzo-giusto",
+								"richieste",
+								"{{richiesta_id}}",
+								"ricontatto"
+							]
+						},
+						"description": "Atteso 200 con requestedAt. Manda l'email al referente (o a RICONTATTO_FALLBACK_EMAIL)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Simula devops",
+			"item": [
+				{
+					"name": "3.1 Risultato con prezzo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-API-Key",
+								"value": "{{webhook_secret}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idRicerca\": 1211470,\n  \"providerCode\": \"POLIZZAEXPRESS\",\n  \"richiestaId\": \"{{richiesta_id}}\",\n  \"compagnia\": \"Prima\",\n  \"prezzoTotale\": 484.65\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/devops/risultati",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"devops",
+								"risultati"
+							]
+						},
+						"description": "Atteso {\"esito\":\"salvato\"} ed email con la stima. Una seconda chiamata risponde 'gia_registrato'."
+					},
+					"response": []
+				},
+				{
+					"name": "3.2 Risultato senza prezzo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-API-Key",
+								"value": "{{webhook_secret}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"richiestaId\": \"{{richiesta_id}}\",\n  \"prezzoTotale\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/devops/risultati",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"devops",
+								"risultati"
+							]
+						},
+						"description": "Richiesta 'non_disponibile'. Usala su una richiesta diversa da 3.1."
+					},
+					"response": []
+				},
+				{
+					"name": "3.3 Webhook senza segreto (deve dare 401)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"richiestaId\": \"{{richiesta_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/devops/risultati",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"devops",
+								"risultati"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Tentativi",
+			"item": [
+				{
+					"name": "4.1 Ritenta tutte le richieste in errore",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{cron_secret}}",
+								"type": "text"
+							},
+							{
+								"key": "X-Debug",
+								"value": "{{cron_secret}}",
+								"type": "text",
+								"description": "Debug: aspetta devops e mostra la sua risposta. Disattivalo per il comportamento normale."
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tutte\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/interno/tentativi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interno",
+								"tentativi"
+							]
+						},
+						"description": "Rimanda subito a devops tutte le richieste in errore. Con X-Debug: 200 con la risposta di devops per id. Senza X-Debug: 202 subito, invii in background (esito nei log)."
+					},
+					"response": []
+				},
+				{
+					"name": "4.2 Rilancia una sola richiesta",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{cron_secret}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"{{richiesta_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/interno/tentativi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interno",
+								"tentativi"
+							]
+						},
+						"description": "Atteso 200 con la risposta di devops per {{richiesta_id}}. Rilancia solo quella richiesta (in errore o mai partita). 404 se non esiste, non ha un account o è già stata inviata."
+					},
+					"response": []
+				},
+				{
+					"name": "4.3 Rilancia richiesta inesistente (deve dare 404)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{cron_secret}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"ST-NONESISTE\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/interno/tentativi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interno",
+								"tentativi"
+							]
+						},
+						"description": "Atteso 404."
+					},
+					"response": []
+				},
+				{
+					"name": "4.4 Tentativi senza segreto (deve dare 401)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"{{richiesta_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/interno/tentativi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interno",
+								"tentativi"
+							]
+						},
+						"description": "Atteso 401."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Pagine referenti",
+			"item": [
+				{
+					"name": "5.1 Salva configurazione (come devops)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{webhook_secret}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"versione\": 1,\n  \"logo\": null,\n  \"navbar\": {\n    \"titolo\": \"Andrea Rotaru\",\n    \"sottotitolo\": \"Il tuo referente RC auto\"\n  },\n  \"hero\": {\n    \"etichetta\": \"RC auto · Andrea Rotaru\",\n    \"titolo\": \"La tua RC auto,\\ncon chi conosci.\",\n    \"titoloEvidenziato\": \"Senza sorprese.\",\n    \"descrizione\": \"Una prima stima in pochi minuti, poi ne parliamo insieme.\",\n    \"vantaggi\": [\n      \"Senza impegno\",\n      \"Consulenza personale\"\n    ]\n  },\n  \"referente\": {\n    \"nome\": \"Andrea Rotaru\",\n    \"ruolo\": \"Il tuo referente\",\n    \"telefono\": \"+39 333 123 4567\",\n    \"email\": null,\n    \"foto\": null,\n    \"presentazione\": \"Ti accompagno dalla prima stima alla scelta della copertura giusta.\"\n  },\n  \"sezioni\": {\n    \"fiducia\": true,\n    \"passi\": true\n  },\n  \"colori\": {\n    \"navbar\": \"#ffffff\",\n    \"principale\": \"#fff5eb\",\n    \"form\": \"#ffffff\",\n    \"sezioni\": \"#ffffff\",\n    \"accento\": \"#ff6b01\"\n  },\n  \"email\": {\n    \"colori\": {\n      \"accento\": \"#ff6b01\",\n      \"sfondo\": \"#f5f6fa\",\n      \"card\": \"#ffffff\"\n    },\n    \"intestazione\": \"Andrea Rotaru · il tuo referente RC auto\",\n    \"conferma\": {\n      \"oggetto\": \"Abbiamo ricevuto la tua richiesta\",\n      \"titolo\": \"Grazie,\\nci siamo quasi.\",\n      \"messaggio\": \"Ti scrivo appena la stima è pronta.\"\n    },\n    \"stima\": {\n      \"oggetto\": \"La tua stima RC auto è pronta\",\n      \"titolo\": \"Ecco la tua stima.\",\n      \"messaggio\": \"Se vuoi, ne parliamo insieme: chiamami quando preferisci.\"\n    },\n    \"firma\": \"Andrea Rotaru\\nConsulente assicurativo\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/devops/pagine/{{pagina_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"devops",
+								"pagine",
+								"{{pagina_id}}"
+							]
+						},
+						"description": "La chiamata che farà devops dopo aver salvato la pagina nel suo database. Logo e foto vengono ignorati per ora: la pagina mostra la ✓ e le iniziali."
+					},
+					"response": []
+				},
+				{
+					"name": "5.2 Leggi configurazione (devops)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{webhook_secret}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/devops/pagine/{{pagina_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"devops",
+								"pagine",
+								"{{pagina_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5.3 Leggi pagina (sito pubblico)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/prezzo-giusto/pagine/{{pagina_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"prezzo-giusto",
+								"pagine",
+								"{{pagina_id}}"
+							]
+						},
+						"description": "Quella che legge il sito. 404 = pagina standard."
+					},
+					"response": []
+				},
+				{
+					"name": "5.4 Configurazione non valida (deve dare 422)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{webhook_secret}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"colori\": {\n    \"accento\": \"arancione\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/devops/pagine/{{pagina_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"devops",
+								"pagine",
+								"{{pagina_id}}"
+							]
+						},
+						"description": "Atteso 422 'colori.accento: usa un colore nel formato #rrggbb.'. Non usare javascript: o <script> nei test: il firewall Cloudflare di Supabase blocca la richiesta con un 403."
+					},
+					"response": []
+				},
+				{
+					"name": "5.5 Elimina pagina (torna standard)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{webhook_secret}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/devops/pagine/{{pagina_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"devops",
+								"pagine",
+								"{{pagina_id}}"
+							]
+						},
+						"description": "Elimina configurazione e immagini."
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
