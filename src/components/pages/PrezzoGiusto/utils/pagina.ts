@@ -1,6 +1,6 @@
 import type { Referente } from "./model";
 
-// Pagina personalizzata del referente: /prezzo-giusto/<codice>.
+// Pagina personalizzata del referente: /prezzo-giusto/<codice>/<id configurazione>.
 // La configura il referente su devops; la valida e la normalizza il server
 // (supabase/functions/api/lib/pagina.js). null = testo standard del sito.
 export type PaginaReferente = {
@@ -23,6 +23,8 @@ export type PaginaReferente = {
     nome: string | null;
     ruolo: string | null;
     telefono: string | null;
+    // null o assente (pagine salvate prima di questo campo) = nessuna icona di WhatsApp
+    whatsapp?: string | null;
     email: string | null;
     foto: string | null;
     presentazione: string | null;
@@ -65,10 +67,24 @@ export function withReferente(ref: Referente, pagina: PaginaReferente | null | u
     name: r.nome ?? ref.name,
     role: r.ruolo ?? ref.role,
     phone: r.telefono ?? ref.phone,
+    whatsapp: r.whatsapp ?? undefined,
     email: r.email ?? ref.email,
     photo: r.foto ?? undefined,
     intro: r.presentazione ?? undefined,
   };
+}
+
+/** Link alla chat di WhatsApp. wa.me vuole il prefisso internazionale: senza prefisso il numero è italiano. */
+export function whatsappLink(numero: string) {
+  const cifre = numero.replace(/\D/g, "");
+  const internazionale = numero.trim().startsWith("+")
+    ? cifre
+    : cifre.startsWith("00")
+      ? cifre.slice(2)
+      : cifre.startsWith("39") && cifre.length > 10
+        ? cifre
+        : `39${cifre}`;
+  return `https://wa.me/${internazionale}?text=Ciao%2C%20vorrei%20informazioni%20su%20Polizze%20Express`;
 }
 
 /** Testo leggibile sullo sfondo scelto dal referente: blu scuro su colori chiari, bianco su colori scuri. */

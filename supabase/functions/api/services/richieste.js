@@ -94,6 +94,8 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null, { 
   const profilo = userId ? await getProfilo(userId) : null;
   // Cliente registrato: il referral è quello del link con cui ha attivato l'area (anche vuoto)
   const referralId = (profilo ? profilo.referral_id : data.referralId) || null;
+  // La configurazione del link vale solo se la richiesta resta al referente di quel link
+  const idConfigurazione = data.referralId === referralId ? data.idConfigurazione || null : null;
   const now = new Date().toISOString();
 
   const { richiesta, duplicate } = await insertRichiesta({
@@ -110,6 +112,7 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null, { 
     comune: data.comune,
     cap: data.cap,
     referral_id: referralId,
+    id_configurazione: idConfigurazione,
     stato: userId ? "in_elaborazione" : "in_attesa_attivazione",
     consensi: recordChoices({ ...data, referralId }, now),
     idempotency_key: idempotencyKey ?? null,
@@ -122,7 +125,7 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null, { 
     inviaInBackground(richiesta.id);
   } else {
     const { token, temporaryPassword } = await createActivation(email);
-    const pagina = await configurazioneEmail(referralId);
+    const pagina = await configurazioneEmail(richiesta.id_configurazione);
     await sendAndLog({
       tipo: "attivazione",
       userId: null,
@@ -286,7 +289,7 @@ async function inviaADevops(id) {
   });
 
   // Arriviamo qui solo se devops ha risposto con status 1: in caso di errore nessuna email
-  const pagina = await configurazioneEmail(richiesta.referral_id);
+  const pagina = await configurazioneEmail(richiesta.id_configurazione);
   await sendAndLog({
     tipo: "richiesta_ricevuta",
     userId: richiesta.user_id,
@@ -376,14 +379,14 @@ export async function registraRisultato(body, estimateOverride) {
     await saveRisultato({
       richiesta_id: richiesta.id,
       compagnia: estimate.company,
-      prezzo: estimate.min,
+      prezzo: estimate.prezzo,
     });
   await updateRichiesta(richiesta.id, {
     stato: estimate ? "completata" : "non_disponibile",
     errore: null,
   });
 
-  const pagina = await configurazioneEmail(richiesta.referral_id);
+  const pagina = await configurazioneEmail(richiesta.id_configurazione);
   await sendAndLog({
     tipo: "stima",
     userId: richiesta.user_id,

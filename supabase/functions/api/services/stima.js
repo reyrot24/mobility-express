@@ -2,9 +2,18 @@
 // Formato: { richiestaId, compagnia, prezzoTotale, idRicerca, providerCode } con prezzo annuale
 // in euro, oppure { richiestaId, prezzoTotale: null } se devops non ha un prezzo per la richiesta.
 
+/**
+ * Intervallo mostrato al cliente: da 10 € sotto a 30 € sopra il prezzo, in multipli di 10.
+ * Stesso calcolo di src/components/pages/PrezzoGiusto/utils/estimate.ts.
+ */
+export const intervalloStima = (prezzo) => ({
+  min: Math.max(10, Math.floor((prezzo - 10) / 10) * 10),
+  max: Math.ceil((prezzo + 30) / 10) * 10,
+});
+
 export const DEMO_ESTIMATE = {
-  min: 350,
-  max: 350,
+  prezzo: 350,
+  ...intervalloStima(350),
   currency: "EUR",
   period: "year",
   basis: "prezzo_compagnia",
@@ -13,7 +22,7 @@ export const DEMO_ESTIMATE = {
 };
 
 /**
- * Valida il prezzo ricevuto: min e max coincidono (prezzo puntuale).
+ * Valida il prezzo ricevuto: "prezzo" è quello esatto da salvare, min e max l'intervallo per il cliente.
  * @returns {object|null} la stima normalizzata, null se devops non ha un risultato
  * @throws {Error} se il formato non è valido
  */
@@ -27,8 +36,8 @@ export function parseStima(result) {
     throw new Error("MISSING_ESTIMATE_COMPANY");
 
   return {
-    min: prezzo,
-    max: prezzo,
+    prezzo,
+    ...intervalloStima(prezzo),
     currency: "EUR",
     period: "year",
     basis: "prezzo_compagnia",

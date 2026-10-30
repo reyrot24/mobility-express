@@ -9,27 +9,28 @@ import { EstimateNotice } from "../components/Estimate";
 import { TrustStrip } from "../components/TrustStrip";
 import { LinkNonValido, PaginaInCaricamento } from "./Messaggi";
 import { usePrezzoGiusto } from "../context/PrezzoGiustoContext";
-import { PG_BASE, type QuoteRequest } from "../utils/model";
+import { CONFIGURATION_ID, PG_BASE, type QuoteRequest } from "../utils/model";
 import { HERO_STANDARD, surfaceStyle, withReferente } from "../utils/pagina";
 
 const Landing = () => {
-  const { activeRef, activePage, pages, loadPage, findRef, setActiveRef, submitQuote } =
-    usePrezzoGiusto();
-  // Codice referente dal link di devops: /prezzo-giusto/<codice>
-  const { codice: refId } = useParams();
+  const { activeRef, activePage, pages, openLink, findRef, submitQuote } = usePrezzoGiusto();
+  // Dal link di devops: /prezzo-giusto/<codice>/<id configurazione>.
+  // Il codice serve per le richieste, l'id per la pagina personalizzata
+  const { codice: refId, idConfigurazione } = useParams();
+  // Un id non valido è come una configurazione che non esiste: pagina standard
+  const configId =
+    idConfigurazione && CONFIGURATION_ID.test(idConfigurazione) ? idConfigurazione : null;
   const navigate = useNavigate();
   const linkedRef = useMemo(() => (refId ? findRef(refId) : undefined), [refId, findRef]);
 
   useEffect(() => {
-    if (!linkedRef) return;
-    setActiveRef(linkedRef);
-    loadPage(linkedRef.id);
-  }, [linkedRef, setActiveRef, loadPage]);
+    if (linkedRef) openLink(linkedRef, configId);
+  }, [linkedRef, configId, openLink]);
 
   if (refId && !linkedRef) return <LinkNonValido />;
-  // Dal link si aspetta la pagina del referente; senza codice resta quella del referente attivo
-  if (linkedRef && !(linkedRef.id in pages)) return <PaginaInCaricamento />;
-  const page = linkedRef ? pages[linkedRef.id] : activePage;
+  // Dal link si aspetta la configurazione; senza codice resta quella del link già aperto
+  if (configId && !pages.has(configId)) return <PaginaInCaricamento />;
+  const page = linkedRef ? (configId ? pages.get(configId) : null) : activePage;
   const referral = linkedRef ? withReferente(linkedRef, page) : activeRef;
   const hero = page?.hero;
   const benefits = hero?.vantaggi ?? HERO_STANDARD.vantaggi;

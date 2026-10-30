@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import type { Consents, Estimate, RequestStatus } from "./estimate";
+import { intervalloStima, type Consents, type Estimate, type RequestStatus } from "./estimate";
 import { DEFAULT_REF, type Referente } from "./model";
 
 // Letture dirette dal database: le RLS restituiscono solo i dati del cliente in sessione.
@@ -81,10 +81,8 @@ export async function updateProfilo(userId: string, profilo: ProfiloModificabile
 export function estimateOf(r: Richiesta): Estimate | null {
   const res = r.risultati;
   if (!res) return null;
-  // Prezzo puntuale: min e max coincidono
   return {
-    min: res.prezzo,
-    max: res.prezzo,
+    ...intervalloStima(res.prezzo),
     currency: "EUR",
     period: "year",
     basis: "",

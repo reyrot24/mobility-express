@@ -5,6 +5,7 @@ import { PrezzoGiustoProvider } from "./context/PrezzoGiustoContext";
 import { AuthProvider } from "./context/AuthContext";
 import { PgHeader } from "./components/PgHeader";
 import { PgFooter } from "./components/PgFooter";
+import { PgWhatsApp } from "./components/PgWhatsApp";
 import Landing from "./pages/Landing";
 import Inviata from "./pages/Inviata";
 import Accesso from "./pages/Accesso";
@@ -93,8 +94,9 @@ const PrezzoGiusto = () => {
                   </Contained>
                 }
               />
-              {/* Link di devops con il codice del referente: /prezzo-giusto/<codice> */}
+              {/* Link di devops: codice del referente e, se ha una pagina personalizzata, id della configurazione */}
               <Route path=":codice" element={<Landing />} />
+              <Route path=":codice/:idConfigurazione" element={<Landing />} />
               <Route
                 path="*"
                 element={
@@ -106,6 +108,7 @@ const PrezzoGiusto = () => {
             </Routes>
           </main>
           <PgFooter />
+          <PgWhatsApp />
           <Toaster position="top-right" />
         </div>
       </PrezzoGiustoProvider>

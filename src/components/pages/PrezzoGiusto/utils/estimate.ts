@@ -49,6 +49,13 @@ export type Consents = {
   recordedAt: string;
 };
 
+// Intervallo mostrato al cliente: da 10 € sotto a 30 € sopra il prezzo, in multipli di 10.
+// Stesso calcolo di supabase/functions/api/services/stima.js.
+export const intervalloStima = (prezzo: number) => ({
+  min: Math.max(10, Math.floor((prezzo - 10) / 10) * 10),
+  max: Math.ceil((prezzo + 30) / 10) * 10,
+});
+
 // Range (min–max) oppure prezzo puntuale quando min e max coincidono
 export const estimateLabel = (estimate: Estimate) =>
   estimate.min === estimate.max

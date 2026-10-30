@@ -48,7 +48,8 @@ export const richiediStima = (
   data: QuoteRequest,
   referralId: string,
   idempotencyKey: string,
-  token?: string
+  token?: string,
+  configurationId?: string | null
 ) =>
   post<RichiestaResponse>(
     "/prezzo-giusto/richieste",
@@ -57,6 +58,7 @@ export const richiediStima = (
       cognome: data.lastName,
       cellulare: data.phone,
       referral_id: referralId,
+      id_configurazione: configurationId ?? "",
       targa: data.plate,
       tipoStrada: data.streetType,
       strada: data.street,
@@ -113,10 +115,10 @@ export const attivaArea = (payload: {
 export const cambiaPassword = (password: string, token: string) =>
   post<{ ok: true }>("/account/password", { password }, bearer(token));
 
-/** Pagina personalizzata del referente. null se non l'ha configurata (404): si usa la pagina standard. */
-export async function leggiPagina(referralId: string): Promise<PaginaReferente | null> {
+/** Pagina personalizzata. null se la configurazione non esiste (404): si usa la pagina standard. */
+export async function leggiPagina(configurationId: string): Promise<PaginaReferente | null> {
   const response = await fetch(
-    `${API_BASE}/prezzo-giusto/pagine/${encodeURIComponent(referralId)}`
+    `${API_BASE}/prezzo-giusto/pagine/${encodeURIComponent(configurationId)}`
   );
   if (response.status === 404) return null;
   if (!response.ok) throw new Error(`Pagina del referente non disponibile (${response.status}).`);

@@ -72,8 +72,8 @@
 			"type": "string"
 		},
 		{
-			"key": "pagina_id",
-			"value": "DEMO-STUDIO",
+			"key": "id_configurazione",
+			"value": "CONF-DEMO",
 			"type": "string"
 		}
 	],
@@ -135,7 +135,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"cellulare\": \"+393331234567\",\n  \"referral_id\": \"{{referral_id}}\",\n  \"targa\": \"AB123CD\",\n  \"tipoStrada\": \"Via\",\n  \"strada\": \"Roma\",\n  \"civico\": \"10\",\n  \"comune\": \"Milano\",\n  \"cap\": \"20100\",\n  \"email\": \"{{email_nuovo}}\",\n  \"privacy\": true,\n  \"ricontatto\": false,\n  \"marketing\": false\n}",
+							"raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"cellulare\": \"+393331234567\",\n  \"referral_id\": \"{{referral_id}}\",\n  \"id_configurazione\": \"{{id_configurazione}}\",\n  \"targa\": \"AB123CD\",\n  \"tipoStrada\": \"Via\",\n  \"strada\": \"Roma\",\n  \"civico\": \"10\",\n  \"comune\": \"Milano\",\n  \"cap\": \"20100\",\n  \"email\": \"{{email_nuovo}}\",\n  \"privacy\": true,\n  \"ricontatto\": false,\n  \"marketing\": false\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -728,7 +728,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"versione\": 1,\n  \"logo\": null,\n  \"navbar\": {\n    \"titolo\": \"Andrea Rotaru\",\n    \"sottotitolo\": \"Il tuo referente RC auto\"\n  },\n  \"hero\": {\n    \"etichetta\": \"RC auto · Andrea Rotaru\",\n    \"titolo\": \"La tua RC auto,\\ncon chi conosci.\",\n    \"titoloEvidenziato\": \"Senza sorprese.\",\n    \"descrizione\": \"Una prima stima in pochi minuti, poi ne parliamo insieme.\",\n    \"vantaggi\": [\n      \"Senza impegno\",\n      \"Consulenza personale\"\n    ]\n  },\n  \"referente\": {\n    \"nome\": \"Andrea Rotaru\",\n    \"ruolo\": \"Il tuo referente\",\n    \"telefono\": \"+39 333 123 4567\",\n    \"email\": null,\n    \"foto\": null,\n    \"presentazione\": \"Ti accompagno dalla prima stima alla scelta della copertura giusta.\"\n  },\n  \"sezioni\": {\n    \"fiducia\": true,\n    \"passi\": true\n  },\n  \"colori\": {\n    \"navbar\": \"#ffffff\",\n    \"principale\": \"#fff5eb\",\n    \"form\": \"#ffffff\",\n    \"sezioni\": \"#ffffff\",\n    \"accento\": \"#ff6b01\"\n  },\n  \"email\": {\n    \"colori\": {\n      \"accento\": \"#ff6b01\",\n      \"sfondo\": \"#f5f6fa\",\n      \"card\": \"#ffffff\"\n    },\n    \"intestazione\": \"Andrea Rotaru · il tuo referente RC auto\",\n    \"conferma\": {\n      \"oggetto\": \"Abbiamo ricevuto la tua richiesta\",\n      \"titolo\": \"Grazie,\\nci siamo quasi.\",\n      \"messaggio\": \"Ti scrivo appena la stima è pronta.\"\n    },\n    \"stima\": {\n      \"oggetto\": \"La tua stima RC auto è pronta\",\n      \"titolo\": \"Ecco la tua stima.\",\n      \"messaggio\": \"Se vuoi, ne parliamo insieme: chiamami quando preferisci.\"\n    },\n    \"firma\": \"Andrea Rotaru\\nConsulente assicurativo\"\n  }\n}",
+							"raw": "{\n  \"versione\": 1,\n  \"logo\": null,\n  \"navbar\": {\n    \"titolo\": \"Andrea Rotaru\",\n    \"sottotitolo\": \"Il tuo referente RC auto\"\n  },\n  \"hero\": {\n    \"etichetta\": \"RC auto · Andrea Rotaru\",\n    \"titolo\": \"La tua RC auto,\\ncon chi conosci.\",\n    \"titoloEvidenziato\": \"Senza sorprese.\",\n    \"descrizione\": \"Una prima stima in pochi minuti, poi ne parliamo insieme.\",\n    \"vantaggi\": [\n      \"Senza impegno\",\n      \"Consulenza personale\"\n    ]\n  },\n  \"referente\": {\n    \"nome\": \"Andrea Rotaru\",\n    \"ruolo\": \"Il tuo referente\",\n    \"telefono\": \"+39 333 123 4567\",\n    \"whatsapp\": \"+39 333 123 4567\",\n    \"email\": null,\n    \"foto\": null,\n    \"presentazione\": \"Ti accompagno dalla prima stima alla scelta della copertura giusta.\"\n  },\n  \"sezioni\": {\n    \"fiducia\": true,\n    \"passi\": true\n  },\n  \"colori\": {\n    \"navbar\": \"#ffffff\",\n    \"principale\": \"#fff5eb\",\n    \"form\": \"#ffffff\",\n    \"sezioni\": \"#ffffff\",\n    \"accento\": \"#ff6b01\"\n  },\n  \"email\": {\n    \"colori\": {\n      \"accento\": \"#ff6b01\",\n      \"sfondo\": \"#f5f6fa\",\n      \"card\": \"#ffffff\"\n    },\n    \"intestazione\": \"Andrea Rotaru · il tuo referente RC auto\",\n    \"conferma\": {\n      \"oggetto\": \"Abbiamo ricevuto la tua richiesta\",\n      \"titolo\": \"Grazie,\\nci siamo quasi.\",\n      \"messaggio\": \"Ti scrivo appena la stima è pronta.\"\n    },\n    \"stima\": {\n      \"oggetto\": \"La tua stima RC auto è pronta\",\n      \"titolo\": \"Ecco la tua stima.\",\n      \"messaggio\": \"Se vuoi, ne parliamo insieme: chiamami quando preferisci.\"\n    },\n    \"firma\": \"Andrea Rotaru\\nConsulente assicurativo\"\n  }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -736,17 +736,17 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/devops/pagine/{{pagina_id}}",
+							"raw": "{{base_url}}/devops/pagine/{{id_configurazione}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"devops",
 								"pagine",
-								"{{pagina_id}}"
+								"{{id_configurazione}}"
 							]
 						},
-						"description": "La chiamata che farà devops dopo aver salvato la pagina nel suo database. Logo e foto vengono ignorati per ora: la pagina mostra la ✓ e le iniziali."
+						"description": "La chiamata che farà devops: l'idConfiguration nell'URL, la configurazione nel body. Poi apri /prezzo-giusto/{{referral_id}}/{{id_configurazione}}. Logo e foto vengono ignorati per ora: la pagina mostra la ✓ e le iniziali."
 					},
 					"response": []
 				},
@@ -762,14 +762,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/devops/pagine/{{pagina_id}}",
+							"raw": "{{base_url}}/devops/pagine/{{id_configurazione}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"devops",
 								"pagine",
-								"{{pagina_id}}"
+								"{{id_configurazione}}"
 							]
 						}
 					},
@@ -781,14 +781,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/prezzo-giusto/pagine/{{pagina_id}}",
+							"raw": "{{base_url}}/prezzo-giusto/pagine/{{id_configurazione}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"prezzo-giusto",
 								"pagine",
-								"{{pagina_id}}"
+								"{{id_configurazione}}"
 							]
 						},
 						"description": "Quella che legge il sito. 404 = pagina standard."
@@ -821,14 +821,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/devops/pagine/{{pagina_id}}",
+							"raw": "{{base_url}}/devops/pagine/{{id_configurazione}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"devops",
 								"pagine",
-								"{{pagina_id}}"
+								"{{id_configurazione}}"
 							]
 						},
 						"description": "Atteso 422 'colori.accento: usa un colore nel formato #rrggbb.'. Non usare javascript: o <script> nei test: il firewall Cloudflare di Supabase blocca la richiesta con un 403."
@@ -847,14 +847,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/devops/pagine/{{pagina_id}}",
+							"raw": "{{base_url}}/devops/pagine/{{id_configurazione}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"devops",
 								"pagine",
-								"{{pagina_id}}"
+								"{{id_configurazione}}"
 							]
 						},
 						"description": "Elimina configurazione e immagini."

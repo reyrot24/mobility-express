@@ -16,14 +16,14 @@ import { useTheme } from "@/components/dark-mode/theme-provider";
 type PrezzoGiustoState = {
   /** Referente attivo, con i dati della sua pagina personalizzata */
   activeRef: Referente;
-  /** Pagina personalizzata del referente attivo: resta su tutte le pagine del sito */
+  /** Pagina personalizzata del link attivo: resta su tutte le pagine del sito */
   activePage: PaginaReferente | null;
-  /** Pagine caricate per codice: assente = in caricamento, null = pagina standard */
-  pages: Record<string, PaginaReferente | null>;
-  loadPage: (id: string) => void;
+  /** Pagine caricate per id configurazione: assente = in caricamento, null = pagina standard */
+  pages: Map<string, PaginaReferente | null>;
+  /** Link di devops aperto: referente per le richieste e, se c'è, configurazione da caricare */
+  openLink: (ref: Referente, configurationId: string | null) => void;
   current: Quote | null;
   findRef: (id: string) => Referente | undefined;
-  setActiveRef: (ref: Referente) => void;
   /** referralId: codice referente del profilo (area personale), al posto di quello del link. Può essere vuoto */
   submitQuote: (
     data: QuoteRequest,
@@ -36,12 +36,13 @@ const PrezzoGiustoContext = createContext<PrezzoGiustoState | null>(null);
 
 export const PrezzoGiustoProvider = ({ children }: { children: React.ReactNode }) => {
   const { session } = useAuth();
-  const [linkRef, setActiveRef] = useState<Referente>(DEFAULT_REF);
-  const [pages, setPages] = useState<Record<string, PaginaReferente | null>>({});
+  const [linkRef, setLinkRef] = useState<Referente>(DEFAULT_REF);
+  const [configurationId, setConfigurationId] = useState<string | null>(null);
+  const [pages, setPages] = useState<Map<string, PaginaReferente | null>>(new Map());
   const requested = useRef(new Set<string>());
   const [current, setCurrent] = useState<Quote | null>(null);
 
-  const activePage = pages[linkRef.id] ?? null;
+  const activePage = (configurationId && pages.get(configurationId)) || null;
   const activeRef = useMemo(() => withReferente(linkRef, activePage), [linkRef, activePage]);
 
   // Con la pagina del referente si usa sempre la modalità chiara: i suoi colori sono pensati per quella
@@ -65,17 +66,19 @@ export const PrezzoGiustoProvider = ({ children }: { children: React.ReactNode }
     return () => ["--orange", "--orange-hover", "--pg-accento-testo"].forEach((p) => root.removeProperty(p));
   }, [accent]);
 
-  // Una sola richiesta per codice. Se il server non risponde si mostra la pagina standard:
+  // Una sola richiesta per configurazione. Se il server non risponde si mostra la pagina standard:
   // il codice del link resta valido e la richiesta di stima va comunque al referente.
-  const loadPage = useCallback((id: string) => {
-    if (requested.current.has(id)) return;
+  const openLink = useCallback((ref: Referente, id: string | null) => {
+    setLinkRef(ref);
+    setConfigurationId(id);
+    if (!id || requested.current.has(id)) return;
     requested.current.add(id);
     leggiPagina(id)
       .catch((err) => {
         console.error("[prezzo-giusto]", err);
         return null;
       })
-      .then((page) => setPages((prev) => ({ ...prev, [id]: page })));
+      .then((page) => setPages((prev) => new Map(prev).set(id, page)));
   }, []);
 
   // Ogni codice valido del link è accettato e inviato a devops.
@@ -92,7 +95,14 @@ export const PrezzoGiustoProvider = ({ children }: { children: React.ReactNode }
   ) {
     const ref = referralId === undefined ? { ...activeRef } : { ...activeRef, id: referralId ?? "" };
     // Se il cliente è in sessione la richiesta va al suo account
-    const result = await richiediStima(data, ref.id, idempotencyKey, session?.access_token);
+    const result = await richiediStima(
+      data,
+      ref.id,
+      idempotencyKey,
+      session?.access_token,
+      // Dall'area personale la richiesta non arriva da un link
+      referralId === undefined ? configurationId : null
+    );
     const quote: Quote = {
       ...data,
       id: result.id,
@@ -112,10 +122,9 @@ export const PrezzoGiustoProvider = ({ children }: { children: React.ReactNode }
         activeRef,
         activePage,
         pages,
-        loadPage,
+        openLink,
         current,
         findRef,
-        setActiveRef,
         submitQuote,
       }}
     >

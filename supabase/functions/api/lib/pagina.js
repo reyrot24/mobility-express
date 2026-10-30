@@ -1,4 +1,4 @@
-// Configurazione della pagina personalizzata del referente (/prezzo-giusto/<referral_id>).
+// Configurazione della pagina personalizzata del referente (/prezzo-giusto/<referral_id>/<id_configurazione>).
 // Stessa forma del tipo PaginaReferente in src/components/pages/PrezzoGiusto/utils/pagina.ts.
 // Ogni campo è facoltativo: null = testo standard del sito. Le chiavi sconosciute vengono ignorate.
 
@@ -50,6 +50,13 @@ function email(value, campo) {
 function telefono(value, campo) {
   const text = testo(value, campo, 30);
   if (text && !/^\+?[\d\s.()/-]{6,30}$/.test(text)) throw new ErrorePagina(`${campo}: numero non valido.`);
+  return text;
+}
+
+/** Numero per il link di WhatsApp: oltre al formato servono abbastanza cifre per aprire la chat. */
+function whatsapp(value, campo) {
+  const text = telefono(value, campo);
+  if (text && text.replace(/\D/g, "").length < 8) throw new ErrorePagina(`${campo}: numero non valido.`);
   return text;
 }
 
@@ -145,6 +152,8 @@ export function validatePagina(body) {
           nome: testo(referente.nome, "referente.nome", 80),
           ruolo: testo(referente.ruolo, "referente.ruolo", 60),
           telefono: telefono(referente.telefono, "referente.telefono"),
+          // null = nessuna icona di WhatsApp sul sito
+          whatsapp: whatsapp(referente.whatsapp, "referente.whatsapp"),
           email: email(referente.email, "referente.email"),
           foto: null,
           presentazione: testo(referente.presentazione, "referente.presentazione", 300, { multiriga: true }),

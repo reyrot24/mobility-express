@@ -4,6 +4,8 @@ export const PG_BASE = "/prezzo-giusto";
 
 // Codice referente nel link di devops: /prezzo-giusto/<codice>. Stessa regola in server/lib/validation.js
 export const REFERRAL_CODE = /^[A-Za-z0-9_-]{1,64}$/;
+// Configurazione di devops nel link: /prezzo-giusto/<codice>/<id>. Stessa regola in server/lib/validation.js
+export const CONFIGURATION_ID = /^[A-Za-z0-9_-]{1,64}$/;
 
 export const ROAD_TYPES = [
   "Via",
@@ -33,6 +35,7 @@ export type Referente = {
   phone: string;
   email: string;
   // Dalla pagina personalizzata del referente (utils/pagina.ts)
+  whatsapp?: string;
   photo?: string;
   intro?: string;
 };

@@ -9,6 +9,8 @@ const str = (value) => (typeof value === "string" ? value.trim() : "");
 const isName = (value) => value.length >= 1 && value.length <= 80 && /^[\p{L}][\p{L}\s'’.-]*$/u.test(value);
 // Codice referente nel link di devops: /prezzo-giusto/<codice>. Stessa regola in utils/model.ts
 export const REFERRAL_CODE = /^[A-Za-z0-9_-]{1,64}$/;
+// Id della configurazione di devops nel link: /prezzo-giusto/<codice>/<id>. Stessa regola in utils/model.ts
+export const CONFIGURATION_ID = /^[A-Za-z0-9_-]{1,64}$/;
 const isOptionalBoolean = (value) => value === undefined || typeof value === "boolean";
 
 /**
@@ -20,6 +22,7 @@ export function validateRichiesta(body) {
     cognome: str(body?.cognome),
     cellulare: normalizeCellulare(body?.cellulare),
     referralId: str(body?.referral_id),
+    idConfigurazione: str(body?.id_configurazione),
     targa: str(body?.targa).replace(/\s/g, "").toUpperCase(),
     tipoStrada: str(body?.tipoStrada),
     strada: str(body?.strada),
@@ -41,6 +44,9 @@ export function validateRichiesta(body) {
   // Referral facoltativo: vuoto se il cliente non è arrivato da un link di devops
   if (data.referralId && !REFERRAL_CODE.test(data.referralId))
     return { error: "Link referral non valido." };
+  // Facoltativo: vuoto se il link non ha una pagina personalizzata
+  if (data.idConfigurazione && !CONFIGURATION_ID.test(data.idConfigurazione))
+    return { error: "Link non valido." };
   if (!/^[A-Z]{2}\d{3}[A-Z]{2}$/.test(data.targa)) return { error: "Targa non valida." };
   if (!ROAD_TYPES.includes(data.tipoStrada)) return { error: "Tipo di strada non valido." };
   if (data.strada.length < 2 || data.strada.length > 120) return { error: "Indirizzo non valido." };
