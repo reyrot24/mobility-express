@@ -67,7 +67,10 @@ export async function salvaPaginaDevops(req, { params: [idConfigurazione] }) {
   if (negato) return negato;
   try {
     const { data, error } = validatePagina(await readJson(req));
-    if (error) return erroreSalvataggio(422, error);
+    if (error) {
+      console.warn(`[pagine] configurazione ${idConfigurazione} rifiutata: ${error}`);
+      return erroreSalvataggio(422, error);
+    }
     const updatedAt = await salvaPagina(idConfigurazione, data);
     return json(200, { status: 1, message: "", data: { configuration: data, updatedAt } });
   } catch (err) {

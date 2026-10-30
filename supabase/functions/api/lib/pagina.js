@@ -132,8 +132,8 @@ export function validatePagina(body) {
         logo: null,
         // Le due righe accanto al logo. Con un titolo personalizzato il sottotitolo standard non compare
         navbar: {
-          titolo: testo(navbar.titolo, "navbar.titolo", 40),
-          sottotitolo: testo(navbar.sottotitolo, "navbar.sottotitolo", 40),
+          titolo: testo(navbar.titolo, "navbar.titolo", 60),
+          sottotitolo: testo(navbar.sottotitolo, "navbar.sottotitolo", 60),
         },
         hero: {
           etichetta: testo(hero.etichetta, "hero.etichetta", 60),
