@@ -35,7 +35,7 @@ type SocialMediaLinks = {
 };
 
 type FooterLink = {
-  page: any;
+  page: React.ReactNode;
   title: string;
 };
 
@@ -50,7 +50,7 @@ export type Footer4Props = React.ComponentPropsWithoutRef<"section"> &
   Partial<Props>;
 
 export const Footer = (props: Footer4Props) => {
-  const { logos, footerText, footerLinks, socialMediaLinks } = {
+  const { logos, footerText, footerLinks /* socialMediaLinks */ } = {
     ...Footer4Defaults,
     ...props,
   } as Props;
@@ -75,13 +75,13 @@ export const Footer = (props: Footer4Props) => {
             )}
           </a>
 
-          <div className="flex items-start justify-start justify-items-center gap-x-3 lg:justify-self-end">
+          {/* <div className="flex items-start justify-start justify-items-center gap-x-3 lg:justify-self-end">
             {socialMediaLinks.map((link, index) => (
               <a key={index} href={link.url}>
                 {link.icon}
               </a>
             ))}
-          </div>
+          </div> */}
         </div>
         <div className="flex mb-8 items-center justify-center text-xs md:gap-x-6 md:pt-4">
           <p>
@@ -90,28 +90,33 @@ export const Footer = (props: Footer4Props) => {
             assicurativo regolamentato dall'IVASS ed iscritto al RUI con numero
             B000514026, P.IVA 07965051217, Indirizzo: VIA VITTORIA COLONNA 14 -
             80121 NAPOLI (NA)- PEC: alcabrokersrl@legalmail.it - Telefono: +39
-            081 529 70 45.
+            081 17 67 67 09.
           </p>
         </div>
         <ul className="pb-4 flex items-center justify-center gap-x-8 gap-y-4 text-sm md:grid-flow-col md:gap-x-6 md:gap-y-0">
           {footerLinks.map((link, index) => (
-            <Dialog key={index}>
-              <DialogTrigger asChild>
-                <li className="underline cursor-pointer hover:decoration-orangeHover underline-offset-1 hover:text-orangeHover ">
-                  {link.title}
-                </li>
-              </DialogTrigger>
-              <DialogContent className="h-[500px] overflow-auto no-scrollbar">
-                {link.page}
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button type="button" variant="default">
-                      Close
-                    </Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <li key={index}>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button
+                    type="button"
+                    className="underline cursor-pointer hover:decoration-orangeHover underline-offset-1 hover:text-orangeHover "
+                  >
+                    {link.title}
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="h-[500px] overflow-auto no-scrollbar">
+                  {link.page}
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button type="button" variant="default">
+                        Chiudi
+                      </Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </li>
           ))}
         </ul>
 
@@ -132,7 +137,7 @@ export const Footer4Defaults: Footer4Props = {
     { url: "#", icon: <BiLogoLinkedinSquare className="size-6" /> },
     { url: "#", icon: <BiLogoYoutube className="size-6" /> },
   ],
-  footerText: "© 2024 Alca Broker Srl. Tutti i diritti riservati.",
+  footerText: `© ${new Date().getFullYear()} Alca Broker Srl. Tutti i diritti riservati.`,
   footerLinks: [
     { page: <Privacy />, title: "Privacy Policy" },
     { page: <TerminiDiServizio />, title: "Termini di Servizio" },

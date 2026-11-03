@@ -91,7 +91,7 @@ export const Form = (props: Contact6Props) => {
 
       const response = await fetch(
         "https://devops.mobilityexpress.it/apiAdr/elencoProvince",
-        requestOptions
+        requestOptions,
       );
       const responseData = await response.json();
       if (responseData.status !== 1) {
@@ -112,7 +112,7 @@ export const Form = (props: Contact6Props) => {
       };
       const response = await fetch(
         `https://devops.mobilityexpress.it/apiAdr/elencoComuni/${provinciaSigla}`,
-        options
+        options,
       );
       const responseData = await response.json();
       if (responseData.status !== 1) {
@@ -132,7 +132,7 @@ export const Form = (props: Contact6Props) => {
       };
       const response = await fetch(
         "https://devops.mobilityexpress.it/apiAdr/elencoToponomie",
-        options
+        options,
       );
       const responseData = await response.json();
       if (responseData.status !== 1) {
@@ -210,7 +210,7 @@ export const Form = (props: Contact6Props) => {
   const [viaCorso, setViaCorso] = useState("");
 
   const [acceptTerms, setAcceptTerms] = useState<boolean | "indeterminate">(
-    false
+    false,
   );
   const [selectedItem, setSelectedItem] = useState("società");
   const { register, handleSubmit, reset } = useForm<IFormInput>();
@@ -1034,7 +1034,7 @@ export const Form = (props: Contact6Props) => {
                   <DialogFooter>
                     <DialogClose asChild>
                       <Button type="button" variant="default">
-                        Close
+                        Chiudi
                       </Button>
                     </DialogClose>
                   </DialogFooter>

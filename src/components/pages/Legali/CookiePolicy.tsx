@@ -84,10 +84,8 @@ const CookiePolicy = () => {
       <div className="my-4">
         <h1 className="text-md font-semibold  mb-2">COME GESTIRE I COOKIE</h1>
         <p>
-          Puoi decidere di consentire o meno l'impostazione dei cookie
-          modificando il widget di Iubenda. Inoltre, La maggior parte dei
-          browser consente di controllare i cookie attraverso le proprie
-          impostazioni. Tuttavia, disabilitare i cookie potrebbe influenzare
+          La maggior parte dei browser consente di controllare i cookie
+          attraverso le proprie impostazioni. Tuttavia, disabilitare i cookie potrebbe influenzare
           negativamente l'esperienza di navigazione sul Sito.
         </p>
       </div>

@@ -31,3 +31,6 @@ supabase/.temp/
 
 # Collection Postman con segreti e dati di test
 postman/*.local.postman_collection.json
+
+# Output di build TypeScript
+*.tsbuildinfo

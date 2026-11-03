@@ -38,7 +38,7 @@ const Section1 = ({ errors }: { errors: { [key: string]: string | null } }) => {
 
       const response = await fetch(
         "https://devops.mobilityexpress.it/api/csSearch",
-        options
+        options,
       );
       const responseData = await response.json();
       setRisultati(responseData.data.companies);
@@ -60,7 +60,7 @@ const Section1 = ({ errors }: { errors: { [key: string]: string | null } }) => {
 
       const response = await fetch(
         "https://devops.mobilityexpress.it/api/csGetInfo",
-        options
+        options,
       );
       const responseData = await response.json();
       const report = responseData.data?.report;
@@ -153,7 +153,7 @@ const Section1 = ({ errors }: { errors: { [key: string]: string | null } }) => {
                     <DialogFooter>
                       <DialogClose asChild>
                         <Button type="button" variant="default">
-                          Close
+                          Chiudi
                         </Button>
                       </DialogClose>
                     </DialogFooter>

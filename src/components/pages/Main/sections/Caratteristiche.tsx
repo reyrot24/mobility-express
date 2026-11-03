@@ -72,9 +72,9 @@ export const Caratteristiche = (props: Layout221Props) => {
                       />
                     )}
                   </div>
-                  <h1 className="mb-3 text-xl font-bold md:mb-4 md:text-2xl underline decoration-orangeHover">
+                  <h3 className="mb-3 text-xl font-bold md:mb-4 md:text-2xl underline decoration-orangeHover">
                     {feature.heading}
-                  </h1>
+                  </h3>
                   <p>{feature.description}</p>
                 </div>
               ))}

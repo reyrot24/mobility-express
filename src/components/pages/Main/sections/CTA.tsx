@@ -38,5 +38,5 @@ export const CTA = (props: Cta25Props) => {
 
 export const Cta25Defaults: Cta25Props = {
   heading: "Pronto a far parte del nostro team?",
-  description: "Prenota un consulto o contattaci quì sotto.",
+  description: "Prenota un consulto o contattaci qui sotto.",
 };

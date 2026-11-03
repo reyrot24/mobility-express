@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+# Pagine personali o raggiungibili solo da link privati
+Disallow: /questionario-catastrofale/
+Disallow: /prezzo-giusto/area
+Disallow: /prezzo-giusto/accesso
+Disallow: /prezzo-giusto/attiva
+Disallow: /prezzo-giusto/reimposta-password
+Disallow: /prezzo-giusto/inviata
+
+Sitemap: https://polizzexpress.it/sitemap.xml

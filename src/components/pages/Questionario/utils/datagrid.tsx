@@ -31,12 +31,34 @@ export interface RowData {
 }
 
 // Initialize 5 rows, first row enabled, others disabled
-const initialData: RowData[] = Array.from({ length: 5 }, (_) => ({
+const initialData: RowData[] = Array.from({ length: 5 }, () => ({
   date: "",
   amount: 0,
   type: "",
   disabled: true, // First row enabled, others disabled
 }));
+
+// Stato locale per l'input: il valore viene salvato nella riga solo al blur
+const AmountCell = ({
+  initialValue,
+  disabled,
+  onCommit,
+}: {
+  initialValue: number;
+  disabled: boolean;
+  onCommit: (value: number) => void;
+}) => {
+  const [localValue, setLocalValue] = useState(initialValue.toString());
+  return (
+    <Input
+      type="number"
+      value={localValue}
+      onChange={(e) => setLocalValue(e.target.value)}
+      onBlur={() => onCommit(Number(localValue))}
+      disabled={disabled}
+    />
+  );
+};
 
 const DataTable = ({
   setFormLocale,
@@ -97,24 +119,13 @@ const DataTable = ({
     {
       header: "Importo liquidato (se assicurato)",
       accessorKey: "amount",
-      cell: ({ row }) => {
-        const [localValue, setLocalValue] = useState(
-          row.original.amount.toString()
-        ); // Local state for input
-        return (
-          <Input
-            type="number"
-            /* value={row.original.amount}
-          onChange={(e) => updateRow(row.index, "amount", e.target.value)}
-          onFocus={(e) => e.target.select()} // Auto-select all text on focus
-          disabled={row.original.disabled} */
-            value={localValue}
-            onChange={(e) => setLocalValue(e.target.value)} // Update local state
-            onBlur={() => updateRow(row.index, "amount", Number(localValue))} // Commit change on blur
-            disabled={row.original.disabled}
-          />
-        );
-      },
+      cell: ({ row }) => (
+        <AmountCell
+          initialValue={row.original.amount}
+          disabled={row.original.disabled}
+          onCommit={(value) => updateRow(row.index, "amount", value)}
+        />
+      ),
     },
   ];
 

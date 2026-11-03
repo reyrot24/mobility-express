@@ -58,7 +58,7 @@ const HelpButton = () => {
                 variant="default"
                 onClick={() => setChiamami(false)}
               >
-                Close
+                Chiudi
               </Button>
             </DialogClose>
           </DialogFooter>

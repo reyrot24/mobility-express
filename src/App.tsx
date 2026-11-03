@@ -13,7 +13,7 @@ function App() {
       <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="*" element={<Index />} />
             {/*  <Route path="/iscrizione" element={<Iscriviti />} /> */}{" "}
             {/* // ! Change when iscriviti api is online */}
             <Route

@@ -35,21 +35,31 @@ export const Contattaci = (props: Contact5Props) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
         <div className="flex flex-col gap-4 items-center ">
           <BiEnvelope size={40} className="text-orangeHover" />
-          <h1 className="font-bold">Email</h1>
+          <h3 className="font-bold">Email</h3>
           <p className="text-center">Inviaci un'email per qualsiasi dubbio:</p>
-          <p className="text-center">{email}</p>
+          <a
+            href={`mailto:${email}`}
+            className="text-center underline-offset-2 hover:text-orangeHover hover:underline"
+          >
+            {email}
+          </a>
         </div>
         <div className="flex flex-col gap-4 items-center">
           <BiPhone size={40} className="text-orangeHover" />
-          <h1 className="font-bold">Telefono</h1>
+          <h3 className="font-bold">Telefono</h3>
           <p className="text-center">
             Chiamaci per parlare direttamente con noi:
           </p>
-          <p className="text-center">{phone}</p>
+          <a
+            href={`tel:${phone.replace(/\s/g, "")}`}
+            className="text-center underline-offset-2 hover:text-orangeHover hover:underline"
+          >
+            {phone}
+          </a>
         </div>
         <div className="flex flex-col gap-4 items-center">
           <BiMap size={40} className="text-orangeHover" />
-          <h1 className="font-bold">Indirizzo</h1>
+          <h3 className="font-bold">Indirizzo</h3>
           <p className="text-center">
             Vienici a trovare al seguente indirizzo:
           </p>
@@ -58,7 +68,7 @@ export const Contattaci = (props: Contact5Props) => {
       </div>
       <div className="mt-8 flex justify-center">
         <a
-          href="https://wa.me/393773887286?text=Ciao%2C%20sono%20un%20subagente%2C%20vorrei%20vedere%20la%20piattaforma"
+          href="https://wa.me/393773937469?text=Ciao%2C%20sono%20un%20subagente%2C%20vorrei%20vedere%20la%20piattaforma"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -76,6 +86,6 @@ export const Contact5Defaults: Contact5Props = {
   description:
     "Contattaci attraverso uno di questi canali o vienici a trovare.",
   email: "sviluppo@alcabroker.it",
-  phone: "+39  081 17 67 67 09",
+  phone: "+39 081 17 67 67 09",
   address: "Via Vittoria Colonna 14 - 80121 Napoli (NA)",
 };

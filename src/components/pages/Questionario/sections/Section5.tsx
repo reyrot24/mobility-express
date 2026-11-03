@@ -39,24 +39,18 @@ const Section5 = ({
                 <Select
                   onValueChange={(value) => {
                     setPresenzaCorsi(value);
-                    value === "no"
-                      ? setFormLocale({
-                          ...formLocale,
-                          section5: {
-                            ...formLocale.section5,
-                            corsiAcqua: value,
-                            corsiAcquaNome: "",
-                            corsiAcquaDistanza: "",
-                            corsiAcquaDislivello: "",
-                          },
-                        })
-                      : setFormLocale({
-                          ...formLocale,
-                          section5: {
-                            ...formLocale.section5,
-                            corsiAcqua: value,
-                          },
-                        });
+                    setFormLocale({
+                      ...formLocale,
+                      section5: {
+                        ...formLocale.section5,
+                        corsiAcqua: value,
+                        ...(value === "no" && {
+                          corsiAcquaNome: "",
+                          corsiAcquaDistanza: "",
+                          corsiAcquaDislivello: "",
+                        }),
+                      },
+                    });
                   }}
                   value={formLocale.section5.corsiAcqua}
                   defaultValue="no"
