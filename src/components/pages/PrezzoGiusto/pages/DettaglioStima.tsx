@@ -88,15 +88,12 @@ const DettaglioStima = () => {
             <DetailLine label="Ricontatto via email">
               {r.consensi.callback.granted ? "Richiesto" : "Non richiesto"}
             </DetailLine>
-            <DetailLine label="Marketing via email">
-              {r.consensi.marketing.granted ? "Consenso prestato" : "Consenso non prestato"}
-            </DetailLine>
             <p className="mt-4 text-[11px] opacity-70">
-              Per revocare il consenso commerciale:{" "}
-              <a className="underline" href={`mailto:${PRIVACY_EMAIL}`}>
-                {PRIVACY_EMAIL}
-              </a>
-              .
+              Consenso commerciale e interruzione del monitoraggio si gestiscono nella sezione{" "}
+              <Link className="underline" to={`${PG_BASE}/area?sezione=servizio`}>
+                “Il servizio”
+              </Link>
+              . Richieste privacy: {PRIVACY_EMAIL}.
             </p>
           </Panel>
         </div>

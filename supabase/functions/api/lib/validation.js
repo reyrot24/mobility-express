@@ -9,6 +9,11 @@ const str = (value) => (typeof value === "string" ? value.trim() : "");
 const isName = (value) => value.length >= 1 && value.length <= 80 && /^[\p{L}][\p{L}\s'’.-]*$/u.test(value);
 // Codice referente nel link di devops: /prezzo-giusto/<codice>. Stessa regola in utils/model.ts
 export const REFERRAL_CODE = /^[A-Za-z0-9_-]{1,64}$/;
+// Percorsi del sito sotto /prezzo-giusto/: non possono essere codici referente. Stessa lista in utils/model.ts
+export const PERCORSI_RISERVATI = [
+  "come-funziona", "inviata", "accesso", "reimposta-password", "area", "attiva", "condizioni", "privacy",
+];
+const isReferral = (value) => REFERRAL_CODE.test(value) && !PERCORSI_RISERVATI.includes(value.toLowerCase());
 // Id della configurazione di devops nel link: /prezzo-giusto/<codice>/<id>. Stessa regola in utils/model.ts
 export const CONFIGURATION_ID = /^[A-Za-z0-9_-]{1,64}$/;
 const isOptionalBoolean = (value) => value === undefined || typeof value === "boolean";
@@ -34,15 +39,16 @@ export function validateRichiesta(body) {
 
   if (body?.privacy !== true)
     return { error: "Conferma di aver letto l’informativa privacy." };
-  // Ricontatto e marketing: facoltativi, mai dedotti da altri campi
-  if (!isOptionalBoolean(body?.ricontatto) || !isOptionalBoolean(body?.marketing))
-    return { error: "Scelte di contatto non valide." };
+  // Ricontatto: facoltativo, mai dedotto da altri campi. Il marketing non si sceglie qui ma alla
+  // conferma dell'adesione o nell'area personale: un eventuale campo "marketing" viene ignorato.
+  if (!isOptionalBoolean(body?.ricontatto) || !isOptionalBoolean(body?.condizioni))
+    return { error: "Scelte non valide." };
   // Nome e cognome sono facoltativi: il form pubblico non li chiede, il cliente li completa nell'area personale
   if (data.nome && !isName(data.nome)) return { error: "Nome non valido." };
   if (data.cognome && !isName(data.cognome)) return { error: "Cognome non valido." };
   if (!data.cellulare) return { error: "Controlla il numero di cellulare." };
   // Referral facoltativo: vuoto se il cliente non è arrivato da un link di devops
-  if (data.referralId && !REFERRAL_CODE.test(data.referralId))
+  if (data.referralId && !isReferral(data.referralId))
     return { error: "Link referral non valido." };
   // Facoltativo: vuoto se il link non ha una pagina personalizzata
   if (data.idConfigurazione && !CONFIGURATION_ID.test(data.idConfigurazione))
@@ -61,7 +67,9 @@ export function validateRichiesta(body) {
     data: {
       ...data,
       ricontatto: body.ricontatto === true,
-      marketing: body.marketing === true,
+      // Solo dall'area personale: accettazione delle Condizioni nel form (la verifica la fa il servizio)
+      condizioni: body.condizioni === true,
+      documenti: documentiMostrati(body?.documenti),
       indirizzo: `${data.tipoStrada} ${data.strada} ${data.civico}, ${data.cap} ${data.comune}`,
     },
   };
@@ -74,18 +82,35 @@ export function normalizeCellulare(value) {
   return /^\+?\d{8,15}$/.test(phone) ? phone : null;
 }
 
-/** Valida il form di attivazione dell'area personale (nome, cognome e cellulare sono nella richiesta). */
+/** Id dei documenti mostrati al cliente, es. { condizioni: "condizioni-1.0", privacy: "privacy-1.0" }. */
+function documentiMostrati(value) {
+  const id = (v) => (typeof v === "string" && /^[a-z]+-[0-9.]{1,10}$/.test(v) ? v : null);
+  return { condizioni: id(value?.condizioni), privacy: id(value?.privacy) };
+}
+
+/**
+ * Valida la conferma dell'adesione dalla pagina del link personale.
+ * La password nuova è obbligatoria solo per chi non ha ancora un account (la verifica il servizio).
+ */
 export function validateAttivazione(body) {
   const data = {
     token: str(body?.token),
     password: typeof body?.password === "string" ? body.password : "",
     temporaryPassword:
       typeof body?.temporaryPassword === "string" ? body.temporaryPassword : "",
+    condizioniAccettate: body?.condizioniAccettate === true,
+    // null = scelta non mostrata (cliente con account già esistente)
+    marketing: typeof body?.marketing === "boolean" ? body.marketing : null,
+    documenti: documentiMostrati(body?.documenti),
   };
   if (!data.token || data.token.length > 100) return { error: "Link di attivazione non valido." };
+  if (!data.condizioniAccettate)
+    return { error: "Per attivare il servizio devi accettare le Condizioni del servizio." };
+  if (!data.documenti.condizioni || !data.documenti.privacy)
+    return { error: "Versione dei documenti mancante. Ricarica la pagina." };
   if (data.temporaryPassword.length > 128)
     return { error: "La password temporanea non è valida." };
-  if (data.password.length < 12 || data.password.length > 72)
+  if (data.password && (data.password.length < 12 || data.password.length > 72))
     return { error: "La password deve avere tra 12 e 72 caratteri." };
   return { data };
 }

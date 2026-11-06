@@ -15,13 +15,29 @@ const transporter = config.smtp.host
 
 if (!config.smtp.host)
   console.warn("[mailer] SMTP_HOST non impostato: le email saranno solo stampate nei log.");
+if (!config.adesioniReali)
+  console.warn(
+    `[mailer] AMBIENTE DI TEST: email solo verso ${config.emailAllowlist.join(", ") || "(allowlist vuota: nessuno)"}.`
+  );
+
+/** Destinatario rifiutato dall'ambiente di test: l'invio non parte e viene registrato come "bloccata". */
+export class EmailBloccataError extends Error {}
+
+/** true se l'email può partire verso questo indirizzo nell'ambiente attuale. */
+export const destinatarioAmmesso = (to) =>
+  config.adesioniReali || config.emailAllowlist.includes(String(to).trim().toLowerCase());
 
 /**
  * Invia un'email.
  * @param {{to: string, subject: string, html: string, text: string, replyTo?: string}} message
  * @returns {Promise<string>} messageId
+ * @throws {EmailBloccataError} in ambiente di test, se il destinatario non è nella allowlist
  */
 export async function sendMail({ to, subject, html, text, replyTo }) {
+  // Unico punto di uscita delle email: nessun percorso può saltare il blocco dell'ambiente di test
+  if (!destinatarioAmmesso(to))
+    throw new EmailBloccataError(`AMBIENTE_TEST: ${to} non è in PG_EMAIL_ALLOWLIST`);
+
   const info = await transporter.sendMail({
     from: config.mailFrom,
     to,

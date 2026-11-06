@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { Check, LoaderCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { PageTitle } from "../components/PageTitle";
 import { PasswordForm } from "../components/PasswordForm";
 import { QuoteForm } from "../components/QuoteForm";
+import { GestioneServizio } from "../components/GestioneServizio";
 import { Field, FormError } from "../components/Field";
 import { Badge, DarkCard, EmptyState, Notice, Panel } from "../components/Surface";
 import { useAuth } from "../context/AuthContext";
@@ -31,14 +32,16 @@ import {
   type QuoteRequest,
 } from "../utils/model";
 
-type Tab = "richieste" | "nuova" | "dati" | "polizze";
+type Tab = "richieste" | "nuova" | "servizio" | "dati" | "polizze";
 
 // Finché ci sono richieste in elaborazione ricarichiamo l'elenco periodicamente
 const POLL_MS = 8000;
 
 const AreaPersonale = () => {
   const { session, loading } = useAuth();
-  const [tab, setTab] = useState<Tab>("richieste");
+  // Link "Gestisci servizio" delle email: /prezzo-giusto/area?sezione=servizio
+  const [params] = useSearchParams();
+  const [tab, setTab] = useState<Tab>(params.get("sezione") === "servizio" ? "servizio" : "richieste");
   const [profilo, setProfilo] = useState<Profilo | null>(null);
   const [richieste, setRichieste] = useState<Richiesta[] | null>(null);
   const [loadError, setLoadError] = useState("");
@@ -78,6 +81,7 @@ const AreaPersonale = () => {
   const tabs: [Tab, string][] = [
     ["richieste", `Le mie richieste${richieste ? ` (${richieste.length})` : ""}`],
     ["nuova", "Nuova richiesta"],
+    ["servizio", "Il servizio"],
     ["dati", "I miei dati"],
     ["polizze", "Le mie polizze"],
   ];
@@ -130,6 +134,8 @@ const AreaPersonale = () => {
         />
       )}
 
+      {tab === "servizio" && <GestioneServizio token={session.access_token} />}
+
       {tab === "dati" && profilo && (
         <IMieiDati
           userId={session.user.id}
@@ -154,12 +160,14 @@ const statusBadgeClass: Record<Richiesta["stato"], string> = {
   completata: "bg-[#eef8f1] text-[#1d5a33] dark:bg-[#1d5a33] dark:text-white",
   non_disponibile: "bg-[#f0f1f6] text-[#40455f] dark:bg-white/10 dark:text-white",
   errore: "bg-[#fff1ec] text-[#a72e28] dark:bg-[#a72e28] dark:text-white",
+  annullata: "bg-[#f0f1f6] text-[#40455f] dark:bg-white/10 dark:text-white",
 };
 
 const statusNote: Partial<Record<Richiesta["stato"], string>> = {
   in_elaborazione: "Stiamo preparando la stima: ti scriveremo appena è pronta.",
   non_disponibile: "Per questa richiesta non è disponibile una stima automatica.",
   errore: "Si è verificato un problema tecnico. Ti ricontatteremo noi.",
+  annullata: "Hai interrotto il monitoraggio prima che la stima fosse pronta.",
 };
 
 // Icona accanto all'etichetta dello stato: caricamento finché la stima è in elaborazione, check quando è pronta
@@ -180,6 +188,7 @@ const FILTRI: Richiesta["stato"][] = [
   "non_disponibile",
   "errore",
   "in_attesa_attivazione",
+  "annullata",
 ];
 
 type Filtro = Richiesta["stato"] | "tutte";

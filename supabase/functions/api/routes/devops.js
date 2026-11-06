@@ -1,6 +1,7 @@
 import { config } from "../config.js";
 import { hasApiKey, hasBearerSecret, isDebug } from "../lib/auth.js";
 import { inBackground, json, readJson } from "../lib/http.js";
+import { cessaDaOperatore } from "../services/adesioni.js";
 import { elaboraTentativi, registraRisultato, rilanciaRichiesta } from "../services/richieste.js";
 
 // POST /devops/risultati
@@ -46,4 +47,24 @@ export async function tentativi(req) {
     )
   );
   return json(202, { ok: true });
+}
+
+// POST /devops/richieste/:id/cessa   { "operatore": "nome.cognome", "motivo": "richiesta via email del ..." }
+// Cessazione chiesta dal cliente scrivendo a info@alcabroker.it: l'operatore la registra da devops.
+// Autorizzazione: "X-API-Key: <DEVOPS_WEBHOOK_SECRET>". 404 se la richiesta non ha un servizio attivo.
+export async function cessaRichiesta(req, { params: [id] }) {
+  if (!config.devopsWebhook.secret) return json(503, { message: "API non configurata." });
+  if (!hasApiKey(req, config.devopsWebhook.secret)) return json(401, { message: "Non autorizzato." });
+  const body = await readJson(req);
+  const operatore = typeof body?.operatore === "string" ? body.operatore.trim().slice(0, 80) : "";
+  const motivo = typeof body?.motivo === "string" ? body.motivo.trim().slice(0, 500) : "";
+  if (!operatore) return json(400, { message: "Indica l'operatore che registra la cessazione." });
+  try {
+    const adesione = await cessaDaOperatore(id, { operatore, motivo });
+    if (!adesione) return json(404, { message: "Nessun servizio attivo per questa richiesta." });
+    return json(200, { id: adesione.id, stato: adesione.stato, cessataIl: adesione.cessata_at });
+  } catch (err) {
+    console.error("[devops] cessazione non riuscita:", err.message);
+    return json(503, { message: "Riprova più tardi." });
+  }
 }

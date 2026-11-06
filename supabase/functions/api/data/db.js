@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
+import { MARKETING_TEXT, MARKETING_VERSION } from "../lib/consensi.js";
 import { supabase } from "../services/supabase.js";
 
 // Accesso al database Supabase. Il client usa la chiave secret: valida sempre i dati prima.
@@ -67,8 +68,11 @@ export async function updatePassword(userId, password) {
 const ACTIVATION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const hashToken = (token) => createHash("sha256").update(token).digest("hex");
 
-/** Crea un link di attivazione per l'email e restituisce il token in chiaro (solo per l'email). */
-export async function createActivation(email) {
+/**
+ * Crea il link personale di conferma per una richiesta e restituisce il token in chiaro (solo per l'email).
+ * Nel database resta solo l'hash: chi legge le tabelle non può usare i link.
+ */
+export async function createActivation(email, richiestaId) {
   const token = randomBytes(32).toString("base64url");
   const temporaryPassword = randomBytes(18).toString("base64url");
   unwrap(
@@ -76,6 +80,7 @@ export async function createActivation(email) {
       token_hash: hashToken(token),
       temporary_password_hash: createHash("sha256").update(temporaryPassword).digest("hex"),
       email,
+      richiesta_id: richiestaId,
       expires_at: new Date(Date.now() + ACTIVATION_TTL_MS).toISOString(),
     }),
     "creazione attivazione"
@@ -83,18 +88,24 @@ export async function createActivation(email) {
   return { token, temporaryPassword };
 }
 
-/** Attivazione valida (non usata, non scaduta) oppure null. */
-export async function findActivation(token) {
+/**
+ * Legge il link di conferma.
+ * @returns {Promise<{activation: object|null, motivo: null|"token_inesistente"|"token_riusato"|"token_scaduto", row: object|null}>}
+ *   activation è valorizzato solo se il link si può ancora usare; row c'è anche se è usato o scaduto
+ */
+export async function readActivation(token) {
   const row = unwrap(
     await db()
       .from("attivazioni")
-      .select("token_hash, temporary_password_hash, email, expires_at, used_at")
+      .select("token_hash, temporary_password_hash, email, richiesta_id, expires_at, used_at")
       .eq("token_hash", hashToken(token))
       .maybeSingle(),
     "lettura attivazione"
   );
-  if (!row || row.used_at || new Date(row.expires_at) <= new Date()) return null;
-  return row;
+  if (!row) return { activation: null, motivo: "token_inesistente", row: null };
+  if (row.used_at) return { activation: null, motivo: "token_riusato", row };
+  if (new Date(row.expires_at) <= new Date()) return { activation: null, motivo: "token_scaduto", row };
+  return { activation: row, motivo: null, row };
 }
 
 /** Segna il link come usato. false se nel frattempo è stato usato da un'altra richiesta. */
@@ -145,34 +156,6 @@ export async function getRichiesta(id) {
   return unwrap(
     await db().from("richieste").select().eq("id", id).maybeSingle(),
     "lettura richiesta"
-  );
-}
-
-/** Ultima richiesta fatta con questa email e non ancora collegata a un account. */
-export async function findUltimaRichiestaInAttesa(email) {
-  return unwrap(
-    await db()
-      .from("richieste")
-      .select("nome, cognome, cellulare, referral_id")
-      .eq("email", email.toLowerCase())
-      .is("user_id", null)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-    "lettura richiesta in attesa"
-  );
-}
-
-/** Collega all'utente le richieste fatte con la sua email prima dell'attivazione. */
-export async function linkRichiesteInAttesa(email, userId) {
-  return unwrap(
-    await db()
-      .from("richieste")
-      .update({ user_id: userId, stato: "in_elaborazione" })
-      .is("user_id", null)
-      .eq("email", email.toLowerCase())
-      .select(),
-    "collegamento richieste"
   );
 }
 
@@ -254,4 +237,142 @@ export async function saveRisultato(row) {
 export async function logEmail(row) {
   const { error } = await db().from("email_inviate").insert(row);
   if (error) console.error("[db] registro email non salvato:", error.message);
+}
+
+// ───────────── Documenti legali e adesioni ─────────────
+
+let documentiCache = null;
+const DOCUMENTI_CACHE_MS = 60 * 1000;
+
+/** Versioni attive di Condizioni e Informativa: { condizioni, privacy }. Cache di un minuto. */
+export async function getDocumentiAttivi() {
+  if (documentiCache && documentiCache.scade > Date.now()) return documentiCache.documenti;
+  const rows = unwrap(
+    await db()
+      .from("documenti_legali")
+      .select("id, tipo, versione, data_versione, sha256_pdf, url_pdf, url_pagina")
+      .eq("attivo", true),
+    "lettura documenti legali"
+  );
+  const documenti = Object.fromEntries(rows.map((r) => [r.tipo, r]));
+  if (!documenti.condizioni || !documenti.privacy) throw new Error("DOCUMENTI_LEGALI_MANCANTI");
+  documentiCache = { documenti, scade: Date.now() + DOCUMENTI_CACHE_MS };
+  return documenti;
+}
+
+const COLONNE_ADESIONE =
+  "id, richiesta_id, user_id, email, targa, referral_id, stato, privacy_doc_id, informativa_resa_at, condizioni_doc_id, condizioni_accettate_at, verifica_identita, cessata_at, cessazione_canale, created_at";
+
+export async function insertAdesione(row) {
+  return unwrap(
+    await db().from("adesioni").insert(row).select(COLONNE_ADESIONE).single(),
+    "creazione adesione"
+  );
+}
+
+export async function getAdesioneByRichiesta(richiestaId) {
+  return unwrap(
+    await db().from("adesioni").select(COLONNE_ADESIONE).eq("richiesta_id", richiestaId).maybeSingle(),
+    "lettura adesione"
+  );
+}
+
+export async function listAdesioniUtente(userId) {
+  return unwrap(
+    await db()
+      .from("adesioni")
+      .select(COLONNE_ADESIONE)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false }),
+    "lettura adesioni"
+  );
+}
+
+/** Conferma in una transazione (funzione conferma_adesione): adesione, marketing, eventi, richiesta. */
+export async function confermaAdesione({ adesioneId, userId, condizioniDocId, verifica, marketing, dettagli }) {
+  return unwrap(
+    await db().rpc("conferma_adesione", {
+      p_adesione_id: adesioneId,
+      p_user_id: userId,
+      p_condizioni_doc_id: condizioniDocId,
+      p_verifica: verifica,
+      p_marketing: marketing,
+      p_marketing_testo: MARKETING_TEXT,
+      p_marketing_versione: MARKETING_VERSION,
+      p_dettagli: dettagli ?? {},
+    }),
+    "conferma adesione"
+  );
+}
+
+/**
+ * Cessa un'adesione attiva. Con userId solo se è di quel cliente.
+ * @returns {Promise<object|null>} l'adesione cessata, null se non esiste, non è sua o non è attiva
+ */
+export async function cessaAdesioneAttiva(id, { userId, canale, motivo }) {
+  let query = db()
+    .from("adesioni")
+    .update({
+      stato: "cessata",
+      cessata_at: new Date().toISOString(),
+      cessazione_canale: canale,
+      cessazione_motivo: motivo || null,
+    })
+    .eq("id", id)
+    .eq("stato", "attiva");
+  if (userId) query = query.eq("user_id", userId);
+  const rows = unwrap(await query.select(COLONNE_ADESIONE), "cessazione adesione");
+  return rows[0] ?? null;
+}
+
+/** Richiesta non ancora arrivata a devops: dopo la cessazione non parte più. */
+export async function annullaRichiestaNonInviata(richiestaId) {
+  unwrap(
+    await db()
+      .from("richieste")
+      .update({ stato: "annullata", invio_avviato_at: null, prossimo_tentativo_at: null })
+      .eq("id", richiestaId)
+      .in("stato", ["in_attesa_attivazione", "in_elaborazione", "errore"])
+      .is("inviata_devops_at", null),
+    "annullamento richiesta"
+  );
+}
+
+/** Ultima scelta marketing per l'email: true, false o null se mai espressa. */
+export async function getMarketingAttuale(email) {
+  const row = unwrap(
+    await db()
+      .from("consensi_marketing")
+      .select("granted, created_at")
+      .eq("email", email.toLowerCase())
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    "lettura consenso marketing"
+  );
+  return row ? { granted: row.granted, aggiornatoIl: row.created_at } : null;
+}
+
+export async function insertConsensoMarketing(row) {
+  unwrap(
+    await db().from("consensi_marketing").insert({
+      ...row,
+      email: row.email.toLowerCase(),
+      testo: MARKETING_TEXT,
+      versione: MARKETING_VERSION,
+    }),
+    "salvataggio consenso marketing"
+  );
+}
+
+/** Registro eventi delle adesioni. Non blocca mai il flusso: se fallisce resta nei log. */
+export async function registraEvento({ adesioneId = null, richiestaId = null, tipo, attore = "sistema", dettagli = null }) {
+  const { error } = await db().from("adesioni_eventi").insert({
+    adesione_id: adesioneId,
+    richiesta_id: richiestaId,
+    tipo,
+    attore,
+    dettagli,
+  });
+  if (error) console.error(`[db] evento "${tipo}" non registrato per ${richiestaId ?? adesioneId}:`, error.message);
 }

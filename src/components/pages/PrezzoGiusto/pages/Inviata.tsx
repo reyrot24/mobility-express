@@ -21,10 +21,10 @@ const Inviata = () => {
       </h1>
       {q.status === "in_attesa_attivazione" ? (
         <p className="mb-5 opacity-80">
-          Ti abbiamo scritto a <strong className="break-all">{q.email}</strong>.
-          Apri l’email e <strong>attiva la tua area personale</strong>: è
-          l’ultimo passaggio, poi prepariamo la stima e ti avvisiamo quando è
-          pronta.
+          Ti abbiamo scritto a <strong className="break-all">{q.email}</strong>{" "}
+          con i documenti del servizio e il tuo link personale. Apri l’email e{" "}
+          <strong>conferma l’adesione</strong>: è l’ultimo passaggio, poi
+          prepariamo la stima e ti avvisiamo quando è pronta.
         </p>
       ) : (
         <p className="mb-5 opacity-80">
@@ -42,11 +42,7 @@ const Inviata = () => {
         <strong className="text-xs">
           {q.consents.callback.granted ? "richiesto via email" : "non richiesto"}
         </strong>
-        <br />
-        Marketing:{" "}
-        <strong className="text-xs">
-          {q.consents.marketing.granted ? "consenso prestato" : "consenso non prestato"}
-        </strong>
+
       </div>
       <div className="flex flex-col gap-3">
         {q.status !== "in_attesa_attivazione" && (

@@ -5,8 +5,8 @@
 import { config } from "./config.js";
 import { InvalidSessionError, SESSION_EXPIRED } from "./lib/auth.js";
 import { HttpError, json } from "./lib/http.js";
-import { attiva, cambiaPassword, leggiAttivazione } from "./routes/account.js";
-import { risultati, tentativi } from "./routes/devops.js";
+import { attiva, cambiaPassword, cessa, leggiAttivazione, marketing, servizio } from "./routes/account.js";
+import { cessaRichiesta, risultati, tentativi } from "./routes/devops.js";
 import {
   eliminaPaginaDevops,
   leggiPaginaDevops,
@@ -17,14 +17,18 @@ import { nuovaRichiesta, ricontatto } from "./routes/prezzoGiusto.js";
 import { supabase } from "./services/supabase.js";
 
 const routes = [
-  ["GET", /^\/health$/, () => json(200, { ok: true })],
+  ["GET", /^\/health$/, () => json(200, { ok: true, ambiente: config.adesioniReali ? "produzione" : "test" })],
   ["POST", /^\/prezzo-giusto\/richieste$/, nuovaRichiesta],
   ["POST", /^\/prezzo-giusto\/richieste\/([^/]+)\/ricontatto$/, ricontatto],
   ["GET", /^\/prezzo-giusto\/pagine\/([^/]+)$/, paginaPubblica],
   ["GET", /^\/account\/attivazione$/, leggiAttivazione],
   ["POST", /^\/account\/attivazione$/, attiva],
   ["POST", /^\/account\/password$/, cambiaPassword],
+  ["GET", /^\/account\/servizio$/, servizio],
+  ["POST", /^\/account\/adesioni\/([^/]+)\/cessa$/, cessa],
+  ["POST", /^\/account\/marketing$/, marketing],
   ["POST", /^\/devops\/risultati$/, risultati],
+  ["POST", /^\/devops\/richieste\/([^/]+)\/cessa$/, cessaRichiesta],
   ["GET", /^\/devops\/pagine\/([^/]+)$/, leggiPaginaDevops],
   ["PUT", /^\/devops\/pagine\/([^/]+)$/, salvaPaginaDevops],
   ["DELETE", /^\/devops\/pagine\/([^/]+)$/, eliminaPaginaDevops],
@@ -37,6 +41,8 @@ if (!config.devopsWebhook.secret)
   console.warn("[api] DEVOPS_WEBHOOK_SECRET non impostato: devops non può inviare i risultati.");
 if (!config.cronSecret)
   console.warn("[api] CRON_SECRET non impostato: i nuovi tentativi verso devops non partono.");
+if (!config.adesioniReali)
+  console.warn("[api] AMBIENTE DI TEST (PG_ADESIONI_REALI non è true): email solo verso PG_EMAIL_ALLOWLIST.");
 if (!supabase)
   console.warn("[api] chiave secret di Supabase mancante: le richieste non possono essere salvate.");
 

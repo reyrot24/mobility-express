@@ -3,7 +3,7 @@ import { leggiPagina, richiediStima } from "../utils/api";
 import { withReferente, type PaginaReferente } from "../utils/pagina";
 import {
   DEFAULT_REF,
-  REFERRAL_CODE,
+  isReferralCode,
   type Quote,
   type QuoteRequest,
   type Referente,
@@ -84,7 +84,7 @@ export const PrezzoGiustoProvider = ({ children }: { children: React.ReactNode }
   // Ogni codice valido del link è accettato e inviato a devops.
   // TODO: mostrare i contatti del referente reale quando devops li renderà disponibili.
   const findRef = useCallback(
-    (id: string) => (REFERRAL_CODE.test(id) ? { ...DEFAULT_REF, id } : undefined),
+    (id: string) => (isReferralCode(id) ? { ...DEFAULT_REF, id } : undefined),
     []
   );
 

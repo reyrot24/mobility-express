@@ -54,6 +54,17 @@ export const config = {
   },
   // pg_cron chiama POST /interno/tentativi con "Authorization: Bearer <segreto>"
   cronSecret: env("CRON_SECRET"),
-  // Solo in sviluppo: senza API esterna simuliamo la risposta di devops con un range dimostrativo
-  simulateDevops: !env("EXTERNAL_API_URL") && env("SIMULA_DEVOPS") === "true",
+  // Ambiente di test del servizio "OK, il prezzo è giusto?" (attivo se PG_ADESIONI_REALI non è "true"):
+  // le email partono solo verso gli indirizzi di PG_EMAIL_ALLOWLIST, le altre vengono bloccate e
+  // registrate. Si esce dal test solo dopo la validazione del DPO di Alca Broker.
+  adesioniReali: env("PG_ADESIONI_REALI") === "true",
+  emailAllowlist: (env("PG_EMAIL_ALLOWLIST") ?? "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean),
 };
+
+// Solo in sviluppo: senza API esterna simuliamo la risposta di devops con un range dimostrativo.
+// Mai con le adesioni reali: al cliente non arrivano importi inventati.
+config.simulateDevops =
+  !config.adesioniReali && !env("EXTERNAL_API_URL") && env("SIMULA_DEVOPS") === "true";

@@ -4,20 +4,23 @@ import { config } from "../config.js";
 import { findReferente } from "../data/referenti.js";
 import {
   claimActivation,
+  confermaAdesione,
   createActivation,
   createUser,
-  findActivation,
   findRichiestaByIdempotencyKey,
-  findUltimaRichiestaInAttesa,
   findUserIdByEmail,
+  getAdesioneByRichiesta,
+  getDocumentiAttivi,
   getProfilo,
   getRichiesta,
+  insertAdesione,
   insertRichiesta,
-  linkRichiesteInAttesa,
   listRichiesteDaInviare,
   listRichiesteDaRitentare,
   logEmail,
   prenotaInvio,
+  readActivation,
+  registraEvento,
   releaseActivation,
   riprendiRichiestaInErrore,
   saveRisultato,
@@ -25,7 +28,7 @@ import {
 } from "../data/db.js";
 import { recordChoices } from "../lib/consensi.js";
 import { inBackground } from "../lib/http.js";
-import { sendMail } from "./mailer.js";
+import { EmailBloccataError, sendMail } from "./mailer.js";
 import { configurazioneEmail } from "./pagine.js";
 import { inviaAPiattaforma } from "./piattaforma.js";
 import { DEMO_ESTIMATE, parseStima } from "./stima.js";
@@ -33,22 +36,56 @@ import { attivazioneEmail, richiestaRicevutaEmail } from "../templates/richiesta
 import { ricontattoEmail } from "../templates/ricontattoEmail.js";
 import { stimaEmail } from "../templates/stimaEmail.js";
 
-const accessoUrl = () => `${config.siteUrl}/prezzo-giusto/accesso`;
+export const accessoUrl = () => `${config.siteUrl}/prezzo-giusto/accesso`;
+export const servizioUrl = () => `${config.siteUrl}/prezzo-giusto/area?sezione=servizio`;
 const attivazioneUrl = (token) =>
   `${config.siteUrl}/prezzo-giusto/attiva?token=${encodeURIComponent(token)}`;
 const indirizzo = (r) => `${r.tipo_strada} ${r.strada} ${r.civico}, ${r.cap} ${r.comune}`;
 
-/** Invia un'email e ne registra l'esito. Non lancia mai: un invio fallito resta nel registro. */
-async function sendAndLog({ tipo, userId, richiestaId, message }) {
+/** Documenti attivi con l'URL pubblico completo, per email e pagina di conferma. */
+export async function documentiPubblici() {
+  const docs = await getDocumentiAttivi();
+  const pubblico = (d) => ({
+    id: d.id,
+    versione: d.versione,
+    data: d.data_versione,
+    url: `${config.siteUrl}${d.url_pagina}`,
+    pdf: `${config.siteUrl}${d.url_pdf}`,
+  });
+  return { condizioni: pubblico(docs.condizioni), privacy: pubblico(docs.privacy) };
+}
+
+// Comunicazioni di servizio al cliente: partono solo se l'adesione della richiesta è attiva
+const EMAIL_DI_SERVIZIO = ["richiesta_ricevuta", "stima"];
+
+/**
+ * Invia un'email e ne registra l'esito. Non lancia mai: un invio fallito resta nel registro.
+ * Le comunicazioni di servizio si bloccano se l'adesione non è attiva (es. monitoraggio interrotto).
+ * @returns {Promise<"inviata"|"fallita"|"bloccata">}
+ */
+export async function sendAndLog({ tipo, userId, richiestaId, message }) {
+  const log = (esito, errore = null) =>
+    logEmail({ tipo, user_id: userId, richiesta_id: richiestaId, destinatario: message.to, esito, errore });
+
+  if (EMAIL_DI_SERVIZIO.includes(tipo)) {
+    const adesione = richiestaId ? await getAdesioneByRichiesta(richiestaId) : null;
+    if (adesione?.stato !== "attiva") {
+      const motivo = adesione ? `ADESIONE_${adesione.stato.toUpperCase()}` : "ADESIONE_MANCANTE";
+      console.warn(`[richieste] email "${tipo}" bloccata per ${richiestaId}: ${motivo}`);
+      await registraEvento({ adesioneId: adesione?.id, richiestaId, tipo: "comunicazione_bloccata", dettagli: { email: tipo, motivo } });
+      await log("bloccata", motivo);
+      return "bloccata";
+    }
+  }
   try {
     await sendMail(message);
-    await logEmail({ tipo, user_id: userId, richiesta_id: richiestaId, destinatario: message.to, esito: "inviata" });
+    await log("inviata");
+    return "inviata";
   } catch (err) {
-    console.error(`[richieste] email "${tipo}" non inviata per ${richiestaId}:`, err.message);
-    await logEmail({
-      tipo, user_id: userId, richiesta_id: richiestaId, destinatario: message.to,
-      esito: "fallita", errore: err.message,
-    });
+    const bloccata = err instanceof EmailBloccataError;
+    console.error(`[richieste] email "${tipo}" ${bloccata ? "bloccata" : "non inviata"} per ${richiestaId}:`, err.message);
+    await log(bloccata ? "bloccata" : "fallita", err.message);
+    return bloccata ? "bloccata" : "fallita";
   }
 }
 
@@ -63,7 +100,6 @@ export const toResponse = (r) => ({
       granted: r.consensi.callback.granted,
       requestedAt: r.consensi.callback.requestedAt,
     },
-    marketing: { granted: r.consensi.marketing.granted },
     version: r.consensi.version,
     recordedAt: r.consensi.recordedAt,
   },
@@ -71,27 +107,46 @@ export const toResponse = (r) => ({
 
 // ───────────── 1. Nuova richiesta ─────────────
 
+/** Errore da mostrare al cliente con uno status HTTP (es. documenti cambiati nel frattempo). */
+export class ErroreAdesione extends Error {
+  constructor(status, message) {
+    super(message);
+    this.status = status;
+  }
+}
+
+const DOCUMENTI_AGGIORNATI = () =>
+  new ErroreAdesione(409, "I documenti del servizio sono stati aggiornati. Ricarica la pagina e rileggili prima di confermare.");
+
 /**
- * Salva la richiesta e avvisa il cliente.
- * - Cliente registrato (o in sessione): richiesta collegata all'account, invio a devops
- *   ed email 2 solo se devops la accetta.
- * - Cliente non registrato: richiesta salvata solo in "richieste", email 1 con il link
- *   per attivare l'area personale. Devops viene contattato solo dopo l'attivazione.
+ * Salva la richiesta e l'adesione al servizio (con l'informativa resa).
+ * - Senza sessione (form pubblico, anche se l'email ha già un account): l'adesione resta "in_attesa"
+ *   ed email 1 con i documenti e il link personale di conferma. Devops viene contattato solo dopo.
+ * - Cliente in sessione (area personale): identità già verificata, le Condizioni si accettano nel
+ *   form; adesione confermata subito e invio a devops.
  * @param {object} data dati validati del form
  * @param {string|undefined} idempotencyKey
  * @param {{id: string, email: string}|null} sessionUser cliente in sessione (area personale)
- * @param {{debug?: boolean}} [options] debug: aspetta devops e aggiunge la sua risposta (campo rispostaDevops)
+ * @param {{debug?: boolean, userAgent?: string}} [options] debug: aspetta devops e aggiunge la sua risposta
  */
-export async function creaRichiesta(data, idempotencyKey, sessionUser = null, { debug = false } = {}) {
+export async function creaRichiesta(data, idempotencyKey, sessionUser = null, { debug = false, userAgent } = {}) {
   if (idempotencyKey) {
     const existing = await findRichiestaByIdempotencyKey(idempotencyKey);
     if (existing) return toResponse(existing);
   }
 
+  const documenti = await documentiPubblici();
+  if (sessionUser) {
+    if (!data.condizioni)
+      throw new ErroreAdesione(400, "Per attivare il servizio devi accettare le Condizioni del servizio.");
+    if (data.documenti.condizioni !== documenti.condizioni.id || data.documenti.privacy !== documenti.privacy.id)
+      throw DOCUMENTI_AGGIORNATI();
+  }
+
   const email = sessionUser?.email ?? data.email;
-  const userId = sessionUser?.id ?? (await findUserIdByEmail(email));
-  // Per un cliente registrato usiamo i dati del profilo, non quelli digitati ora
-  const profilo = userId ? await getProfilo(userId) : null;
+  // Solo per riprendere nome, cognome e referente: senza sessione l'identità va comunque verificata
+  const accountId = sessionUser?.id ?? (await findUserIdByEmail(email));
+  const profilo = accountId ? await getProfilo(accountId) : null;
   // Cliente registrato: il referral è quello del link con cui ha attivato l'area (anche vuoto)
   const referralId = (profilo ? profilo.referral_id : data.referralId) || null;
   // La configurazione del link vale solo se la richiesta resta al referente di quel link
@@ -100,7 +155,7 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null, { 
 
   const { richiesta, duplicate } = await insertRichiesta({
     id: "ST-" + randomUUID().slice(0, 8).toUpperCase(),
-    user_id: userId,
+    user_id: null, // si collega all'account solo con l'adesione confermata
     email,
     nome: profilo?.nome || data.nome,
     cognome: profilo?.cognome || data.cognome,
@@ -113,90 +168,193 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null, { 
     cap: data.cap,
     referral_id: referralId,
     id_configurazione: idConfigurazione,
-    stato: userId ? "in_elaborazione" : "in_attesa_attivazione",
-    consensi: recordChoices({ ...data, referralId }, now),
+    stato: "in_attesa_attivazione",
+    consensi: recordChoices({ ...data, referralId }, now, documenti.privacy.id),
     idempotency_key: idempotencyKey ?? null,
   });
   if (duplicate) return toResponse(richiesta);
 
-  if (userId) {
-    // L'email di conferma parte da inviaADevops, solo se devops accetta la richiesta
-    if (debug) return { ...toResponse(richiesta), rispostaDevops: await rispostaDevops(richiesta.id) };
-    inviaInBackground(richiesta.id);
-  } else {
-    const { token, temporaryPassword } = await createActivation(email);
-    const pagina = await configurazioneEmail(richiesta.id_configurazione);
-    await sendAndLog({
-      tipo: "attivazione",
-      userId: null,
-      richiestaId: richiesta.id,
-      message: {
-        to: email,
-        ...attivazioneEmail({
-          nome: richiesta.nome,
-          id: richiesta.id,
-          targa: richiesta.targa,
-          attivazioneUrl: attivazioneUrl(token),
-          temporaryPassword,
-          email: pagina?.email,
-        }),
-      },
+  const adesione = await insertAdesione({
+    richiesta_id: richiesta.id,
+    email,
+    targa: richiesta.targa,
+    referral_id: referralId,
+    id_configurazione: idConfigurazione,
+    privacy_doc_id: documenti.privacy.id,
+    informativa_resa_at: now,
+  });
+  await registraEvento({
+    adesioneId: adesione.id,
+    richiestaId: richiesta.id,
+    tipo: "richiesta_ricevuta",
+    attore: "cliente",
+    dettagli: { canale: sessionUser ? "area_personale" : "form_pubblico", privacy: documenti.privacy.id },
+  });
+
+  if (sessionUser) {
+    await confermaAdesione({
+      adesioneId: adesione.id,
+      userId: sessionUser.id,
+      condizioniDocId: documenti.condizioni.id,
+      verifica: "sessione",
+      marketing: null, // dall'area personale il marketing si gestisce nella sezione "Il servizio"
+      dettagli: { user_agent: userAgent?.slice(0, 300) ?? null },
     });
+    const confermata = await getRichiesta(richiesta.id);
+    // L'email di conferma parte da inviaADevops, solo se devops accetta la richiesta
+    if (debug) return { ...toResponse(confermata), rispostaDevops: await rispostaDevops(richiesta.id) };
+    inviaInBackground(richiesta.id);
+    return toResponse(confermata);
   }
+
+  const { token, temporaryPassword } = await createActivation(email, richiesta.id);
+  const pagina = await configurazioneEmail(richiesta.id_configurazione);
+  const esito = await sendAndLog({
+    tipo: "attivazione",
+    userId: null,
+    richiestaId: richiesta.id,
+    message: {
+      to: email,
+      ...attivazioneEmail({
+        nome: richiesta.nome,
+        id: richiesta.id,
+        targa: richiesta.targa,
+        attivazioneUrl: attivazioneUrl(token),
+        temporaryPassword,
+        documenti,
+        email: pagina?.email,
+      }),
+    },
+  });
+  await registraEvento({
+    adesioneId: adesione.id,
+    richiestaId: richiesta.id,
+    tipo: esito === "inviata" ? "email_adesione_inviata" : "email_adesione_fallita",
+    dettagli: {
+      esito,
+      condizioni: documenti.condizioni.id,
+      privacy: documenti.privacy.id,
+      scadenza_link_giorni: 7,
+    },
+  });
 
   return toResponse(richiesta);
 }
 
-// ───────────── 2. Attivazione dell'area personale ─────────────
+// ───────────── 2. Conferma dell'adesione ─────────────
 
-/** Dati per precompilare il form di attivazione, oppure null se il link non è valido. */
+/** Registra un link non utilizzabile (inesistente, scaduto o già usato). */
+async function registraLinkNonValido(motivo, row, contesto) {
+  const adesione = row?.richiesta_id ? await getAdesioneByRichiesta(row.richiesta_id) : null;
+  await registraEvento({
+    adesioneId: adesione?.id,
+    richiestaId: row?.richiesta_id ?? null,
+    tipo: motivo,
+    attore: "cliente",
+    dettagli: { contesto },
+  });
+}
+
+/**
+ * Dati per la pagina di conferma, oppure null se il link non è valido.
+ * Aprire la pagina non accetta nulla: registra solo l'evento "link_aperto".
+ */
 export async function datiAttivazione(token) {
-  const activation = await findActivation(token);
-  if (!activation) return null;
+  const { activation, motivo, row } = await readActivation(token);
+  if (!activation) {
+    await registraLinkNonValido(motivo, row, "apertura");
+    return null;
+  }
+  const adesione = activation.richiesta_id ? await getAdesioneByRichiesta(activation.richiesta_id) : null;
+  // Link creati prima delle adesioni (senza richiesta) non sono più utilizzabili
+  if (adesione?.stato !== "in_attesa") return null;
+  await registraEvento({ adesioneId: adesione.id, richiestaId: adesione.richiesta_id, tipo: "link_aperto", attore: "cliente" });
+
   return {
     email: activation.email,
     temporaryPasswordRequired: Boolean(activation.temporary_password_hash),
+    accountEsistente: Boolean(await findUserIdByEmail(activation.email)),
+    richiesta: { id: adesione.richiesta_id, targa: adesione.targa },
+    documenti: await documentiPubblici(),
   };
 }
 
 /**
- * Attiva l'area personale: crea utente e profilo con i dati dell'ultima richiesta,
- * collega le richieste in attesa e le invia a devops.
- * @param {{debug?: boolean}} [options] debug: aspetta devops e aggiunge le sue risposte per id (campo rispostaDevops)
+ * Conferma esplicita dell'adesione dalla pagina del link personale.
+ * Verifica link e password temporanea, controlla che i documenti mostrati siano quelli attivi,
+ * crea l'account se manca e registra tutto in una transazione (conferma_adesione).
+ * Solo dopo la richiesta parte verso devops.
+ * @param {{debug?: boolean, userAgent?: string}} [options]
  * @returns {Promise<{email: string, alreadyRegistered: boolean}|null>} null se il link non è valido
  */
-export async function attivaArea(token, { password, temporaryPassword }, { debug = false } = {}) {
-  const activation = await findActivation(token);
-  if (!activation) return null;
+export async function attivaArea(
+  token,
+  { password, temporaryPassword, marketing, documenti: mostrati },
+  { debug = false, userAgent } = {}
+) {
+  const { activation, motivo, row } = await readActivation(token);
+  if (!activation) {
+    await registraLinkNonValido(motivo, row, "conferma");
+    return null;
+  }
+  const adesione = activation.richiesta_id ? await getAdesioneByRichiesta(activation.richiesta_id) : null;
+  if (adesione?.stato !== "in_attesa") return null;
+  const rifiuta = (causa) =>
+    registraEvento({ adesioneId: adesione.id, richiestaId: adesione.richiesta_id, tipo: "conferma_rifiutata", attore: "cliente", dettagli: { causa } });
+
   if (activation.temporary_password_hash) {
     const providedHash = createHash("sha256").update(temporaryPassword ?? "").digest();
     const storedHash = Buffer.from(activation.temporary_password_hash, "hex");
-    if (storedHash.length !== providedHash.length || !timingSafeEqual(providedHash, storedHash))
-      throw new Error("PASSWORD_TEMPORANEA_NON_VALIDA");
+    if (storedHash.length !== providedHash.length || !timingSafeEqual(providedHash, storedHash)) {
+      await rifiuta("password_temporanea");
+      throw new ErroreAdesione(400, "La password temporanea non è corretta.");
+    }
   }
-  if (!(await claimActivation(token))) return null;
+  const documenti = await documentiPubblici();
+  if (mostrati.condizioni !== documenti.condizioni.id || mostrati.privacy !== documenti.privacy.id) {
+    await rifiuta("documenti_non_attuali");
+    throw DOCUMENTI_AGGIORNATI();
+  }
+  const existingUserId = await findUserIdByEmail(activation.email);
+  if (!existingUserId && !password)
+    throw new ErroreAdesione(400, "Scegli una password di almeno 12 caratteri.");
 
-  let result;
+  if (!(await claimActivation(token))) {
+    await registraLinkNonValido("token_riusato", row, "conferma");
+    return null;
+  }
+
   try {
-    // Dati e referente dell'ultima richiesta diventano quelli del profilo
-    const ultima = await findUltimaRichiestaInAttesa(activation.email);
-    result = await createUser({
-      email: activation.email,
-      password,
-      nome: ultima?.nome ?? "",
-      cognome: ultima?.cognome ?? "",
-      cellulare: ultima?.cellulare ?? "",
-      referralId: ultima?.referral_id ?? null,
+    const richiesta = await getRichiesta(adesione.richiesta_id);
+    const userId =
+      existingUserId ??
+      (
+        await createUser({
+          email: activation.email,
+          password,
+          nome: richiesta?.nome ?? "",
+          cognome: richiesta?.cognome ?? "",
+          cellulare: richiesta?.cellulare ?? "",
+          referralId: richiesta?.referral_id ?? null,
+        })
+      ).userId;
+    await confermaAdesione({
+      adesioneId: adesione.id,
+      userId,
+      condizioniDocId: documenti.condizioni.id,
+      verifica: "link_email+password_temporanea",
+      // Chi ha già un account gestisce il marketing dall'area personale: qui non lo sceglie
+      marketing: existingUserId ? null : marketing === true,
+      dettagli: { user_agent: userAgent?.slice(0, 300) ?? null, account_creato: !existingUserId },
     });
   } catch (err) {
     await releaseActivation(token);
     throw err;
   }
 
-  const collegate = await linkRichiesteInAttesa(activation.email, result.userId);
-  const attivata = { email: activation.email, alreadyRegistered: !result.created };
-  if (debug) return { ...attivata, rispostaDevops: await risposteDevops(collegate) };
-  for (const r of collegate) inviaInBackground(r.id);
+  const attivata = { email: activation.email, alreadyRegistered: Boolean(existingUserId) };
+  if (debug) return { ...attivata, rispostaDevops: await risposteDevops([{ id: adesione.richiesta_id }]) };
+  inviaInBackground(adesione.richiesta_id);
   return attivata;
 }
 
@@ -246,6 +404,19 @@ async function risposteDevops(richieste) {
 async function inviaADevops(id) {
   const richiesta = await prenotaInvio(id);
   if (!richiesta) return undefined;
+  // Solo richieste con un'adesione confermata e attiva arrivano a devops
+  const adesione = await getAdesioneByRichiesta(id);
+  if (adesione?.stato !== "attiva") {
+    const motivo = adesione ? `ADESIONE_${adesione.stato.toUpperCase()}` : "ADESIONE_MANCANTE";
+    console.warn(`[richieste] ${id} non inviata a devops: ${motivo}`);
+    await updateRichiesta(id, {
+      stato: adesione?.stato === "cessata" ? "annullata" : "errore",
+      errore: motivo,
+      invio_avviato_at: null,
+      prossimo_tentativo_at: null,
+    });
+    return undefined;
+  }
   const profilo = richiesta.user_id ? await getProfilo(richiesta.user_id) : null;
 
   let risposta;
@@ -301,6 +472,7 @@ async function inviaADevops(id) {
         id: richiesta.id,
         targa: richiesta.targa,
         accessoUrl: accessoUrl(),
+        servizioUrl: servizioUrl(),
         email: pagina?.email,
       }),
     },
@@ -367,12 +539,14 @@ function referenteEmail(referralId, pagina) {
  * Idempotente: se la richiesta ha già un risultato non invia una seconda email.
  * @param {object} body JSON ricevuto da devops (formato da confermare)
  * @param {object} [estimateOverride] stima già normalizzata (solo simulazione in sviluppo)
- * @returns {Promise<"salvato"|"gia_registrato"|"non_trovata">}
+ * @returns {Promise<"salvato"|"gia_registrato"|"annullata"|"non_trovata">}
  */
 export async function registraRisultato(body, estimateOverride) {
   const richiesta = await getRichiesta(String(body?.richiestaId ?? ""));
   if (!richiesta || !richiesta.user_id) return "non_trovata";
   if (["completata", "non_disponibile"].includes(richiesta.stato)) return "gia_registrato";
+  // Monitoraggio interrotto prima dell'invio: nessuna elaborazione successiva
+  if (richiesta.stato === "annullata") return "annullata";
 
   const estimate = estimateOverride ?? parseStima(body);
   if (estimate)
@@ -387,7 +561,8 @@ export async function registraRisultato(body, estimateOverride) {
   });
 
   const pagina = await configurazioneEmail(richiesta.id_configurazione);
-  await sendAndLog({
+  const documenti = await documentiPubblici();
+  const esito = await sendAndLog({
     tipo: "stima",
     userId: richiesta.user_id,
     richiestaId: richiesta.id,
@@ -400,10 +575,21 @@ export async function registraRisultato(body, estimateOverride) {
         referente: referenteEmail(richiesta.referral_id, pagina),
         callbackRequested: richiesta.consensi.callback.granted,
         areaUrl: accessoUrl(),
+        servizioUrl: servizioUrl(),
+        condizioniUrl: documenti.condizioni.url,
         email: pagina?.email,
       }),
     },
   });
+  if (esito === "inviata") {
+    const adesione = await getAdesioneByRichiesta(richiesta.id);
+    await registraEvento({
+      adesioneId: adesione?.id,
+      richiestaId: richiesta.id,
+      tipo: estimate ? "stima_inviata" : "stima_non_disponibile",
+      dettagli: estimate ? { min: estimate.min, max: estimate.max, demo: estimate.demo } : null,
+    });
+  }
   return "salvato";
 }
 

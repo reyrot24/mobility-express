@@ -1,6 +1,8 @@
+import { Link } from "react-router-dom";
 import TerminiDiServizio from "../../Legali/TerminiDiServizio";
 import CookiePolicy from "../../Legali/CookiePolicy";
 import { InfoDialog, NotaStimaDialog, PrivacyContent } from "./Dialogs";
+import { PG_BASE } from "../utils/model";
 
 const footerLinks = [
   { page: <PrivacyContent />, title: "Privacy Policy" },
@@ -41,6 +43,12 @@ export const PgFooter = () => (
         aria-label="Informazioni legali"
         className="flex flex-wrap gap-x-6 gap-y-3 text-xs"
       >
+        <Link to={`${PG_BASE}/condizioni`} className={linkClassName}>
+          Condizioni del servizio
+        </Link>
+        <Link to={`${PG_BASE}/privacy`} className={linkClassName}>
+          Informativa del servizio
+        </Link>
         {footerLinks.map((link) => (
           <InfoDialog
             key={link.title}

@@ -4,6 +4,12 @@ export const PG_BASE = "/prezzo-giusto";
 
 // Codice referente nel link di devops: /prezzo-giusto/<codice>. Stessa regola in server/lib/validation.js
 export const REFERRAL_CODE = /^[A-Za-z0-9_-]{1,64}$/;
+// Percorsi del sito sotto /prezzo-giusto/: non sono codici referente. Stessa lista in lib/validation.js
+export const PERCORSI_RISERVATI = [
+  "come-funziona", "inviata", "accesso", "reimposta-password", "area", "attiva", "condizioni", "privacy",
+];
+export const isReferralCode = (value: string) =>
+  REFERRAL_CODE.test(value) && !PERCORSI_RISERVATI.includes(value.toLowerCase());
 // Configurazione di devops nel link: /prezzo-giusto/<codice>/<id>. Stessa regola in server/lib/validation.js
 export const CONFIGURATION_ID = /^[A-Za-z0-9_-]{1,64}$/;
 
@@ -53,11 +59,12 @@ export type QuoteInput = {
   email: string;
 };
 
-// Scelte del modulo: privacy obbligatoria, ricontatto e marketing facoltativi e indipendenti
+// Scelte del modulo: informativa obbligatoria, ricontatto facoltativo. Le Condizioni si accettano nel
+// form solo dall'area personale (identità già verificata); il marketing non si sceglie qui.
 export type QuoteChoices = {
   privacy: true;
   callback: boolean;
-  marketing: boolean;
+  condizioni: boolean;
 };
 
 export type QuoteRequest = QuoteInput & QuoteChoices;
@@ -169,12 +176,12 @@ export function validateQuote(input: Record<string, unknown>): QuoteRequest {
     throw new Error("Controlla l’indirizzo email.");
   if (!flag(input.privacy))
     throw new Error(
-      "Conferma di aver letto l’informativa privacy. Ricontatto e marketing restano facoltativi.",
+      "Conferma di aver letto l’informativa privacy del servizio. Il ricontatto resta facoltativo.",
     );
   return {
     ...data,
     privacy: true,
     callback: flag(input.callback),
-    marketing: flag(input.marketing),
+    condizioni: flag(input.condizioni),
   };
 }

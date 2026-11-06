@@ -57,3 +57,20 @@ export const layout = (content, stile = STILE_STANDARD) => `<!doctype html>
     <p style="font-size:11px;color:${coloreNote(stile.sfondo)};text-align:center;margin-top:16px">Mobility Express è un marchio di Alca Broker srl · RUI B000514026 · P.IVA 07965051217</p>
   </div>
 </body></html>`;
+
+/**
+ * Link ai documenti del servizio "OK, il prezzo è giusto?" (versione inclusa).
+ * @param {{condizioni: {url: string, versione: string}, privacy: {url: string, versione: string}}} documenti
+ */
+export const linkDocumenti = (documenti, accento = STILE_STANDARD.accento) =>
+  `<ul style="font-size:14px;margin:8px 0 0;padding-left:18px">
+        <li><a href="${escapeHtml(documenti.condizioni.url)}" style="color:${accento}">Condizioni del servizio</a> (versione ${escapeHtml(documenti.condizioni.versione)})</li>
+        <li><a href="${escapeHtml(documenti.privacy.url)}" style="color:${accento}">Informativa privacy del servizio</a> (versione ${escapeHtml(documenti.privacy.versione)})</li>
+      </ul>`;
+
+/** Nota in fondo alle comunicazioni di servizio: come gestire o interrompere il monitoraggio. */
+export const notaServizio = (servizioUrl) =>
+  `<p style="font-size:12px;color:#5e637e;margin:8px 0 0">Comunicazione di servizio di “OK, il prezzo è giusto?”, non promozionale. Puoi <a href="${escapeHtml(servizioUrl)}" style="color:#5e637e">gestire il servizio o interrompere il monitoraggio</a> dalla tua area personale, oppure scrivendo a info@alcabroker.it.</p>`;
+
+export const notaServizioTesto = (servizioUrl) =>
+  `Comunicazione di servizio, non promozionale. Gestisci o interrompi il monitoraggio: ${servizioUrl} (oppure scrivi a info@alcabroker.it).`;

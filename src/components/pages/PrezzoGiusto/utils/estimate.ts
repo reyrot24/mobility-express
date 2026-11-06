@@ -1,19 +1,21 @@
 // Testi legali della stima orientativa e delle scelte di contatto.
-// Se cambiano, aggiornare CHOICE_VERSION (qui e in server/lib/consensi.js).
+// Stessi testi di supabase/functions/api/lib/consensi.js: se cambiano, aggiornare le versioni in entrambi.
 
+// Allineato alle Condizioni del Servizio v1.0, par. 5
 export const ESTIMATE_DISCLAIMER =
-  "Stima indicativa, non vincolante, non costituisce preventivo assicurativo né offerta contrattuale. Il prezzo definitivo dipende da verifiche, garanzie selezionate e condizioni della compagnia.";
+  "Stima indicativa, gratuita e non vincolante: non è un preventivo ufficiale né un’offerta e non garantisce il prezzo di una compagnia né l’assicurabilità del rischio. Il premio e le condizioni effettive dipendono dalla verifica dei dati e dall’eventuale preventivo rilasciato dalla compagnia.";
 
+// DA VALIDARE CON IL DPO (Informativa, par. 6): descrizione della logica effettiva della stima
 export const ESTIMATE_METHOD =
-  "Metodo previsto: parametri generali e tariffe di riferimento. Il range non è calcolato su una specifica offerta di una compagnia.";
+  "L’intervallo è elaborato in automatico dai dati della richiesta. Non è un confronto con tutte le compagnie e non garantisce il prezzo più basso.";
 
-export const CHOICE_VERSION = "soft-estimate-2026-10-06-v1";
+export const CHOICE_VERSION = "prezzo-giusto-2026-11-05-v2";
 
 export const CALLBACK_TEXT =
   "Chiedo di essere ricontattato via email dal referente associato alla mia richiesta per ottenere un preventivo assicurativo effettivo. Facoltativo.";
 
 export const MARKETING_TEXT =
-  "Acconsento a ricevere via email comunicazioni commerciali di Alca Broker srl. Consenso facoltativo e revocabile, non necessario per ricevere la stima o chiedere il ricontatto.";
+  "Acconsento a ricevere via email comunicazioni commerciali di Alca Broker S.r.l. su prodotti e servizi ulteriori rispetto al monitoraggio. Consenso facoltativo e revocabile, non necessario per attivare il servizio.";
 
 export const PRIVACY_EMAIL = "privacy@alcabroker.it";
 
@@ -31,7 +33,8 @@ export type RequestStatus =
   | "in_elaborazione"
   | "completata"
   | "non_disponibile"
-  | "errore";
+  | "errore"
+  | "annullata";
 
 export const STATUS_LABELS: Record<RequestStatus, string> = {
   in_attesa_attivazione: "In attesa di attivazione",
@@ -39,12 +42,15 @@ export const STATUS_LABELS: Record<RequestStatus, string> = {
   completata: "Stima pronta",
   non_disponibile: "Stima non disponibile",
   errore: "Problema tecnico",
+  annullata: "Monitoraggio interrotto",
 };
 
+// Scelte salvate con la richiesta. Condizioni accettate e marketing sono nel registro delle adesioni
+// (sezione "Il servizio" dell'area personale), non qui.
 export type Consents = {
   privacyAcknowledged: boolean;
+  privacyDocumento?: string;
   callback: { granted: boolean; requestedAt?: string };
-  marketing: { granted: boolean };
   version: string;
   recordedAt: string;
 };

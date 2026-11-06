@@ -1,6 +1,7 @@
 import type { QuoteRequest } from "./model";
 import type { Consents, RequestStatus } from "./estimate";
 import type { PaginaReferente } from "./pagina";
+import { DOCUMENTI_MOSTRATI } from "./documenti";
 
 // API: Edge Function "api" di Supabase (supabase/functions/api).
 // In produzione VITE_PG_API_URL = https://<progetto>.supabase.co/functions/v1/api.
@@ -68,7 +69,9 @@ export const richiediStima = (
       email: data.email,
       privacy: data.privacy,
       ricontatto: data.callback,
-      marketing: data.marketing,
+      // Solo dall'area personale: Condizioni accettate nel form, con la versione mostrata
+      condizioni: data.condizioni,
+      documenti: DOCUMENTI_MOSTRATI,
     },
     { "Idempotency-Key": idempotencyKey, ...bearer(token) }
   );
@@ -81,12 +84,18 @@ export const richiediRicontatto = (id: string, token: string) =>
     bearer(token)
   );
 
+export type DocumentoPubblico = { id: string; versione: string; data: string; url: string; pdf: string };
+
 export type DatiAttivazione = {
   email: string;
   temporaryPasswordRequired: boolean;
+  /** L'email ha già un account: niente nuova password, il marketing si gestisce dall'area */
+  accountEsistente: boolean;
+  richiesta: { id: string; targa: string };
+  documenti: { condizioni: DocumentoPubblico; privacy: DocumentoPubblico };
 };
 
-/** Dati per precompilare il form di attivazione dell'area personale. */
+/** Dati per la pagina di conferma dell'adesione. Aprirla non accetta nulla. */
 export async function datiAttivazione(token: string): Promise<DatiAttivazione> {
   let response: Response;
   try {
@@ -104,12 +113,60 @@ export async function datiAttivazione(token: string): Promise<DatiAttivazione> {
   return data as DatiAttivazione;
 }
 
-/** Attiva l'area personale: crea l'account con i dati della richiesta e la password scelta. */
+/** Conferma esplicita dell'adesione: Condizioni accettate, marketing separato, versione dei documenti. */
 export const attivaArea = (payload: {
   token: string;
   temporaryPassword: string;
-  password: string;
-}) => post<{ email: string; alreadyRegistered: boolean }>("/account/attivazione", payload);
+  password?: string;
+  condizioniAccettate: true;
+  marketing: boolean | null;
+}) =>
+  post<{ email: string; alreadyRegistered: boolean }>("/account/attivazione", {
+    ...payload,
+    documenti: DOCUMENTI_MOSTRATI,
+  });
+
+export type Adesione = {
+  id: string;
+  richiestaId: string | null;
+  targa: string;
+  stato: "in_attesa" | "attiva" | "cessata";
+  attivataIl: string | null;
+  condizioni: string | null;
+  privacy: string;
+  cessataIl: string | null;
+};
+
+export type StatoServizio = {
+  adesioni: Adesione[];
+  marketing: { granted: boolean; aggiornatoIl: string | null; testo: string };
+  documenti: { condizioni: DocumentoPubblico; privacy: DocumentoPubblico };
+};
+
+/** "Gestisci servizio": adesioni, consenso marketing e documenti in vigore. */
+export async function leggiServizio(token: string): Promise<StatoServizio> {
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}/account/servizio`, { headers: bearer(token) });
+  } catch {
+    throw new Error("Non riusciamo a raggiungere il servizio. Controlla la connessione e riprova.");
+  }
+  const data = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(data?.message ?? "Non riusciamo a caricare il servizio.");
+  return data as StatoServizio;
+}
+
+/** "Interrompi monitoraggio" per un veicolo: blocca subito le comunicazioni di servizio. */
+export const interrompiMonitoraggio = (id: string, token: string, motivo = "") =>
+  post<{ id: string; stato: "cessata"; cessataIl: string }>(
+    `/account/adesioni/${encodeURIComponent(id)}/cessa`,
+    { motivo },
+    bearer(token)
+  );
+
+/** Concede o revoca il consenso alle comunicazioni commerciali. Indipendente dal servizio. */
+export const impostaMarketing = (granted: boolean, token: string) =>
+  post<{ granted: boolean; aggiornatoIl: string }>("/account/marketing", { granted }, bearer(token));
 
 /** Nuova password: passa dal server, che toglie anche l'obbligo di cambio al primo accesso. */
 export const cambiaPassword = (password: string, token: string) =>

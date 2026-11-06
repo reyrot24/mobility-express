@@ -2,7 +2,7 @@ import { getRequestUser, InvalidSessionError, isDebug, requireUser } from "../li
 import { json, readJson } from "../lib/http.js";
 import { rateLimit } from "../lib/rateLimit.js";
 import { validateRichiesta } from "../lib/validation.js";
-import { creaRichiesta, richiediRicontatto } from "../services/richieste.js";
+import { creaRichiesta, ErroreAdesione, richiediRicontatto } from "../services/richieste.js";
 
 const QUINDICI_MINUTI = 15 * 60 * 1000;
 
@@ -21,9 +21,16 @@ export async function nuovaRichiesta(req) {
     if (error) return json(400, { message: error });
 
     const key = req.headers.get("Idempotency-Key")?.slice(0, 100) || undefined;
-    return json(202, await creaRichiesta(data, key, user, { debug: isDebug(req) }));
+    return json(
+      202,
+      await creaRichiesta(data, key, user, {
+        debug: isDebug(req),
+        userAgent: req.headers.get("User-Agent") ?? undefined,
+      })
+    );
   } catch (err) {
     if (err instanceof InvalidSessionError) throw err;
+    if (err instanceof ErroreAdesione) return json(err.status, { message: err.message });
     console.error("[prezzo-giusto] richiesta non salvata:", err.message);
     return json(503, {
       message: "Al momento non riusciamo a registrare la richiesta. Riprova tra qualche minuto.",

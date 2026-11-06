@@ -216,7 +216,7 @@ export const QuoteForm = ({ onSubmit, referentName, customer, style }: Props) =>
           />
         )}
 
-        <Choices referentName={referentName} />
+        <Choices referentName={referentName} conCondizioni={Boolean(customer)} />
 
         <FormError message={error} />
         {busy && (

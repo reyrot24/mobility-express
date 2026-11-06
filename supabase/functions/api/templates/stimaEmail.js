@@ -1,5 +1,7 @@
 import { ESTIMATE_DISCLAIMER, ESTIMATE_METHOD } from "../lib/consensi.js";
-import { button, escapeHtml, firma, hr, layout, multiline, stileEmail } from "./layout.js";
+import {
+  button, escapeHtml, firma, hr, layout, multiline, notaServizio, notaServizioTesto, stileEmail,
+} from "./layout.js";
 
 const range = (estimate) =>
   estimate.min === estimate.max ? `${estimate.min} €` : `${estimate.min}–${estimate.max} €`;
@@ -7,7 +9,8 @@ const range = (estimate) =>
 /**
  * Email al cliente con la stima orientativa.
  * @param {{id: string, targa: string, estimate: object|null, referente: {name, phone, email}|null,
- *          callbackRequested: boolean, areaUrl: string, email?: object|null}} params
+ *          callbackRequested: boolean, areaUrl: string, servizioUrl: string, condizioniUrl: string,
+ *          email?: object|null}} params
  *        email: personalizzazione del referente (configurazione.email)
  */
 export function stimaEmail({
@@ -17,6 +20,8 @@ export function stimaEmail({
   referente,
   callbackRequested,
   areaUrl,
+  servizioUrl,
+  condizioniUrl,
   email,
 }) {
   const stile = stileEmail(email);
@@ -30,11 +35,12 @@ export function stimaEmail({
         <div style="font-size:40px;font-weight:600;letter-spacing:-1.5px;margin-top:8px">${range(estimate)}<small style="font-size:15px;font-weight:400;color:#5e637e;letter-spacing:0"> / anno · indicativo</small></div>
         <p style="font-size:12px;color:#5e637e;margin:4px 0 0">Richiesta ${escapeHtml(id)} · veicolo ${escapeHtml(targa)}</p>
       </div>`
-    : `<p style="margin:24px 0">Al momento non è disponibile una stima per il veicolo <strong>${escapeHtml(targa)}</strong>. Puoi chiedere al tuo referente un preventivo effettivo.</p>`;
+    : `<p style="margin:24px 0">Al momento non è disponibile una stima attendibile per il veicolo <strong>${escapeHtml(targa)}</strong>: con i dati disponibili non possiamo indicarti un importo. Puoi chiedere al tuo referente un preventivo effettivo.</p>`;
 
   const notice = `<div style="border-left:4px solid ${stile.accento};background:#fff5eb;border-radius:6px;padding:12px 16px;font-size:12px;line-height:1.6">
       <p style="margin:0">${ESTIMATE_DISCLAIMER}</p>
       <p style="margin:6px 0 0;color:#5e637e">${ESTIMATE_METHOD}</p>
+      <p style="margin:6px 0 0;color:#5e637e">Dettagli nelle <a href="${escapeHtml(condizioniUrl)}" style="color:#5e637e">Condizioni del servizio</a>.</p>
     </div>`;
 
   const referenteBlock = referente
@@ -64,18 +70,17 @@ export function stimaEmail({
       ${button(areaUrl, "Entra nella tua area personale", true)}
       ${firma(stile)}
       ${hr}
-      <p style="font-size:12px;color:#5e637e;margin:0">Ricevi questa email per la richiesta di stima ${escapeHtml(id)}. Il consenso commerciale resta distinto dal ricontatto. Per revocarlo: privacy@alcabroker.it.</p>`, stile);
+      <p style="font-size:12px;color:#5e637e;margin:0">Ricevi questa email per la richiesta di stima ${escapeHtml(id)}. Per un preventivo ufficiale serve una richiesta separata e la verifica della compagnia.</p>
+      ${notaServizio(servizioUrl)}`, stile);
 
   const text = [
     subject,
     "",
     estimate
       ? `${estimate.min === estimate.max ? "Prezzo" : "Range"} indicativo per il veicolo ${targa}: ${range(estimate)} / anno.`
-      : `Al momento non è disponibile una stima per il veicolo ${targa}.`,
+      : `Al momento non è disponibile una stima attendibile per il veicolo ${targa}.`,
     "",
-    ESTIMATE_DISCLAIMER,
-    ESTIMATE_METHOD,
-    "",
+    ...(estimate ? [ESTIMATE_DISCLAIMER, ESTIMATE_METHOD, `Condizioni del servizio: ${condizioniUrl}`, ""] : []),
     ...[messaggio, stile.firma].filter(Boolean).flatMap((t) => [t, ""]),
     referente
       ? `Il tuo referente: ${[referente.name, referente.phone, referente.email].filter(Boolean).join(" · ")}`
@@ -86,7 +91,8 @@ export function stimaEmail({
     "",
     `Area personale: ${areaUrl}`,
     "",
-    `Richiesta ${id}. Per revocare il consenso commerciale: privacy@alcabroker.it.`,
+    `Richiesta ${id}.`,
+    notaServizioTesto(servizioUrl),
   ].join("\n");
 
   return { subject, html, text };

@@ -4,11 +4,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import Privacy from "../../Legali/Privacy";
 import { Contact } from "./Referente";
 import { EstimateNotice } from "./Estimate";
 import { PRIVACY_EMAIL } from "../utils/estimate";
+import { PG_BASE } from "../utils/model";
 import type { Referente } from "../utils/model";
 
 type InfoDialogProps = {
@@ -44,23 +46,25 @@ export const InfoDialog = ({
   </Dialog>
 );
 
-// Sezione specifica del servizio, mostrata prima della Privacy Policy generale
+// Sezione specifica del servizio, mostrata prima della Privacy Policy generale del sito
 export const ServicePrivacy = () => (
   <section className="mb-6 rounded-lg bg-background2 p-5 text-xs [&_p]:mb-2">
-    <h2 className="mb-3 text-base font-bold">La richiesta di stima e le tue scelte</h2>
+    <h2 className="mb-3 text-base font-bold">Il servizio “OK, il prezzo è giusto?”</h2>
     <p>
-      La richiesta serve a ricevere via email una stima indicativa e a
-      ritrovarla nell’area personale. Targa, residenza ed email sono dati
-      personali.
+      Il servizio ha un’informativa dedicata di Alca Broker S.r.l.:{" "}
+      <Link className="underline" to={`${PG_BASE}/privacy`}>
+        Informativa privacy del servizio
+      </Link>{" "}
+      e{" "}
+      <Link className="underline" to={`${PG_BASE}/condizioni`}>
+        Condizioni del servizio
+      </Link>
+      .
     </p>
     <p>
-      Il ricontatto via email per un preventivo effettivo è facoltativo e
-      riguarda il referente associato al link. È distinto dal consenso
-      facoltativo per le comunicazioni commerciali via email di Alca Broker srl.
-    </p>
-    <p>
-      Puoi ricevere la stima senza richiedere il ricontatto e senza acconsentire
-      al marketing. Il consenso commerciale può essere revocato scrivendo a{" "}
+      Il ricontatto per un preventivo effettivo e le comunicazioni commerciali sono scelte
+      facoltative e distinte: puoi ricevere la stima senza nessuna delle due. Il consenso
+      commerciale si gestisce dall’area personale o scrivendo a{" "}
       <a className="underline" href={`mailto:${PRIVACY_EMAIL}`}>
         {PRIVACY_EMAIL}
       </a>

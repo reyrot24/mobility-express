@@ -14,14 +14,20 @@ import DettaglioStima from "./pages/DettaglioStima";
 import ComeFunziona from "./pages/ComeFunziona";
 import ReimpostaPassword from "./pages/ReimpostaPassword";
 import Attivazione from "./pages/Attivazione";
+import { Condizioni, InformativaPrivacy } from "./pages/DocumentoLegale";
 import { PaginaNonTrovata } from "./pages/Messaggi";
 
 const titles: Record<string, string> = {
   area: "La tua area",
   accesso: "La tua area",
   "reimposta-password": "Reimposta la password",
-  attiva: "Attiva la tua area",
+  attiva: "Conferma l’adesione",
+  condizioni: "Condizioni del servizio",
+  privacy: "Informativa privacy del servizio",
 };
+
+// VITE_PG_AMBIENTE=test: nastro visibile su tutte le pagine finché il DPO non valida il servizio
+const AMBIENTE_TEST = import.meta.env.VITE_PG_AMBIENTE === "test";
 
 // Le pagine "a tutta larghezza" gestiscono da sole i propri margini
 const Contained = ({ children }: { children: React.ReactNode }) => (
@@ -41,6 +47,11 @@ const PrezzoGiusto = () => {
     <AuthProvider>
       <PrezzoGiustoProvider>
         <div className="bg-background1 text-sm text-text">
+          {AMBIENTE_TEST && (
+            <div className="bg-[#6b4a00] px-[5%] py-1.5 text-center text-[11px] font-semibold text-white" role="note">
+              Ambiente di test · dati sintetici · nessuna adesione reale
+            </div>
+          )}
           <PgHeader />
           <main>
             <Routes>
@@ -94,6 +105,9 @@ const PrezzoGiusto = () => {
                   </Contained>
                 }
               />
+              {/* Documenti del servizio: pubblici, senza login */}
+              <Route path="condizioni" element={<Condizioni />} />
+              <Route path="privacy" element={<InformativaPrivacy />} />
               {/* Link di devops: codice del referente e, se ha una pagina personalizzata, id della configurazione */}
               <Route path=":codice" element={<Landing />} />
               <Route path=":codice/:idConfigurazione" element={<Landing />} />
