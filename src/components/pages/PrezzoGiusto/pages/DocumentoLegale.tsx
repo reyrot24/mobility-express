@@ -38,7 +38,7 @@ const Documento = ({
     <h1 className="mb-3 text-3xl font-bold tracking-tight">{doc.titolo}</h1>
     <p className="mb-5 opacity-80">{doc.sottotitolo}</p>
 
-    <div className="mb-6 flex flex-wrap items-center gap-3">
+    <div className="mb-8 flex flex-wrap items-center gap-3">
       <Button asChild>
         <a href={doc.pdf} target="_blank" rel="noopener">
           <Download className="mr-2 size-4" aria-hidden="true" />
@@ -49,10 +49,6 @@ const Documento = ({
         Versione {doc.versione} · {dataItaliana(doc.data)}
       </span>
     </div>
-
-    <p className="mb-8 rounded-md border border-[#f1d38c] bg-[#fff7df] p-4 text-xs font-semibold text-[#6b4a00]">
-      {doc.avviso}
-    </p>
 
     {doc.sezioni.map((sezione) => (
       <section key={sezione.titolo} className="mb-6">

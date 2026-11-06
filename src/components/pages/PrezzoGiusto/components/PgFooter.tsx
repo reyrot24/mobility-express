@@ -31,10 +31,6 @@ export const PgFooter = () => (
       Indirizzo: VIA VITTORIA COLONNA 14 - 80121 NAPOLI (NA) - PEC:{" "}
       <a className={linkClassName} href="mailto:alcabrokersrl@legalmail.it">
         alcabrokersrl@legalmail.it
-      </a>{" "}
-      - Telefono:{" "}
-      <a className={linkClassName} href="tel:+390815297045">
-        +39 081 529 70 45
       </a>
       .
     </p>

@@ -13,13 +13,9 @@ export type DocumentoLegale = {
   versione: string;
   data: string;
   pdf: string;
-  avviso: string;
   sezioni: { titolo: string; paragrafi: string[] }[];
   nota: string;
 };
-
-const AVVISO =
-  "VERSIONE 1.0 PER INTEGRAZIONE TECNICA - Pubblicazione e invio ai clienti subordinati alla validazione di Alca Broker e del DPO sull'operatività effettiva.";
 
 export const CONDIZIONI: DocumentoLegale = {
   id: "condizioni-1.0",
@@ -31,7 +27,6 @@ export const CONDIZIONI: DocumentoLegale = {
   versione: "1.0",
   data: "2026-11-04",
   pdf: "/legal/il-prezzo-giusto/condizioni-v1.0.pdf",
-  avviso: AVVISO,
   sezioni: [
     {
       titolo: "1. Soggetto che offre il servizio",
@@ -119,7 +114,6 @@ export const PRIVACY: DocumentoLegale = {
   versione: "1.0",
   data: "2026-11-04",
   pdf: "/legal/il-prezzo-giusto/privacy-v1.0.pdf",
-  avviso: AVVISO,
   sezioni: [
     {
       titolo: "1. Titolare e contatti",
