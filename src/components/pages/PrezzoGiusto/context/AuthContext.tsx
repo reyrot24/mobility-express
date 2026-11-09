@@ -3,6 +3,22 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { cambiaPassword } from "../utils/api";
 import { PG_BASE } from "../utils/model";
+import {
+  EMAIL_ANTEPRIMA,
+  USER_ID_ANTEPRIMA,
+  anteprimaAttiva,
+  impostaSessioneAnteprima,
+  sessioneAnteprima,
+} from "../utils/anteprima";
+
+// Anteprima locale (solo `npm run dev`): sessione finta per l'area personale, senza Supabase
+const SESSIONE_ANTEPRIMA = {
+  access_token: "anteprima",
+  refresh_token: "anteprima",
+  expires_in: 3600,
+  token_type: "bearer",
+  user: { id: USER_ID_ANTEPRIMA, email: EMAIL_ANTEPRIMA, app_metadata: {}, user_metadata: {}, aud: "authenticated", created_at: "" },
+} as Session;
 
 type AuthState = {
   session: Session | null;
@@ -28,6 +44,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (import.meta.env.DEV && anteprimaAttiva()) {
+      setSession(sessioneAnteprima() ? SESSIONE_ANTEPRIMA : null);
+      setLoading(false);
+      return;
+    }
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setLoading(false);
@@ -44,6 +65,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     loading,
 
     async signIn(email, password) {
+      if (import.meta.env.DEV && anteprimaAttiva()) {
+        if (email.trim().toLowerCase() !== EMAIL_ANTEPRIMA)
+          throw new Error(`In anteprima si entra solo con ${EMAIL_ANTEPRIMA} (password qualsiasi).`);
+        impostaSessioneAnteprima(true);
+        setSession(SESSIONE_ANTEPRIMA);
+        return;
+      }
       const { error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password,
@@ -52,12 +80,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     },
 
     async signOut() {
+      if (import.meta.env.DEV && anteprimaAttiva()) {
+        impostaSessioneAnteprima(false);
+        setSession(null);
+        return;
+      }
       await supabase.auth.signOut();
     },
 
     async changePassword(password) {
       if (!session) throw new Error("Accedi di nuovo alla tua area personale.");
       await cambiaPassword(password, session.access_token);
+      if (import.meta.env.DEV && anteprimaAttiva()) return;
       // Il cambio password chiude tutte le sessioni: rientriamo con la nuova
       const { error } = await supabase.auth.signInWithPassword({
         email: session.user.email ?? "",
@@ -67,6 +101,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     },
 
     async sendResetLink(email) {
+      if (import.meta.env.DEV && anteprimaAttiva()) return;
       const { error } = await supabase.auth.resetPasswordForEmail(
         email.trim().toLowerCase(),
         { redirectTo: `${window.location.origin}${PG_BASE}/reimposta-password` }

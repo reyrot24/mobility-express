@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { PrezzoGiustoProvider } from "./context/PrezzoGiustoContext";
@@ -16,6 +16,13 @@ import ReimpostaPassword from "./pages/ReimpostaPassword";
 import Attivazione from "./pages/Attivazione";
 import { Condizioni, InformativaPrivacy } from "./pages/DocumentoLegale";
 import { PaginaNonTrovata } from "./pages/Messaggi";
+
+// Anteprima locale: solo con `npm run dev`. In produzione import.meta.env.DEV è false e le rotte
+// (con i loro file) non entrano nella build.
+const Anteprima = import.meta.env.DEV ? lazy(() => import("./anteprima/Anteprima")) : null;
+const InviataAnteprima = import.meta.env.DEV
+  ? lazy(() => import("./anteprima/Anteprima").then((m) => ({ default: m.InviataAnteprima })))
+  : null;
 
 const titles: Record<string, string> = {
   area: "La tua area",
@@ -105,6 +112,26 @@ const PrezzoGiusto = () => {
                   </Contained>
                 }
               />
+              {Anteprima && InviataAnteprima && (
+                <>
+                  <Route
+                    path="anteprima"
+                    element={
+                      <Suspense fallback={null}>
+                        <Anteprima />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="anteprima/inviata/:tipo"
+                    element={
+                      <Suspense fallback={null}>
+                        <InviataAnteprima />
+                      </Suspense>
+                    }
+                  />
+                </>
+              )}
               {/* Documenti del servizio: pubblici, senza login */}
               <Route path="condizioni" element={<Condizioni />} />
               <Route path="privacy" element={<InformativaPrivacy />} />

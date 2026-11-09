@@ -3,12 +3,13 @@ import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FormError, PhoneField } from "./Field";
-import { Choices } from "./Choices";
+import { DocumentiObbligatori, ScelteFacoltative } from "./Choices";
 import {
   ROAD_TYPES,
   formDataToObject,
   normalizeQuoteInput,
   splitStreet,
+  validateDocumenti,
   validateQuote,
   validateVehicle,
   type QuoteRequest,
@@ -44,8 +45,9 @@ const sharedFieldsClassName =
 
 /**
  * Richiesta di stima in due passaggi, pensata per lo smartphone:
- * 1. La tua auto: targa, via e civico (o SNC). Comune e CAP arrivano da devops con il risultato.
- * 2. Ricevi la stima: email, cellulare facoltativo, informativa e ricontatto facoltativo.
+ * 1. La tua auto: targa, via e civico (o SNC), informativa e Condizioni. Comune e CAP arrivano
+ *    da devops con il risultato.
+ * 2. Ricevi la stima: email, cellulare facoltativo, ricontatto e comunicazioni commerciali facoltativi.
  * I campi del passaggio 1 restano nel form (nascosti) e arrivano al server come prima.
  */
 export const QuoteForm = (props: Props) => {
@@ -124,6 +126,7 @@ const ModuloStima = ({
     try {
       const data = normalizeQuoteInput(formDataToObject(form));
       validateVehicle(data);
+      validateDocumenti(formDataToObject(form));
       setRiepilogo(
         `${data.plate} · ${data.streetType} ${data.street} ${data.houseNumber}`
       );
@@ -292,8 +295,9 @@ const ModuloStima = ({
               />
               Senza numero civico (SNC)
             </label>
-
           </fieldset>
+
+          <DocumentiObbligatori />
 
           <FormError message={step === 1 ? error : ""} />
           <Button className="mt-5 h-11 w-full rounded-lg text-[15px] font-semibold" type="submit">
@@ -383,7 +387,7 @@ const ModuloStima = ({
           )}
 
           <div>
-            <Choices referentName={referentName} inArea={Boolean(customer)} />
+            <ScelteFacoltative referentName={referentName} inArea={Boolean(customer)} />
           </div>
 
           <FormError message={step === 2 ? error : ""} />

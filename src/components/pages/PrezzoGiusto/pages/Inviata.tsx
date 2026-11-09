@@ -6,7 +6,7 @@ import { usePrezzoGiusto } from "../context/PrezzoGiustoContext";
 import { PG_BASE } from "../utils/model";
 
 const Inviata = () => {
-  const { current: q } = usePrezzoGiusto();
+  const { current: q, linkPath } = usePrezzoGiusto();
   if (!q) return <NessunaRichiesta />;
   const daAttivare = q.status === "in_attesa_attivazione";
 
@@ -63,8 +63,8 @@ const Inviata = () => {
           </Button>
         )}
         <Button asChild size="lg" variant="outline">
-          {/* Stesso link del referente, così il codice resta associato */}
-          <Link to={q.ref.id ? `${PG_BASE}/${encodeURIComponent(q.ref.id)}` : PG_BASE}>
+          {/* Stesso link del referente (codice e pagina personalizzata), così resta associato */}
+          <Link to={linkPath}>
             Fai un’altra richiesta
           </Link>
         </Button>

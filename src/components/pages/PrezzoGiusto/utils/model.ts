@@ -195,6 +195,16 @@ export function normalizeQuoteInput(input: Record<string, unknown>): QuoteInput 
   return data;
 }
 
+/** Informativa e Condizioni: obbligatorie, nel passaggio 1 del modulo. */
+export function validateDocumenti(input: Record<string, unknown>) {
+  if (!flag(input.privacy))
+    throw new Error("Conferma di aver letto l’informativa privacy del servizio.");
+  if (!flag(input.condizioni))
+    throw new Error(
+      "Per continuare accetta le Condizioni del servizio. Ricontatto e comunicazioni commerciali sono facoltativi.",
+    );
+}
+
 /** Normalizza e valida i dati del modulo. Lancia un Error con il messaggio da mostrare. */
 export function validateQuote(input: Record<string, unknown>): QuoteRequest {
   const data = normalizeQuoteInput(input);
@@ -209,12 +219,7 @@ export function validateQuote(input: Record<string, unknown>): QuoteRequest {
   // Cellulare facoltativo: se c'è dev'essere valido
   if (data.phone && !isPhone(data.phone))
     throw new Error("Controlla il numero di cellulare: 9 o 10 cifre, per esempio 3331234567. Oppure lascialo vuoto.");
-  if (!flag(input.privacy))
-    throw new Error("Conferma di aver letto l’informativa privacy del servizio.");
-  if (!flag(input.condizioni))
-    throw new Error(
-      "Per inviare la richiesta accetta le Condizioni del servizio. Ricontatto e comunicazioni commerciali restano facoltativi.",
-    );
+  validateDocumenti(input);
   return {
     ...data,
     privacy: true,

@@ -1,6 +1,11 @@
 import { supabase } from "@/lib/supabase";
 import { intervalloStima, type Consents, type Estimate, type RequestStatus } from "./estimate";
 import { DEFAULT_REF, type Referente } from "./model";
+import { anteprimaAttiva } from "./anteprima";
+import * as finti from "../anteprima/dati";
+
+// Anteprima locale (solo `npm run dev`): dati finti al posto del database. Sempre false in produzione.
+const inAnteprima = () => import.meta.env.DEV && anteprimaAttiva();
 
 // Letture dirette dal database: le RLS restituiscono solo i dati del cliente in sessione.
 
@@ -48,6 +53,7 @@ const normalize = (row: Record<string, unknown>): Richiesta => {
 };
 
 export async function fetchRichieste(): Promise<Richiesta[]> {
+  if (inAnteprima()) return finti.fetchRichieste();
   const { data, error } = await supabase
     .from("richieste")
     .select(COLONNE)
@@ -57,6 +63,7 @@ export async function fetchRichieste(): Promise<Richiesta[]> {
 }
 
 export async function fetchRichiesta(id: string): Promise<Richiesta | null> {
+  if (inAnteprima()) return finti.fetchRichiesta(id);
   const { data, error } = await supabase
     .from("richieste")
     .select(COLONNE)
@@ -67,6 +74,7 @@ export async function fetchRichiesta(id: string): Promise<Richiesta | null> {
 }
 
 export async function fetchProfilo(userId: string): Promise<Profilo> {
+  if (inAnteprima()) return finti.fetchProfilo();
   const { data, error } = await supabase
     .from("profili")
     .select("nome, cognome, cellulare, referral_id, comune, cap")
@@ -76,7 +84,23 @@ export async function fetchProfilo(userId: string): Promise<Profilo> {
   return data ?? { nome: "", cognome: "", cellulare: "", referral_id: null, comune: null, cap: null };
 }
 
+/**
+ * Codice referente e pagina personalizzata salvati sul profilo alla conferma: l'area personale
+ * usa logo e colori del link da cui è arrivato il cliente. null se non disponibili.
+ */
+export async function fetchConfigurazioneProfilo(userId: string) {
+  if (inAnteprima()) return finti.fetchConfigurazioneProfilo();
+  const { data, error } = await supabase
+    .from("profili")
+    .select("referral_id, id_configurazione")
+    .eq("id", userId)
+    .maybeSingle();
+  if (error || !data) return null;
+  return data as { referral_id: string | null; id_configurazione: string | null };
+}
+
 export async function updateProfilo(userId: string, profilo: ProfiloModificabile) {
+  if (inAnteprima()) return finti.updateProfilo(profilo);
   const { error } = await supabase.from("profili").update(profilo).eq("id", userId);
   if (error) throw new Error("Non è stato possibile salvare i dati. Riprova.");
 }

@@ -2,12 +2,15 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { leggiPagina, richiediStima } from "../utils/api";
 import { withReferente, type PaginaReferente } from "../utils/pagina";
 import {
+  CONFIGURATION_ID,
   DEFAULT_REF,
+  PG_BASE,
   isReferralCode,
   type Quote,
   type QuoteRequest,
   type Referente,
 } from "../utils/model";
+import { fetchConfigurazioneProfilo } from "../utils/account";
 import { useAuth } from "./AuthContext";
 import { useTheme } from "@/components/dark-mode/theme-provider";
 
@@ -22,7 +25,11 @@ type PrezzoGiustoState = {
   pages: Map<string, PaginaReferente | null>;
   /** Link di devops aperto: referente per le richieste e, se c'è, configurazione da caricare */
   openLink: (ref: Referente, configurationId: string | null) => void;
+  /** Percorso del link attivo (/prezzo-giusto/<codice>/<id configurazione>), per rifare una richiesta */
+  linkPath: string;
   current: Quote | null;
+  /** Ultima richiesta inviata (usato anche dall'anteprima locale per mostrare /inviata) */
+  setCurrent: (quote: Quote | null) => void;
   /** Targa scritta nel form (senza spazi, maiuscola), per il messaggio di WhatsApp. "" se vuota */
   targaForm: string;
   setTargaForm: (targa: string) => void;
@@ -46,6 +53,10 @@ export const PrezzoGiustoProvider = ({ children }: { children: React.ReactNode }
   const [current, setCurrent] = useState<Quote | null>(null);
   const [targaForm, setTargaForm] = useState("");
 
+  const linkPath =
+    linkRef.id && linkRef.id !== DEFAULT_REF.id
+      ? `${PG_BASE}/${encodeURIComponent(linkRef.id)}${configurationId ? `/${configurationId}` : ""}`
+      : PG_BASE;
   const activePage = (configurationId && pages.get(configurationId)) || null;
   const activeRef = useMemo(() => withReferente(linkRef, activePage), [linkRef, activePage]);
 
@@ -92,6 +103,25 @@ export const PrezzoGiustoProvider = ({ children }: { children: React.ReactNode }
     []
   );
 
+  // Area personale senza un link aperto in questa visita: logo, colori e referente della pagina
+  // da cui il cliente ha confermato la prima richiesta (salvata sul profilo)
+  const userId = session?.user.id;
+  const linkAperto = configurationId !== null || linkRef.id !== DEFAULT_REF.id;
+  useEffect(() => {
+    if (!userId || linkAperto) return;
+    let attivo = true;
+    fetchConfigurazioneProfilo(userId).then((conf) => {
+      if (!attivo || !conf?.referral_id) return;
+      const ref = findRef(conf.referral_id);
+      if (!ref) return;
+      const id = conf.id_configurazione;
+      openLink(ref, id && CONFIGURATION_ID.test(id) ? id : null);
+    });
+    return () => {
+      attivo = false;
+    };
+  }, [userId, linkAperto, findRef, openLink]);
+
   async function submitQuote(
     data: QuoteRequest,
     idempotencyKey: string,
@@ -127,7 +157,9 @@ export const PrezzoGiustoProvider = ({ children }: { children: React.ReactNode }
         activePage,
         pages,
         openLink,
+        linkPath,
         current,
+        setCurrent,
         targaForm,
         setTargaForm,
         findRef,

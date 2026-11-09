@@ -13,23 +13,13 @@ const DocLink = ({ to, children }: { to: string; children: React.ReactNode }) =>
 );
 
 /**
- * Scelte del modulo, ognuna con la sua casella e mai preselezionate:
- * - Informativa privacy del servizio: obbligatoria (presa visione, con la versione).
- * - Condizioni del servizio: obbligatorie (accettazione, con la versione).
- * - Ricontatto: facoltativo.
- * - Comunicazioni commerciali: facoltative, separate dal servizio.
- * Il server registra le scelte con data/ora e versioni; la richiesta parte solo dopo la conferma
- * dal link ricevuto via email (o subito, dall'area personale).
+ * Documenti obbligatori, nel passaggio 1 del modulo. Caselle mai preselezionate:
+ * - Informativa privacy del servizio: presa visione, con la versione.
+ * - Condizioni del servizio: accettazione, con la versione.
+ * Il server registra le scelte con data/ora e versioni.
  */
-export const Choices = ({
-  referentName,
-  inArea = false,
-}: {
-  referentName?: string;
-  /** Richiesta dall'area personale: niente email di conferma */
-  inArea?: boolean;
-}) => (
-  <div className="mb-4">
+export const DocumentiObbligatori = () => (
+  <div className="mt-4">
     <label className={checkClassName}>
       <input name="privacy" type="checkbox" required className={boxClassName} />
       <span className="opacity-90">
@@ -46,8 +36,23 @@ export const Choices = ({
         {CONDIZIONI.versione}).
       </span>
     </label>
+  </div>
+);
 
-    <p className="mb-2 mt-4 text-[11px] font-semibold uppercase tracking-wide opacity-60">
+/**
+ * Scelte facoltative, nel passaggio 2: ricontatto e comunicazioni commerciali (separate dal servizio).
+ * La richiesta parte solo dopo la conferma dal link ricevuto via email (o subito, dall'area personale).
+ */
+export const ScelteFacoltative = ({
+  referentName,
+  inArea = false,
+}: {
+  referentName?: string;
+  /** Richiesta dall'area personale: niente email di conferma */
+  inArea?: boolean;
+}) => (
+  <div className="mb-4">
+    <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide opacity-60">
       Facoltativo
     </p>
     <label className={checkClassName}>
