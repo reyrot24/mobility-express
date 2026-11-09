@@ -9,6 +9,9 @@ export type Profilo = {
   cognome: string;
   cellulare: string;
   referral_id: string | null;
+  // Arrivano da devops con il risultato: il cliente li legge ma non li modifica
+  comune: string | null;
+  cap: string | null;
 };
 
 export type ProfiloModificabile = Pick<Profilo, "nome" | "cognome" | "cellulare">;
@@ -23,8 +26,9 @@ export type Richiesta = {
   tipo_strada: string;
   strada: string;
   civico: string;
-  comune: string;
-  cap: string;
+  // Vuoti (o null) finché devops non li restituisce con il risultato
+  comune: string | null;
+  cap: string | null;
   referral_id: string | null;
   stato: RequestStatus;
   consensi: Consents;
@@ -65,11 +69,11 @@ export async function fetchRichiesta(id: string): Promise<Richiesta | null> {
 export async function fetchProfilo(userId: string): Promise<Profilo> {
   const { data, error } = await supabase
     .from("profili")
-    .select("nome, cognome, cellulare, referral_id")
+    .select("nome, cognome, cellulare, referral_id, comune, cap")
     .eq("id", userId)
     .maybeSingle();
   if (error) throw new Error(LOAD_ERROR);
-  return data ?? { nome: "", cognome: "", cellulare: "", referral_id: null };
+  return data ?? { nome: "", cognome: "", cellulare: "", referral_id: null, comune: null, cap: null };
 }
 
 export async function updateProfilo(userId: string, profilo: ProfiloModificabile) {
@@ -90,8 +94,12 @@ export function estimateOf(r: Richiesta): Estimate | null {
   };
 }
 
-export const indirizzoOf = (r: Richiesta) =>
-  `${r.tipo_strada} ${r.strada} ${r.civico}, ${r.cap} ${r.comune}`;
+/** Senza comune e CAP (arrivano da devops con il risultato) mostra solo la via. */
+export const indirizzoOf = (r: Richiesta) => {
+  const via = `${r.tipo_strada} ${r.strada} ${r.civico}`;
+  const luogo = [r.cap, r.comune].filter(Boolean).join(" ");
+  return luogo ? `${via}, ${luogo}` : via;
+};
 
 // TODO: risolvere il referente con l'API referral. Per ora il browser conosce solo quello demo.
 const REFERENTI: Record<string, Referente> = { [DEFAULT_REF.id]: DEFAULT_REF };

@@ -58,6 +58,17 @@ export async function getProfilo(userId) {
   );
 }
 
+/** Comune e CAP arrivati da devops con il risultato: il cliente non li modifica dall'area. */
+export async function updateResidenzaProfilo(userId, { comune, cap }) {
+  unwrap(
+    await db()
+      .from("profili")
+      .update({ comune, cap, residenza_aggiornata_at: new Date().toISOString() })
+      .eq("id", userId),
+    "aggiornamento residenza profilo"
+  );
+}
+
 /** Imposta la nuova password del cliente. */
 export async function updatePassword(userId, password) {
   unwrap(await db().auth.admin.updateUserById(userId, { password }), "aggiornamento password");

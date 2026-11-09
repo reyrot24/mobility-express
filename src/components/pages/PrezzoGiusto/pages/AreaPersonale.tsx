@@ -428,8 +428,9 @@ const IMieiDati = ({
     };
     if (next.nome && !isName(next.nome)) return setError("Controlla il nome.");
     if (next.cognome && !isName(next.cognome)) return setError("Controlla il cognome.");
-    if (!isPhone(next.cellulare))
-      return setError("Controlla il numero di cellulare: 9 o 10 cifre, per esempio 3331234567.");
+    // Facoltativo: vuoto va bene, se c'è dev'essere valido
+    if (next.cellulare && !isPhone(next.cellulare))
+      return setError("Controlla il numero di cellulare: 9 o 10 cifre, per esempio 3331234567. Oppure lascialo vuoto.");
     setBusy(true);
     setError("");
     try {
@@ -464,7 +465,23 @@ const IMieiDati = ({
             maxLength={80}
             autoComplete="family-name"
           />
-          <PhoneField name="cellulare" defaultValue={profilo.cellulare} />
+          <PhoneField
+            name="cellulare"
+            label="Cellulare (facoltativo)"
+            required={false}
+            defaultValue={profilo.cellulare}
+          />
+          <Field
+            label="Comune e CAP di residenza"
+            value={
+              profilo.comune && profilo.cap
+                ? `${profilo.cap} ${profilo.comune}`
+                : "In attesa della prima stima"
+            }
+            readOnly
+            disabled
+            hint="Li ricaviamo dai dati del veicolo quando prepariamo la stima."
+          />
           <Field
             label="Email"
             value={email}

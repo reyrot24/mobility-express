@@ -34,6 +34,7 @@ const Landing = () => {
   const referral = linkedRef ? withReferente(linkedRef, page) : activeRef;
   const hero = page?.hero;
   const benefits = hero?.vantaggi ?? HERO_STANDARD.vantaggi;
+  const descrizione = hero?.descrizione ?? HERO_STANDARD.descrizione;
   // Le pagine salvate prima dei colori non hanno "colori"
   const colors = page?.colori;
   const sectionsStyle = surfaceStyle(colors?.sezioni);
@@ -46,21 +47,37 @@ const Landing = () => {
   return (
     <>
       <section className="bg-background2 px-[5%]" style={surfaceStyle(colors?.principale)}>
-        <div className="grid items-start gap-8 py-8 md:grid-cols-[1fr_1.13fr] md:items-center md:gap-16 md:py-12">
-          <div>
+        {/* Su smartphone: titolo, poi subito il modulo, poi vantaggi e referente.
+            Da tablet in su: testo a sinistra, modulo a destra. */}
+        <div className="grid items-start gap-x-14 gap-y-4 py-4 md:grid-cols-[1fr_1fr] md:gap-y-6 md:py-8">
+          <div className="md:col-start-1 md:row-start-1 md:self-end">
             <Eyebrow>{hero?.etichetta ?? HERO_STANDARD.etichetta}</Eyebrow>
-            <h1 className="whitespace-pre-line break-words text-[34px] font-extrabold leading-[1.12] tracking-tighter md:text-[clamp(32px,3.6vw,48px)]">
+            <h1 className="whitespace-pre-line break-words text-2xl font-extrabold leading-[1.15] tracking-tight md:text-[clamp(26px,2.6vw,36px)]">
               {hero?.titolo ?? HERO_STANDARD.titolo}
               <br />
               <span className="text-[var(--pg-accento-testo,#e45a00)] dark:text-orange">
                 {hero?.titoloEvidenziato ?? HERO_STANDARD.titoloEvidenziato}
               </span>
             </h1>
-            <p className="mt-6 whitespace-pre-line break-words text-sm leading-relaxed opacity-90 md:text-base">
-              {hero?.descrizione ?? HERO_STANDARD.descrizione}
+            {/* Su smartphone la descrizione va sotto il modulo, che così resta nella prima schermata */}
+            <p className="mt-4 hidden whitespace-pre-line break-words text-sm leading-relaxed opacity-90 md:block">
+              {descrizione}
+            </p>
+          </div>
+          <div className="md:col-start-2 md:row-span-2 md:row-start-1 md:self-center">
+            <QuoteForm
+              onSubmit={handleSubmit}
+              referentName={referral.name}
+              conReferente={Boolean(refId)}
+              style={surfaceStyle(colors?.form)}
+            />
+          </div>
+          <div className="md:col-start-1 md:row-start-2 md:self-start">
+            <p className="mb-5 whitespace-pre-line break-words text-sm leading-relaxed opacity-90 md:hidden">
+              {descrizione}
             </p>
             {benefits.length > 0 && (
-              <div className="mt-6 flex flex-wrap gap-5 text-[11px] md:text-xs">
+              <div className="flex flex-wrap gap-5 text-[11px] md:text-xs">
                 {benefits.map((benefit) => (
                   <span key={benefit}>
                     <span className="mr-1.5 font-bold text-[var(--pg-accento-testo,#ce5000)]">✓</span>
@@ -69,8 +86,8 @@ const Landing = () => {
                 ))}
               </div>
             )}
-            <EstimateNotice className="mt-6" />
-            <div className="mt-8 flex items-center justify-between gap-3 border-t border-[#e8d5c4] pt-6 dark:border-white/10">
+            <EstimateNotice className="mt-5" />
+            <div className="mt-6 flex items-center justify-between gap-3 border-t border-[#e8d5c4] pt-6 dark:border-white/10">
               <RefPerson referral={referral} />
               <ReferenteDialog
                 referral={referral}
@@ -78,11 +95,6 @@ const Landing = () => {
               />
             </div>
           </div>
-          <QuoteForm
-            onSubmit={handleSubmit}
-            referentName={referral.name}
-            style={surfaceStyle(colors?.form)}
-          />
         </div>
       </section>
       {(page?.sezioni.fiducia ?? true) && <TrustStrip style={sectionsStyle} />}

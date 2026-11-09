@@ -25,7 +25,8 @@ export function validateRichiesta(body) {
   const data = {
     nome: str(body?.nome),
     cognome: str(body?.cognome),
-    cellulare: normalizeCellulare(body?.cellulare),
+    // Facoltativo: "" se non indicato, null se indicato ma non valido
+    cellulare: str(body?.cellulare) ? normalizeCellulare(body?.cellulare) : "",
     referralId: str(body?.referral_id),
     idConfigurazione: str(body?.id_configurazione),
     targa: str(body?.targa).replace(/\s/g, "").toUpperCase(),
@@ -46,7 +47,7 @@ export function validateRichiesta(body) {
   // Nome e cognome sono facoltativi: il form pubblico non li chiede, il cliente li completa nell'area personale
   if (data.nome && !isName(data.nome)) return { error: "Nome non valido." };
   if (data.cognome && !isName(data.cognome)) return { error: "Cognome non valido." };
-  if (!data.cellulare) return { error: "Controlla il numero di cellulare." };
+  if (data.cellulare === null) return { error: "Controlla il numero di cellulare." };
   // Referral facoltativo: vuoto se il cliente non è arrivato da un link di devops
   if (data.referralId && !isReferral(data.referralId))
     return { error: "Link referral non valido." };
@@ -58,7 +59,8 @@ export function validateRichiesta(body) {
   if (data.strada.length < 2 || data.strada.length > 120) return { error: "Indirizzo non valido." };
   if (!/^(?:SNC|\d{1,5}(?:\s*[/-]?\s*[A-Z0-9]{1,5})?)$/.test(data.civico))
     return { error: "Numero civico non valido." };
-  if (data.comune.length < 2 || data.comune.length > 80 || !/^\d{5}$/.test(data.cap))
+  // Comune e CAP facoltativi: il form non li chiede, arrivano da devops con il risultato
+  if ((data.comune || data.cap) && !isComuneCap(data.comune, data.cap))
     return { error: "Comune o CAP non validi." };
   if (data.email.length > 254 || !/^\S+@[^\s@]+\.[^\s@]+$/.test(data.email))
     return { error: "Email non valida." };
@@ -70,9 +72,26 @@ export function validateRichiesta(body) {
       // Solo dall'area personale: accettazione delle Condizioni nel form (la verifica la fa il servizio)
       condizioni: body.condizioni === true,
       documenti: documentiMostrati(body?.documenti),
-      indirizzo: `${data.tipoStrada} ${data.strada} ${data.civico}, ${data.cap} ${data.comune}`,
+      comune: data.comune || null,
+      cap: data.cap || null,
+      indirizzo: indirizzoCompleto(data.tipoStrada, data.strada, data.civico, data.cap, data.comune),
     },
   };
+}
+
+/** Comune (2-80 caratteri) e CAP (5 cifre), entrambi presenti. */
+export const isComuneCap = (comune, cap) =>
+  typeof comune === "string" &&
+  typeof cap === "string" &&
+  comune.trim().length >= 2 &&
+  comune.trim().length <= 80 &&
+  /^\d{5}$/.test(cap.trim());
+
+/** "Via Roma 12, 20121 Milano"; senza comune e CAP solo la via. */
+export function indirizzoCompleto(tipoStrada, strada, civico, cap, comune) {
+  const via = `${tipoStrada} ${strada} ${civico}`;
+  const luogo = [cap, comune].filter(Boolean).join(" ");
+  return luogo ? `${via}, ${luogo}` : via;
 }
 
 // Stessa regola di src/components/pages/PrezzoGiusto/utils/model.ts

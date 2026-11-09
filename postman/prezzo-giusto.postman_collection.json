@@ -1007,10 +1007,10 @@
                 "risultati"
               ]
             },
-            "description": "Email con intervallo indicativo, disclaimer, link alle Condizioni e 'Gestisci servizio'. Evento 'stima_inviata'.",
+            "description": "Email con intervallo indicativo, disclaimer, link alle Condizioni e 'Gestisci servizio'. Evento 'stima_inviata'.\n\nCon \"comune\" e \"cap\" (facoltativi): si salvano sulla richiesta e sul profilo del cliente. Valori non validi vengono ignorati senza bloccare la stima.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"richiestaId\": \"{{richiesta_id}}\",\n  \"compagnia\": \"Compagnia di test\",\n  \"prezzoTotale\": 412.5,\n  \"idRicerca\": \"TEST-1\",\n  \"providerCode\": \"POLIZZAEXPRESS\"\n}",
+              "raw": "{\n  \"richiestaId\": \"{{richiesta_id}}\",\n  \"compagnia\": \"Compagnia di test\",\n  \"prezzoTotale\": 412.5,\n  \"idRicerca\": \"TEST-1\",\n  \"providerCode\": \"POLIZZAEXPRESS\",\n  \"comune\": \"Milano\",\n  \"cap\": \"20121\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

@@ -58,11 +58,14 @@ export const PhoneField = ({
   label = "Cellulare",
   name,
   defaultValue = "",
+  required = true,
   onValueChange,
 }: {
   label?: string;
   name: string;
   defaultValue?: string;
+  /** false: il campo può restare vuoto (nel form arriva "") */
+  required?: boolean;
   onValueChange?: () => void;
 }) => {
   const [digits, setDigits] = useState(() => phoneDigits(defaultValue));
@@ -88,7 +91,7 @@ export const PhoneField = ({
           onChange={(event) => setDigits(phoneDigits(event.target.value))}
           placeholder="3331234567"
           pattern="\d{9,10}"
-          required
+          required={required}
           autoComplete="tel-national"
           className="flex h-10 w-full rounded-md border border-blueText bg-white py-2 pl-14 pr-3 text-sm text-blueText placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orangeHover"
         />

@@ -24,9 +24,11 @@ import {
   releaseActivation,
   riprendiRichiestaInErrore,
   saveRisultato,
+  updateResidenzaProfilo,
   updateRichiesta,
 } from "../data/db.js";
 import { recordChoices } from "../lib/consensi.js";
+import { indirizzoCompleto, isComuneCap } from "../lib/validation.js";
 import { inBackground } from "../lib/http.js";
 import { EmailBloccataError, sendMail } from "./mailer.js";
 import { configurazioneEmail } from "./pagine.js";
@@ -40,7 +42,7 @@ export const accessoUrl = () => `${config.siteUrl}/prezzo-giusto/accesso`;
 export const servizioUrl = () => `${config.siteUrl}/prezzo-giusto/area?sezione=servizio`;
 const attivazioneUrl = (token) =>
   `${config.siteUrl}/prezzo-giusto/attiva?token=${encodeURIComponent(token)}`;
-const indirizzo = (r) => `${r.tipo_strada} ${r.strada} ${r.civico}, ${r.cap} ${r.comune}`;
+const indirizzo = (r) => indirizzoCompleto(r.tipo_strada, r.strada, r.civico, r.cap, r.comune);
 
 /** Documenti attivi con l'URL pubblico completo, per email e pagina di conferma. */
 export async function documentiPubblici() {
@@ -549,6 +551,7 @@ export async function registraRisultato(body, estimateOverride) {
   if (richiesta.stato === "annullata") return "annullata";
 
   const estimate = estimateOverride ?? parseStima(body);
+  const residenza = residenzaDaRisultato(body, richiesta.id);
   if (estimate)
     await saveRisultato({
       richiesta_id: richiesta.id,
@@ -558,7 +561,9 @@ export async function registraRisultato(body, estimateOverride) {
   await updateRichiesta(richiesta.id, {
     stato: estimate ? "completata" : "non_disponibile",
     errore: null,
+    ...(residenza ?? {}),
   });
+  if (residenza) await aggiornaResidenzaProfilo(richiesta.user_id, residenza);
 
   const pagina = await configurazioneEmail(richiesta.id_configurazione);
   const documenti = await documentiPubblici();
@@ -591,6 +596,31 @@ export async function registraRisultato(body, estimateOverride) {
     });
   }
   return "salvato";
+}
+
+/**
+ * Comune e CAP del cliente restituiti da devops con il risultato ("comune", "cap").
+ * Il form non li chiede più: si salvano sulla richiesta e sul profilo. Valori assenti o non
+ * validi vengono ignorati senza bloccare la stima.
+ */
+function residenzaDaRisultato(body, richiestaId) {
+  const comune = typeof body?.comune === "string" ? body.comune.trim() : "";
+  const cap = typeof body?.cap === "string" || typeof body?.cap === "number" ? String(body.cap).trim() : "";
+  if (!comune && !cap) return null;
+  if (!isComuneCap(comune, cap)) {
+    console.warn(`[devops] risultato ${richiestaId}: comune/CAP ignorati, non validi:`, JSON.stringify({ comune, cap }));
+    return null;
+  }
+  return { comune, cap };
+}
+
+/** Il profilo si aggiorna dopo la richiesta: un errore qui non deve far ripetere il webhook. */
+async function aggiornaResidenzaProfilo(userId, residenza) {
+  try {
+    await updateResidenzaProfilo(userId, residenza);
+  } catch (err) {
+    console.error(`[devops] residenza non salvata sul profilo ${userId}:`, err.message);
+  }
 }
 
 // ───────────── Ricontatto ─────────────

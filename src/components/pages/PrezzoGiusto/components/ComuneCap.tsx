@@ -142,7 +142,7 @@ export const ComuneCap = ({ onChange }: { onChange?: () => void }) => {
         />
         {scelto && (
           <span
-            className="pointer-events-none absolute bottom-0 right-3 flex h-10 items-center text-xs font-semibold text-blueText opacity-70"
+            className="pointer-events-none absolute bottom-0 right-3 flex h-11 items-center text-xs font-semibold text-blueText opacity-70"
             aria-hidden="true"
           >
             {scelto.sigla}
