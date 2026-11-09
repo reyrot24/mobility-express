@@ -23,6 +23,9 @@ type PrezzoGiustoState = {
   /** Link di devops aperto: referente per le richieste e, se c'è, configurazione da caricare */
   openLink: (ref: Referente, configurationId: string | null) => void;
   current: Quote | null;
+  /** Targa scritta nel form (senza spazi, maiuscola), per il messaggio di WhatsApp. "" se vuota */
+  targaForm: string;
+  setTargaForm: (targa: string) => void;
   findRef: (id: string) => Referente | undefined;
   /** referralId: codice referente del profilo (area personale), al posto di quello del link. Può essere vuoto */
   submitQuote: (
@@ -41,6 +44,7 @@ export const PrezzoGiustoProvider = ({ children }: { children: React.ReactNode }
   const [pages, setPages] = useState<Map<string, PaginaReferente | null>>(new Map());
   const requested = useRef(new Set<string>());
   const [current, setCurrent] = useState<Quote | null>(null);
+  const [targaForm, setTargaForm] = useState("");
 
   const activePage = (configurationId && pages.get(configurationId)) || null;
   const activeRef = useMemo(() => withReferente(linkRef, activePage), [linkRef, activePage]);
@@ -124,6 +128,8 @@ export const PrezzoGiustoProvider = ({ children }: { children: React.ReactNode }
         pages,
         openLink,
         current,
+        targaForm,
+        setTargaForm,
         findRef,
         submitQuote,
       }}

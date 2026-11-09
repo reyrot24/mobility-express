@@ -242,7 +242,7 @@
             "description": "Atteso 202, stato 'in_attesa_attivazione'. Arriva l'email con: link alle Condizioni, link all'Informativa, link personale di conferma e password temporanea. Copia dal link il valore dopo ?token= in 'token_attivazione' e la password in 'password_temporanea'. Devops NON viene chiamato.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"cellulare\": \"+393331234567\",\n  \"referral_id\": \"{{referral_id}}\",\n  \"id_configurazione\": \"{{id_configurazione}}\",\n  \"targa\": \"AB123CD\",\n  \"tipoStrada\": \"Via\",\n  \"strada\": \"Roma\",\n  \"civico\": \"10\",\n  \"comune\": \"Milano\",\n  \"cap\": \"20100\",\n  \"email\": \"{{email_nuovo}}\",\n  \"privacy\": true,\n  \"ricontatto\": false\n}",
+              "raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"cellulare\": \"\",\n  \"referral_id\": \"{{referral_id}}\",\n  \"id_configurazione\": \"{{id_configurazione}}\",\n  \"targa\": \"AB123CD\",\n  \"tipoStrada\": \"Via\",\n  \"strada\": \"Roma\",\n  \"civico\": \"10\",\n  \"email\": \"{{email_nuovo}}\",\n  \"privacy\": true,\n  \"ricontatto\": false,\n  \"condizioni\": true,\n  \"marketing\": false,\n  \"documenti\": {\n    \"condizioni\": \"condizioni-1.0\",\n    \"privacy\": \"privacy-1.0\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -304,7 +304,7 @@
           ]
         },
         {
-          "name": "2.3 Conferma SENZA Condizioni (deve dare 400)",
+          "name": "2.3 Richiesta SENZA Condizioni (deve dare 400)",
           "request": {
             "method": "POST",
             "header": [
@@ -312,22 +312,27 @@
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}",
+                "type": "text"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/account/attivazione",
+              "raw": "{{base_url}}/prezzo-giusto/richieste",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "account",
-                "attivazione"
+                "prezzo-giusto",
+                "richieste"
               ]
             },
-            "description": "Il token NON viene consumato.",
+            "description": "Atteso 202, stato 'in_attesa_attivazione'. Arriva l'email con: link alle Condizioni, link all'Informativa, link personale di conferma e password temporanea. Copia dal link il valore dopo ?token= in 'token_attivazione' e la password in 'password_temporanea'. Devops NON viene chiamato.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"token\": \"{{token_attivazione}}\",\n  \"temporaryPassword\": \"{{password_temporanea}}\",\n  \"password\": \"{{password}}\",\n  \"condizioniAccettate\": false,\n  \"marketing\": false,\n  \"documenti\": {\n    \"condizioni\": \"condizioni-1.0\",\n    \"privacy\": \"privacy-1.0\"\n  }\n}",
+              "raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"cellulare\": \"\",\n  \"referral_id\": \"{{referral_id}}\",\n  \"id_configurazione\": \"{{id_configurazione}}\",\n  \"targa\": \"GH123IJ\",\n  \"tipoStrada\": \"Via\",\n  \"strada\": \"Roma\",\n  \"civico\": \"10\",\n  \"email\": \"{{email_nuovo}}\",\n  \"privacy\": true,\n  \"ricontatto\": false,\n  \"condizioni\": false,\n  \"marketing\": false,\n  \"documenti\": {\n    \"condizioni\": \"condizioni-1.0\",\n    \"privacy\": \"privacy-1.0\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -342,14 +347,14 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('condizioni obbligatorie (400)', () => pm.response.to.have.status(400));"
+                  "pm.test(\"Condizioni obbligatorie\", () => pm.response.to.have.status(400));"
                 ]
               }
             }
           ]
         },
         {
-          "name": "2.4 Conferma con documenti vecchi (deve dare 409)",
+          "name": "2.4 Richiesta con documenti vecchi (deve dare 409)",
           "request": {
             "method": "POST",
             "header": [
@@ -357,22 +362,27 @@
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}",
+                "type": "text"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/account/attivazione",
+              "raw": "{{base_url}}/prezzo-giusto/richieste",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "account",
-                "attivazione"
+                "prezzo-giusto",
+                "richieste"
               ]
             },
-            "description": "Evento 'conferma_rifiutata' (documenti_non_attuali). Il token NON viene consumato.",
+            "description": "Atteso 202, stato 'in_attesa_attivazione'. Arriva l'email con: link alle Condizioni, link all'Informativa, link personale di conferma e password temporanea. Copia dal link il valore dopo ?token= in 'token_attivazione' e la password in 'password_temporanea'. Devops NON viene chiamato.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"token\": \"{{token_attivazione}}\",\n  \"temporaryPassword\": \"{{password_temporanea}}\",\n  \"password\": \"{{password}}\",\n  \"condizioniAccettate\": true,\n  \"marketing\": false,\n  \"documenti\": {\n    \"condizioni\": \"condizioni-0.9\",\n    \"privacy\": \"privacy-1.0\"\n  }\n}",
+              "raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"cellulare\": \"\",\n  \"referral_id\": \"{{referral_id}}\",\n  \"id_configurazione\": \"{{id_configurazione}}\",\n  \"targa\": \"GH123IJ\",\n  \"tipoStrada\": \"Via\",\n  \"strada\": \"Roma\",\n  \"civico\": \"10\",\n  \"email\": \"{{email_nuovo}}\",\n  \"privacy\": true,\n  \"ricontatto\": false,\n  \"condizioni\": true,\n  \"marketing\": false,\n  \"documenti\": {\n    \"condizioni\": \"condizioni-0.9\",\n    \"privacy\": \"privacy-1.0\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -387,7 +397,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('versione non in vigore (409)', () => pm.response.to.have.status(409));"
+                  "pm.test(\"Documenti non attuali\", () => pm.response.to.have.status(409));"
                 ]
               }
             }
@@ -417,7 +427,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"token\": \"{{token_attivazione}}\",\n  \"temporaryPassword\": \"sbagliata\",\n  \"password\": \"{{password}}\",\n  \"condizioniAccettate\": true,\n  \"marketing\": false,\n  \"documenti\": {\n    \"condizioni\": \"condizioni-1.0\",\n    \"privacy\": \"privacy-1.0\"\n  }\n}",
+              "raw": "{\n  \"token\": \"{{token_attivazione}}\",\n  \"temporaryPassword\": \"sbagliata\",\n  \"password\": \"{{password}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -439,7 +449,7 @@
           ]
         },
         {
-          "name": "2.6 Conferma l'adesione, marketing NEGATO (201)",
+          "name": "2.6 Conferma (Condizioni e marketing dal form) (201)",
           "request": {
             "method": "POST",
             "header": [
@@ -468,7 +478,7 @@
             "description": "Atteso 201. Adesione 'attiva' con data/ora del server e versioni; consensi_marketing.granted = false; la richiesta passa a 'in_elaborazione' e parte verso devops.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"token\": \"{{token_attivazione}}\",\n  \"temporaryPassword\": \"{{password_temporanea}}\",\n  \"password\": \"{{password}}\",\n  \"condizioniAccettate\": true,\n  \"marketing\": false,\n  \"documenti\": {\n    \"condizioni\": \"condizioni-1.0\",\n    \"privacy\": \"privacy-1.0\"\n  }\n}",
+              "raw": "{\n  \"token\": \"{{token_attivazione}}\",\n  \"temporaryPassword\": \"{{password_temporanea}}\",\n  \"password\": \"{{password}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -513,7 +523,7 @@
             "description": "Evento 'token_riusato' nel registro. Nulla cambia.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"token\": \"{{token_attivazione}}\",\n  \"temporaryPassword\": \"{{password_temporanea}}\",\n  \"password\": \"{{password}}\",\n  \"condizioniAccettate\": true,\n  \"marketing\": false,\n  \"documenti\": {\n    \"condizioni\": \"condizioni-1.0\",\n    \"privacy\": \"privacy-1.0\"\n  }\n}",
+              "raw": "{\n  \"token\": \"{{token_attivazione}}\",\n  \"temporaryPassword\": \"{{password_temporanea}}\",\n  \"password\": \"{{password}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -630,7 +640,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"cellulare\": \"+393331234567\",\n  \"referral_id\": \"codice con spazi!\",\n  \"id_configurazione\": \"{{id_configurazione}}\",\n  \"targa\": \"AB123CD\",\n  \"tipoStrada\": \"Via\",\n  \"strada\": \"Roma\",\n  \"civico\": \"10\",\n  \"comune\": \"Milano\",\n  \"cap\": \"20100\",\n  \"email\": \"{{email_nuovo}}\",\n  \"privacy\": true,\n  \"ricontatto\": false\n}",
+              "raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"cellulare\": \"\",\n  \"referral_id\": \"codice con spazi!\",\n  \"id_configurazione\": \"{{id_configurazione}}\",\n  \"targa\": \"AB123CD\",\n  \"tipoStrada\": \"Via\",\n  \"strada\": \"Roma\",\n  \"civico\": \"10\",\n  \"email\": \"{{email_nuovo}}\",\n  \"privacy\": true,\n  \"ricontatto\": false,\n  \"condizioni\": true,\n  \"marketing\": false,\n  \"documenti\": {\n    \"condizioni\": \"condizioni-1.0\",\n    \"privacy\": \"privacy-1.0\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -675,7 +685,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"cellulare\": \"+393331234567\",\n  \"referral_id\": \"privacy\",\n  \"id_configurazione\": \"{{id_configurazione}}\",\n  \"targa\": \"AB123CD\",\n  \"tipoStrada\": \"Via\",\n  \"strada\": \"Roma\",\n  \"civico\": \"10\",\n  \"comune\": \"Milano\",\n  \"cap\": \"20100\",\n  \"email\": \"{{email_nuovo}}\",\n  \"privacy\": true,\n  \"ricontatto\": false\n}",
+              "raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"cellulare\": \"\",\n  \"referral_id\": \"privacy\",\n  \"id_configurazione\": \"{{id_configurazione}}\",\n  \"targa\": \"AB123CD\",\n  \"tipoStrada\": \"Via\",\n  \"strada\": \"Roma\",\n  \"civico\": \"10\",\n  \"email\": \"{{email_nuovo}}\",\n  \"privacy\": true,\n  \"ricontatto\": false,\n  \"condizioni\": true,\n  \"marketing\": false,\n  \"documenti\": {\n    \"condizioni\": \"condizioni-1.0\",\n    \"privacy\": \"privacy-1.0\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -789,7 +799,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"cellulare\": \"+393331234567\",\n  \"referral_id\": \"{{referral_id}}\",\n  \"id_configurazione\": \"{{id_configurazione}}\",\n  \"targa\": \"CD456EF\",\n  \"tipoStrada\": \"Via\",\n  \"strada\": \"Roma\",\n  \"civico\": \"10\",\n  \"comune\": \"Milano\",\n  \"cap\": \"20100\",\n  \"email\": \"{{email_nuovo}}\",\n  \"privacy\": true,\n  \"ricontatto\": false,\n  \"documenti\": {\n    \"condizioni\": \"condizioni-1.0\",\n    \"privacy\": \"privacy-1.0\"\n  }\n}",
+              "raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"cellulare\": \"\",\n  \"referral_id\": \"{{referral_id}}\",\n  \"id_configurazione\": \"{{id_configurazione}}\",\n  \"targa\": \"CD456EF\",\n  \"tipoStrada\": \"Via\",\n  \"strada\": \"Roma\",\n  \"civico\": \"10\",\n  \"email\": \"{{email_nuovo}}\",\n  \"privacy\": true,\n  \"ricontatto\": false,\n  \"documenti\": {\n    \"condizioni\": \"condizioni-1.0\",\n    \"privacy\": \"privacy-1.0\"\n  },\n  \"marketing\": false\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -844,7 +854,7 @@
             "description": "Identità già verificata dalla sessione: adesione confermata subito (verifica 'sessione'), invio a devops. Salva richiesta_id_2.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"cellulare\": \"+393331234567\",\n  \"referral_id\": \"{{referral_id}}\",\n  \"id_configurazione\": \"{{id_configurazione}}\",\n  \"targa\": \"CD456EF\",\n  \"tipoStrada\": \"Via\",\n  \"strada\": \"Roma\",\n  \"civico\": \"10\",\n  \"comune\": \"Milano\",\n  \"cap\": \"20100\",\n  \"email\": \"{{email_nuovo}}\",\n  \"privacy\": true,\n  \"ricontatto\": false,\n  \"condizioni\": true,\n  \"documenti\": {\n    \"condizioni\": \"condizioni-1.0\",\n    \"privacy\": \"privacy-1.0\"\n  }\n}",
+              "raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"cellulare\": \"\",\n  \"referral_id\": \"{{referral_id}}\",\n  \"id_configurazione\": \"{{id_configurazione}}\",\n  \"targa\": \"CD456EF\",\n  \"tipoStrada\": \"Via\",\n  \"strada\": \"Roma\",\n  \"civico\": \"10\",\n  \"email\": \"{{email_nuovo}}\",\n  \"privacy\": true,\n  \"ricontatto\": false,\n  \"condizioni\": true,\n  \"documenti\": {\n    \"condizioni\": \"condizioni-1.0\",\n    \"privacy\": \"privacy-1.0\"\n  },\n  \"marketing\": false\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -953,7 +963,7 @@
             "description": "Serve a 5.6 e 5.7: verrà interrotta prima che arrivi la stima. Salva richiesta_id_3.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"cellulare\": \"+393331234567\",\n  \"referral_id\": \"{{referral_id}}\",\n  \"id_configurazione\": \"{{id_configurazione}}\",\n  \"targa\": \"EF789GH\",\n  \"tipoStrada\": \"Via\",\n  \"strada\": \"Roma\",\n  \"civico\": \"10\",\n  \"comune\": \"Milano\",\n  \"cap\": \"20100\",\n  \"email\": \"{{email_nuovo}}\",\n  \"privacy\": true,\n  \"ricontatto\": false,\n  \"condizioni\": true,\n  \"documenti\": {\n    \"condizioni\": \"condizioni-1.0\",\n    \"privacy\": \"privacy-1.0\"\n  }\n}",
+              "raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"cellulare\": \"\",\n  \"referral_id\": \"{{referral_id}}\",\n  \"id_configurazione\": \"{{id_configurazione}}\",\n  \"targa\": \"EF789GH\",\n  \"tipoStrada\": \"Via\",\n  \"strada\": \"Roma\",\n  \"civico\": \"10\",\n  \"email\": \"{{email_nuovo}}\",\n  \"privacy\": true,\n  \"ricontatto\": false,\n  \"condizioni\": true,\n  \"documenti\": {\n    \"condizioni\": \"condizioni-1.0\",\n    \"privacy\": \"privacy-1.0\"\n  },\n  \"marketing\": false\n}",
               "options": {
                 "raw": {
                   "language": "json"

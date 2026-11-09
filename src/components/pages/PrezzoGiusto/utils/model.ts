@@ -88,12 +88,13 @@ export type QuoteInput = {
   email: string;
 };
 
-// Scelte del modulo: informativa obbligatoria, ricontatto facoltativo. Le Condizioni si accettano nel
-// form solo dall'area personale (identità già verificata); il marketing non si sceglie qui.
+// Scelte del modulo: informativa e Condizioni obbligatorie, ricontatto e comunicazioni commerciali
+// facoltativi (mai preselezionati). La richiesta parte solo dopo la conferma dal link nell'email.
 export type QuoteChoices = {
   privacy: true;
+  condizioni: true;
   callback: boolean;
-  condizioni: boolean;
+  marketing: boolean;
 };
 
 export type QuoteRequest = QuoteInput & QuoteChoices;
@@ -209,13 +210,16 @@ export function validateQuote(input: Record<string, unknown>): QuoteRequest {
   if (data.phone && !isPhone(data.phone))
     throw new Error("Controlla il numero di cellulare: 9 o 10 cifre, per esempio 3331234567. Oppure lascialo vuoto.");
   if (!flag(input.privacy))
+    throw new Error("Conferma di aver letto l’informativa privacy del servizio.");
+  if (!flag(input.condizioni))
     throw new Error(
-      "Conferma di aver letto l’informativa privacy del servizio. Il ricontatto resta facoltativo.",
+      "Per inviare la richiesta accetta le Condizioni del servizio. Ricontatto e comunicazioni commerciali restano facoltativi.",
     );
   return {
     ...data,
     privacy: true,
+    condizioni: true,
     callback: flag(input.callback),
-    condizioni: flag(input.condizioni),
+    marketing: flag(input.marketing),
   };
 }

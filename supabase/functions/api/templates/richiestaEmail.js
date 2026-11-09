@@ -1,5 +1,6 @@
 import {
-  button, escapeHtml, firma, hr, layout, linkDocumenti, multiline, notaServizio, notaServizioTesto, stileEmail,
+  bloccoReferente, button, escapeHtml, firma, hr, layout, linkDocumenti, multiline, notaServizio,
+  notaServizioTesto, referenteTesto, stileEmail,
 } from "./layout.js";
 
 const box = (content) =>
@@ -37,13 +38,16 @@ const messaggioHtml = (messaggio) =>
 const extraText = (messaggio, stile) => [messaggio, stile.firma].filter(Boolean).flatMap((t) => [t, ""]);
 
 /**
- * Email 1: richiesta ricevuta, adesione da confermare.
- * Contiene i link ai due documenti e il link personale alla pagina di conferma (token opaco, a scadenza,
- * senza dati del cliente nell'URL). Aprire il link non accetta nulla: si conferma solo sulla pagina.
+ * Email 1: richiesta ricevuta, da confermare.
+ * Nel form il cliente ha già accettato le Condizioni e preso visione dell'informativa: qui trova i link
+ * ai documenti e il pulsante "Conferma" verso la pagina personale (token opaco, a scadenza, senza dati
+ * nell'URL; password temporanea nel frammento #, compilata dalla pagina). La richiesta parte solo
+ * quando preme "Conferma" su quella pagina: aprire il link non basta.
  * @param {{nome: string, id: string, targa: string, attivazioneUrl: string, temporaryPassword: string,
- *          documenti: object, email?: object|null}} params email: personalizzazione del referente
+ *          documenti: object, referente?: object|null, email?: object|null}} params
+ *        email: personalizzazione del referente (colori, testi, firma, logo)
  */
-export function attivazioneEmail({ nome, id, targa, attivazioneUrl, temporaryPassword, documenti, email }) {
+export function attivazioneEmail({ nome, id, targa, attivazioneUrl, temporaryPassword, documenti, referente, email }) {
   const { stile, subject, titolo, messaggio } = conferma(email, {
     oggetto: OGGETTO_ADESIONE,
     titolo: TITOLO_ADESIONE,
@@ -51,35 +55,35 @@ export function attivazioneEmail({ nome, id, targa, attivazioneUrl, temporaryPas
 
   const html = layout(`
       <h1 style="font-size:26px;line-height:1.2;margin:0">${multiline(titolo)}</h1>
-      <p style="font-size:14px;margin:16px 0 0">${escapeHtml(saluto(nome))} abbiamo ricevuto la tua richiesta di aderire al servizio gratuito <strong>“OK, il prezzo è giusto?”</strong> di Alca Broker S.r.l.: una stima indicativa e non vincolante della RC auto e il monitoraggio delle scadenze note.</p>
+      <p style="font-size:14px;margin:16px 0 0">${escapeHtml(saluto(nome))} abbiamo ricevuto la tua richiesta per il servizio gratuito <strong>“OK, il prezzo è giusto?”</strong> di Alca Broker S.r.l.: una stima indicativa e non vincolante della RC auto e il monitoraggio delle scadenze note.</p>
       ${messaggioHtml(messaggio)}
       ${box(riepilogo(id, targa))}
-      <p style="font-size:14px;margin:0"><strong>Prima di confermare, leggi i documenti del servizio:</strong></p>
+      <p style="font-size:14px;margin:0"><strong>Conferma per far partire la richiesta.</strong> Ti basta scegliere una password per la tua area personale: la useremo per farti seguire la stima.</p>
+      ${button(attivazioneUrl, "Conferma", false, stile.accento)}
+      <p style="font-size:12px;color:#5e637e;margin:12px 0 0">Il link è personale, vale 7 giorni e si può usare una sola volta. La richiesta parte solo quando premi “Conferma” sulla pagina.</p>
+      ${bloccoReferente(referente)}
+      <p style="font-size:13px;margin:24px 0 0">I documenti che hai accettato nel modulo:</p>
       ${linkDocumenti(documenti, stile.accento)}
-      <p style="font-size:14px;margin:16px 0 0">Poi apri la pagina di conferma: lì potrai accettare le Condizioni e, se vuoi, scegliere separatamente se ricevere comunicazioni commerciali. <strong>Aprire il link non attiva nulla</strong>: il servizio parte solo quando confermi sulla pagina.</p>
-      <p style="font-size:14px;margin:16px 0 0">Password temporanea: <strong>${escapeHtml(temporaryPassword)}</strong></p>
-      <p style="font-size:12px;color:#5e637e;margin:6px 0 0">Ti verrà chiesta nella pagina di conferma, per verificare che l’email sia tua.</p>
-      ${button(attivazioneUrl, "Vai alla pagina di conferma", false, stile.accento)}
-      <p style="font-size:12px;color:#5e637e;margin:12px 0 0">Il link è personale, vale 7 giorni e si può usare una sola volta.</p>
+      <p style="font-size:12px;color:#5e637e;margin:16px 0 0">Se la pagina ti chiede una password temporanea: <strong>${escapeHtml(temporaryPassword)}</strong></p>
       ${firma(stile)}
       ${footer(id)}`, stile);
 
   const text = [
     subject,
     "",
-    `${saluto(nome)} abbiamo ricevuto la tua richiesta di aderire al servizio gratuito "OK, il prezzo è giusto?" di Alca Broker S.r.l. per il veicolo ${targa} (richiesta ${id}).`,
+    `${saluto(nome)} abbiamo ricevuto la tua richiesta per il servizio gratuito "OK, il prezzo è giusto?" di Alca Broker S.r.l. per il veicolo ${targa} (richiesta ${id}).`,
     "",
     ...extraText(messaggio, stile),
-    "Prima di confermare, leggi i documenti del servizio:",
+    "Conferma per far partire la richiesta: ti basta scegliere una password per la tua area personale.",
+    `Conferma: ${attivazioneUrl}`,
+    "Il link è personale, vale 7 giorni e si può usare una sola volta.",
+    "",
+    ...(referente ? [referenteTesto(referente), ""] : []),
+    "I documenti che hai accettato nel modulo:",
     `- Condizioni del servizio (versione ${documenti.condizioni.versione}): ${documenti.condizioni.url}`,
     `- Informativa privacy del servizio (versione ${documenti.privacy.versione}): ${documenti.privacy.url}`,
     "",
-    "Aprire il link non attiva nulla: il servizio parte solo quando confermi sulla pagina.",
-    "",
-    `Password temporanea: ${temporaryPassword}`,
-    "",
-    `Pagina di conferma: ${attivazioneUrl}`,
-    "Il link è personale, vale 7 giorni e si può usare una sola volta.",
+    `Se la pagina ti chiede una password temporanea: ${temporaryPassword}`,
     "",
     "Se non hai fatto tu questa richiesta, ignora questo messaggio.",
   ].join("\n");
@@ -90,9 +94,9 @@ export function attivazioneEmail({ nome, id, targa, attivazioneUrl, temporaryPas
 /**
  * Email 2: richiesta ricevuta da un cliente già registrato. Solo l'accesso all'area personale.
  * @param {{nome: string, id: string, targa: string, accessoUrl: string, servizioUrl: string,
- *          email?: object|null}} params
+ *          referente?: object|null, email?: object|null}} params
  */
-export function richiestaRicevutaEmail({ nome, id, targa, accessoUrl, servizioUrl, email }) {
+export function richiestaRicevutaEmail({ nome, id, targa, accessoUrl, servizioUrl, referente, email }) {
   const { stile, subject, titolo, messaggio } = conferma(email);
 
   const html = layout(`
@@ -101,6 +105,7 @@ export function richiestaRicevutaEmail({ nome, id, targa, accessoUrl, servizioUr
       ${messaggioHtml(messaggio)}
       ${box(riepilogo(id, targa))}
       ${button(accessoUrl, "Entra nella tua area personale", false, stile.accento)}
+      ${bloccoReferente(referente)}
       ${firma(stile)}
       ${footer(id)}
       ${notaServizio(servizioUrl)}`, stile);
@@ -114,6 +119,7 @@ export function richiestaRicevutaEmail({ nome, id, targa, accessoUrl, servizioUr
     ...extraText(messaggio, stile),
     `Area personale: ${accessoUrl}`,
     "",
+    ...(referente ? [referenteTesto(referente), ""] : []),
     "Se non hai fatto tu questa richiesta, ignora questo messaggio.",
     notaServizioTesto(servizioUrl),
   ].join("\n");

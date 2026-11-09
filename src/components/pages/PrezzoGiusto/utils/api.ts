@@ -69,6 +69,7 @@ export const richiediStima = (
       email: data.email,
       privacy: data.privacy,
       ricontatto: data.callback,
+      marketing: data.marketing,
       // Solo dall'area personale: Condizioni accettate nel form, con la versione mostrata
       condizioni: data.condizioni,
       documenti: DOCUMENTI_MOSTRATI,
@@ -89,10 +90,14 @@ export type DocumentoPubblico = { id: string; versione: string; data: string; ur
 export type DatiAttivazione = {
   email: string;
   temporaryPasswordRequired: boolean;
-  /** L'email ha già un account: niente nuova password, il marketing si gestisce dall'area */
+  /** L'email ha già un account: niente nuova password, basta confermare */
   accountEsistente: boolean;
   richiesta: { id: string; targa: string };
   documenti: { condizioni: DocumentoPubblico; privacy: DocumentoPubblico };
+  /** Referente della pagina personalizzata del link, se configurato */
+  referente: { name: string; role: string | null; phone: string; email: string } | null;
+  /** Solo link inviati prima che le Condizioni si accettassero nel form */
+  condizioniDaAccettare: boolean;
 };
 
 /** Dati per la pagina di conferma dell'adesione. Aprirla non accetta nulla. */
@@ -113,13 +118,16 @@ export async function datiAttivazione(token: string): Promise<DatiAttivazione> {
   return data as DatiAttivazione;
 }
 
-/** Conferma esplicita dell'adesione: Condizioni accettate, marketing separato, versione dei documenti. */
+/**
+ * "Conferma" dalla pagina del link: fa partire la richiesta. Condizioni e marketing sono quelli
+ * scelti nel form; il server li legge dalla richiesta.
+ */
 export const attivaArea = (payload: {
   token: string;
   temporaryPassword: string;
   password?: string;
-  condizioniAccettate: true;
-  marketing: boolean | null;
+  /** Solo per i link con condizioniDaAccettare */
+  condizioniAccettate?: boolean;
 }) =>
   post<{ email: string; alreadyRegistered: boolean }>("/account/attivazione", {
     ...payload,

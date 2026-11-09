@@ -51,10 +51,18 @@ export async function getProfilo(userId) {
   return unwrap(
     await db()
       .from("profili")
-      .select("nome, cognome, cellulare, referral_id")
+      .select("nome, cognome, cellulare, referral_id, id_configurazione")
       .eq("id", userId)
       .maybeSingle(),
     "lettura profilo"
+  );
+}
+
+/** Pagina del referente da cui il cliente è arrivato: la usano le richieste dall'area personale. */
+export async function updateConfigurazioneProfilo(userId, idConfigurazione) {
+  unwrap(
+    await db().from("profili").update({ id_configurazione: idConfigurazione }).eq("id", userId),
+    "aggiornamento configurazione profilo"
   );
 }
 

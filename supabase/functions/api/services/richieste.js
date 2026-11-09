@@ -1,7 +1,6 @@
 import { Buffer } from "node:buffer";
 import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { config } from "../config.js";
-import { findReferente } from "../data/referenti.js";
 import {
   claimActivation,
   confermaAdesione,
@@ -24,6 +23,7 @@ import {
   releaseActivation,
   riprendiRichiestaInErrore,
   saveRisultato,
+  updateConfigurazioneProfilo,
   updateResidenzaProfilo,
   updateRichiesta,
 } from "../data/db.js";
@@ -40,8 +40,11 @@ import { stimaEmail } from "../templates/stimaEmail.js";
 
 export const accessoUrl = () => `${config.siteUrl}/prezzo-giusto/accesso`;
 export const servizioUrl = () => `${config.siteUrl}/prezzo-giusto/area?sezione=servizio`;
-const attivazioneUrl = (token) =>
-  `${config.siteUrl}/prezzo-giusto/attiva?token=${encodeURIComponent(token)}`;
+// La password temporanea va nel frammento (#pt=): il browser non lo invia mai ai server (né ai log),
+// la pagina la legge e la compila da sola. Così il cliente sceglie solo la sua password.
+const attivazioneUrl = (token, temporaryPassword) =>
+  `${config.siteUrl}/prezzo-giusto/attiva?token=${encodeURIComponent(token)}` +
+  (temporaryPassword ? `#pt=${encodeURIComponent(temporaryPassword)}` : "");
 const indirizzo = (r) => indirizzoCompleto(r.tipo_strada, r.strada, r.civico, r.cap, r.comune);
 
 /** Documenti attivi con l'URL pubblico completo, per email e pagina di conferma. */
@@ -121,11 +124,13 @@ const DOCUMENTI_AGGIORNATI = () =>
   new ErroreAdesione(409, "I documenti del servizio sono stati aggiornati. Ricarica la pagina e rileggili prima di confermare.");
 
 /**
- * Salva la richiesta e l'adesione al servizio (con l'informativa resa).
+ * Salva la richiesta e l'adesione al servizio. Nel form il cliente prende visione dell'informativa,
+ * accetta le Condizioni e sceglie ricontatto e comunicazioni commerciali (registrati con le versioni).
  * - Senza sessione (form pubblico, anche se l'email ha già un account): l'adesione resta "in_attesa"
- *   ed email 1 con i documenti e il link personale di conferma. Devops viene contattato solo dopo.
- * - Cliente in sessione (area personale): identità già verificata, le Condizioni si accettano nel
- *   form; adesione confermata subito e invio a devops.
+ *   ed email 1 con i documenti e il link personale. La richiesta parte (devops) solo quando il
+ *   cliente preme "Conferma" sulla pagina del link: è la verifica che l'email sia sua.
+ * - Cliente in sessione (area personale): identità già verificata, adesione confermata subito e
+ *   invio a devops.
  * @param {object} data dati validati del form
  * @param {string|undefined} idempotencyKey
  * @param {{id: string, email: string}|null} sessionUser cliente in sessione (area personale)
@@ -138,12 +143,10 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null, { 
   }
 
   const documenti = await documentiPubblici();
-  if (sessionUser) {
-    if (!data.condizioni)
-      throw new ErroreAdesione(400, "Per attivare il servizio devi accettare le Condizioni del servizio.");
-    if (data.documenti.condizioni !== documenti.condizioni.id || data.documenti.privacy !== documenti.privacy.id)
-      throw DOCUMENTI_AGGIORNATI();
-  }
+  if (!data.condizioni)
+    throw new ErroreAdesione(400, "Per inviare la richiesta devi accettare le Condizioni del servizio.");
+  if (data.documenti.condizioni !== documenti.condizioni.id || data.documenti.privacy !== documenti.privacy.id)
+    throw DOCUMENTI_AGGIORNATI();
 
   const email = sessionUser?.email ?? data.email;
   // Solo per riprendere nome, cognome e referente: senza sessione l'identità va comunque verificata
@@ -151,8 +154,13 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null, { 
   const profilo = accountId ? await getProfilo(accountId) : null;
   // Cliente registrato: il referral è quello del link con cui ha attivato l'area (anche vuoto)
   const referralId = (profilo ? profilo.referral_id : data.referralId) || null;
-  // La configurazione del link vale solo se la richiesta resta al referente di quel link
-  const idConfigurazione = data.referralId === referralId ? data.idConfigurazione || null : null;
+  // La configurazione del link vale solo se la richiesta resta al referente di quel link.
+  // Dall'area personale (nessun link) vale quella salvata sul profilo, se è dello stesso referente.
+  const idConfigurazione =
+    (data.referralId === referralId ? data.idConfigurazione || null : null) ??
+    (profilo?.id_configurazione && (profilo.referral_id || null) === referralId
+      ? profilo.id_configurazione
+      : null);
   const now = new Date().toISOString();
 
   const { richiesta, duplicate } = await insertRichiesta({
@@ -171,7 +179,10 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null, { 
     referral_id: referralId,
     id_configurazione: idConfigurazione,
     stato: "in_attesa_attivazione",
-    consensi: recordChoices({ ...data, referralId }, now, documenti.privacy.id),
+    consensi: recordChoices({ ...data, referralId }, now, {
+      privacyDocId: documenti.privacy.id,
+      condizioniDocId: documenti.condizioni.id,
+    }),
     idempotency_key: idempotencyKey ?? null,
   });
   if (duplicate) return toResponse(richiesta);
@@ -190,7 +201,14 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null, { 
     richiestaId: richiesta.id,
     tipo: "richiesta_ricevuta",
     attore: "cliente",
-    dettagli: { canale: sessionUser ? "area_personale" : "form_pubblico", privacy: documenti.privacy.id },
+    dettagli: {
+      canale: sessionUser ? "area_personale" : "form_pubblico",
+      privacy: documenti.privacy.id,
+      condizioni_accettate_nel_form: documenti.condizioni.id,
+      ricontatto: data.ricontatto === true,
+      marketing: data.marketing === true,
+      user_agent: userAgent?.slice(0, 300) ?? null,
+    },
   });
 
   if (sessionUser) {
@@ -199,7 +217,8 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null, { 
       userId: sessionUser.id,
       condizioniDocId: documenti.condizioni.id,
       verifica: "sessione",
-      marketing: null, // dall'area personale il marketing si gestisce nella sezione "Il servizio"
+      // Spuntato nel form = consenso; non spuntato non revoca quello già dato (si gestisce in "Il servizio")
+      marketing: data.marketing === true ? true : null,
       dettagli: { user_agent: userAgent?.slice(0, 300) ?? null },
     });
     const confermata = await getRichiesta(richiesta.id);
@@ -211,6 +230,7 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null, { 
 
   const { token, temporaryPassword } = await createActivation(email, richiesta.id);
   const pagina = await configurazioneEmail(richiesta.id_configurazione);
+  const referente = referenteEmail(pagina);
   const esito = await sendAndLog({
     tipo: "attivazione",
     userId: null,
@@ -221,10 +241,11 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null, { 
         nome: richiesta.nome,
         id: richiesta.id,
         targa: richiesta.targa,
-        attivazioneUrl: attivazioneUrl(token),
+        attivazioneUrl: attivazioneUrl(token, temporaryPassword),
         temporaryPassword,
         documenti,
-        email: pagina?.email,
+        referente,
+        email: personalizzazione(pagina),
       }),
     },
   });
@@ -278,20 +299,23 @@ export async function datiAttivazione(token) {
     accountEsistente: Boolean(await findUserIdByEmail(activation.email)),
     richiesta: { id: adesione.richiesta_id, targa: adesione.targa },
     documenti: await documentiPubblici(),
+    referente: referenteEmail(await configurazioneEmail(adesione.id_configurazione)),
+    // Link inviati prima che le Condizioni si accettassero nel form: vanno accettate sulla pagina
+    condizioniDaAccettare: !(await getRichiesta(adesione.richiesta_id))?.consensi?.condizioni?.accepted,
   };
 }
 
 /**
- * Conferma esplicita dell'adesione dalla pagina del link personale.
- * Verifica link e password temporanea, controlla che i documenti mostrati siano quelli attivi,
- * crea l'account se manca e registra tutto in una transazione (conferma_adesione).
- * Solo dopo la richiesta parte verso devops.
+ * Conferma dalla pagina del link personale ("Conferma"): verifica link e password temporanea
+ * (precompilata dal link), crea l'account se manca e registra l'adesione in una transazione
+ * (conferma_adesione) con le Condizioni e il marketing scelti nel form. Solo dopo la richiesta
+ * parte verso devops. Aprire la pagina non conferma nulla: serve il pulsante.
  * @param {{debug?: boolean, userAgent?: string}} [options]
  * @returns {Promise<{email: string, alreadyRegistered: boolean}|null>} null se il link non è valido
  */
 export async function attivaArea(
   token,
-  { password, temporaryPassword, marketing, documenti: mostrati },
+  { password, temporaryPassword, condizioniAccettate, documenti: mostrati },
   { debug = false, userAgent } = {}
 ) {
   const { activation, motivo, row } = await readActivation(token);
@@ -313,10 +337,28 @@ export async function attivaArea(
     }
   }
   const documenti = await documentiPubblici();
-  if (mostrati.condizioni !== documenti.condizioni.id || mostrati.privacy !== documenti.privacy.id) {
-    await rifiuta("documenti_non_attuali");
-    throw DOCUMENTI_AGGIORNATI();
+  const richiestaForm = await getRichiesta(adesione.richiesta_id);
+  const sceltaForm = richiestaForm?.consensi?.condizioni;
+  if (sceltaForm?.accepted) {
+    // Condizioni accettate nel form: devono essere ancora quelle in vigore
+    if (sceltaForm.documento !== documenti.condizioni.id) {
+      await rifiuta("documenti_non_attuali");
+      throw new ErroreAdesione(409, "Le Condizioni del servizio sono state aggiornate dopo la tua richiesta. Invia una nuova richiesta dal sito.");
+    }
+  } else {
+    // Link inviati prima che le Condizioni si accettassero nel form: accettazione da questa pagina
+    if (!condizioniAccettate) {
+      await rifiuta("condizioni_non_accettate");
+      throw new ErroreAdesione(400, "Per attivare il servizio devi accettare le Condizioni del servizio.");
+    }
+    if (mostrati.condizioni !== documenti.condizioni.id || mostrati.privacy !== documenti.privacy.id) {
+      await rifiuta("documenti_non_attuali");
+      throw DOCUMENTI_AGGIORNATI();
+    }
   }
+  // Marketing scelto nel form. Non spuntato: "no" per chi crea l'account, nessun cambiamento per chi
+  // ce l'ha già (non si revoca un consenso dato in precedenza)
+  const marketingForm = richiestaForm?.consensi?.marketing?.granted === true;
   const existingUserId = await findUserIdByEmail(activation.email);
   if (!existingUserId && !password)
     throw new ErroreAdesione(400, "Scegli una password di almeno 12 caratteri.");
@@ -327,7 +369,7 @@ export async function attivaArea(
   }
 
   try {
-    const richiesta = await getRichiesta(adesione.richiesta_id);
+    const richiesta = richiestaForm;
     const userId =
       existingUserId ??
       (
@@ -345,10 +387,21 @@ export async function attivaArea(
       userId,
       condizioniDocId: documenti.condizioni.id,
       verifica: "link_email+password_temporanea",
-      // Chi ha già un account gestisce il marketing dall'area personale: qui non lo sceglie
-      marketing: existingUserId ? null : marketing === true,
-      dettagli: { user_agent: userAgent?.slice(0, 300) ?? null, account_creato: !existingUserId },
+      marketing: marketingForm ? true : existingUserId ? null : false,
+      dettagli: {
+        user_agent: userAgent?.slice(0, 300) ?? null,
+        account_creato: !existingUserId,
+        condizioni_accettate_nel_form_at: sceltaForm?.acceptedAt ?? null,
+      },
     });
+    // Pagina del referente sul profilo: la useranno le richieste fatte dall'area personale
+    if (richiesta?.id_configurazione) {
+      const profilo = await getProfilo(userId);
+      if (profilo && !profilo.id_configurazione && (profilo.referral_id || null) === (richiesta.referral_id || null))
+        await updateConfigurazioneProfilo(userId, richiesta.id_configurazione).catch((err) =>
+          console.error(`[richieste] configurazione non salvata sul profilo ${userId}:`, err.message)
+        );
+    }
   } catch (err) {
     await releaseActivation(token);
     throw err;
@@ -475,7 +528,8 @@ async function inviaADevops(id) {
         targa: richiesta.targa,
         accessoUrl: accessoUrl(),
         servizioUrl: servizioUrl(),
-        email: pagina?.email,
+        referente: referenteEmail(pagina),
+        email: personalizzazione(pagina),
       }),
     },
   });
@@ -529,11 +583,16 @@ export async function rilanciaRichiesta(id) {
 // ───────────── 4. Risultato da devops ─────────────
 
 /** Contatti del referente nell'email della stima: quelli della sua pagina, altrimenti quelli noti al server. */
-function referenteEmail(referralId, pagina) {
-  const noto = findReferente(referralId);
+function referenteEmail(pagina) {
   const r = pagina?.referente;
-  if (!r?.nome || (!r.telefono && !r.email)) return noto;
-  return { name: r.nome, phone: r.telefono ?? noto?.phone ?? "", email: r.email ?? noto?.email ?? "" };
+  if (!r?.nome || (!r.telefono && !r.email)) return null;
+  return { name: r.nome, role: r.ruolo ?? null, phone: r.telefono ?? "", email: r.email ?? "" };
+}
+
+/** Personalizzazione delle email dalla pagina del referente: blocco "email" e logo. */
+function personalizzazione(pagina) {
+  if (!pagina) return null;
+  return { ...(pagina.email ?? {}), logo: pagina.logo ?? null };
 }
 
 /**
@@ -577,12 +636,12 @@ export async function registraRisultato(body, estimateOverride) {
         id: richiesta.id,
         targa: richiesta.targa,
         estimate,
-        referente: referenteEmail(richiesta.referral_id, pagina),
+        referente: referenteEmail(pagina),
         callbackRequested: richiesta.consensi.callback.granted,
         areaUrl: accessoUrl(),
         servizioUrl: servizioUrl(),
         condizioniUrl: documenti.condizioni.url,
-        email: pagina?.email,
+        email: personalizzazione(pagina),
       }),
     },
   });
@@ -647,8 +706,8 @@ export async function richiediRicontatto(id, user) {
 
 /** Avvisa via email il referente (o l'indirizzo di riserva) della richiesta di ricontatto. */
 async function notifyReferente(richiesta) {
-  const referente = findReferente(richiesta.referral_id);
-  const to = referente?.email ?? config.callbackFallbackEmail;
+  const referente = referenteEmail(await configurazioneEmail(richiesta.id_configurazione));
+  const to = referente?.email || config.callbackFallbackEmail;
   if (!to) {
     console.warn(
       `[richieste] ricontatto ${richiesta.id} senza destinatario: imposta RICONTATTO_FALLBACK_EMAIL`

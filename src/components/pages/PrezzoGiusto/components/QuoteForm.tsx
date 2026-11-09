@@ -14,6 +14,7 @@ import {
   type QuoteRequest,
 } from "../utils/model";
 import { tracciaStima, type ParametriStima } from "../utils/tracciamento";
+import { usePrezzoGiusto } from "../context/PrezzoGiustoContext";
 
 type Customer = {
   firstName: string;
@@ -61,6 +62,7 @@ const ModuloStima = ({
   style,
   onReset,
 }: Props & { onReset: () => void }) => {
+  const { setTargaForm } = usePrezzoGiusto();
   const [step, setStep] = useState<1 | 2>(1);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -204,6 +206,7 @@ const ModuloStima = ({
             <input
               id="pg-targa"
               name="plate"
+              onChange={(e) => setTargaForm(e.target.value.replace(/\s/g, "").toUpperCase())}
               placeholder="AB 123 CD"
               maxLength={12}
               required
@@ -380,7 +383,7 @@ const ModuloStima = ({
           )}
 
           <div>
-            <Choices referentName={referentName} conCondizioni={Boolean(customer)} />
+            <Choices referentName={referentName} inArea={Boolean(customer)} />
           </div>
 
           <FormError message={step === 2 ? error : ""} />

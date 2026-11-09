@@ -18,6 +18,8 @@ export const stileEmail = (email) => ({
   card: email?.colori?.card ?? "#ffffff",
   intestazione: email?.intestazione ?? "il prezzo giusto per te.",
   firma: email?.firma ?? null,
+  // URL https del logo sullo storage di devops (validato in lib/pagina.js); null = la ✓
+  logo: email?.logo ?? null,
 });
 
 const STILE_STANDARD = stileEmail(null);
@@ -40,6 +42,30 @@ export const button = (href, label, secondary = false, accento = STILE_STANDARD.
 
 export const hr = `<hr style="border:0;border-top:1px solid #e0e2ed;margin:24px 0"/>`;
 
+/**
+ * Contatti del referente della pagina personalizzata (nome, ruolo, telefono, email).
+ * Senza referente configurato non compare nulla.
+ * @param {{name: string, role?: string|null, phone?: string, email?: string}|null} referente
+ */
+export function bloccoReferente(referente) {
+  if (!referente) return "";
+  const contatti = [
+    referente.phone && `Telefono: <strong>${escapeHtml(referente.phone)}</strong>`,
+    referente.email && `Email: <strong>${escapeHtml(referente.email)}</strong>`,
+  ].filter(Boolean);
+  return `<div style="border:1px solid #e0e2ed;border-radius:10px;padding:14px 18px;margin:24px 0 0">
+      <p style="font-size:12px;color:#5e637e;margin:0">${escapeHtml(referente.role || "Il tuo referente")}</p>
+      <p style="font-size:16px;font-weight:600;margin:2px 0 6px">${escapeHtml(referente.name)}</p>
+      ${contatti.length ? `<p style="font-size:13px;margin:0">${contatti.join("<br/>")}</p>` : ""}
+    </div>`;
+}
+
+/** Versione testo di bloccoReferente. */
+export const referenteTesto = (referente) =>
+  referente
+    ? `${referente.role || "Il tuo referente"}: ${[referente.name, referente.phone, referente.email].filter(Boolean).join(" · ")}`
+    : "";
+
 /** Firma del referente, prima delle note in fondo all'email. */
 export const firma = (stile) =>
   stile.firma ? `<p style="font-size:14px;margin:24px 0 0">${multiline(stile.firma)}</p>` : "";
@@ -50,7 +76,11 @@ export const layout = (content, stile = STILE_STANDARD) => `<!doctype html>
   <div style="max-width:600px;margin:0 auto;padding:24px">
     <div style="background:${stile.card};border-radius:12px;border-top:4px solid ${stile.accento};padding:32px;line-height:1.55">
       <div style="font-size:18px;font-weight:700;margin-bottom:28px">
-        <span style="display:inline-block;width:32px;height:32px;line-height:32px;text-align:center;background:${stile.accento};border-radius:6px;margin-right:8px">✓</span>${escapeHtml(stile.intestazione)}
+        ${
+          stile.logo
+            ? `<img src="${escapeHtml(stile.logo)}" alt="" height="36" style="height:36px;max-width:140px;width:auto;vertical-align:middle;margin-right:10px;border:0"/>`
+            : `<span style="display:inline-block;width:32px;height:32px;line-height:32px;text-align:center;background:${stile.accento};border-radius:6px;margin-right:8px">✓</span>`
+        }<span style="vertical-align:middle">${escapeHtml(stile.intestazione)}</span>
       </div>
       ${content}
     </div>

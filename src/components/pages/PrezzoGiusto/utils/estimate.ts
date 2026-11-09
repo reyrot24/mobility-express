@@ -9,7 +9,7 @@ export const ESTIMATE_DISCLAIMER =
 export const ESTIMATE_METHOD =
   "L’intervallo è elaborato in automatico dai dati della richiesta. Non è un confronto con tutte le compagnie e non garantisce il prezzo più basso.";
 
-export const CHOICE_VERSION = "prezzo-giusto-2026-11-05-v2";
+export const CHOICE_VERSION = "prezzo-giusto-2026-11-10-v3";
 
 export const CALLBACK_TEXT =
   "Chiedo di essere ricontattato via email dal referente associato alla mia richiesta per ottenere un preventivo assicurativo effettivo. Facoltativo.";
@@ -50,7 +50,10 @@ export const STATUS_LABELS: Record<RequestStatus, string> = {
 export type Consents = {
   privacyAcknowledged: boolean;
   privacyDocumento?: string;
+  // Dalla versione v3: Condizioni e marketing scelti nel form
+  condizioni?: { accepted: boolean; documento: string | null; acceptedAt?: string };
   callback: { granted: boolean; requestedAt?: string };
+  marketing?: { granted: boolean; text: string; version: string };
   version: string;
   recordedAt: string;
 };

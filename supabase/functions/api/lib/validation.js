@@ -40,9 +40,13 @@ export function validateRichiesta(body) {
 
   if (body?.privacy !== true)
     return { error: "Conferma di aver letto l’informativa privacy." };
-  // Ricontatto: facoltativo, mai dedotto da altri campi. Il marketing non si sceglie qui ma alla
-  // conferma dell'adesione o nell'area personale: un eventuale campo "marketing" viene ignorato.
-  if (!isOptionalBoolean(body?.ricontatto) || !isOptionalBoolean(body?.condizioni))
+  // Ricontatto e comunicazioni commerciali: facoltativi, mai dedotti da altri campi.
+  // Condizioni: obbligatorie, la verifica la fa il servizio (con la versione del documento).
+  if (
+    !isOptionalBoolean(body?.ricontatto) ||
+    !isOptionalBoolean(body?.condizioni) ||
+    !isOptionalBoolean(body?.marketing)
+  )
     return { error: "Scelte non valide." };
   // Nome e cognome sono facoltativi: il form pubblico non li chiede, il cliente li completa nell'area personale
   if (data.nome && !isName(data.nome)) return { error: "Nome non valido." };
@@ -69,8 +73,8 @@ export function validateRichiesta(body) {
     data: {
       ...data,
       ricontatto: body.ricontatto === true,
-      // Solo dall'area personale: accettazione delle Condizioni nel form (la verifica la fa il servizio)
       condizioni: body.condizioni === true,
+      marketing: body.marketing === true,
       documenti: documentiMostrati(body?.documenti),
       comune: data.comune || null,
       cap: data.cap || null,
@@ -117,16 +121,11 @@ export function validateAttivazione(body) {
     password: typeof body?.password === "string" ? body.password : "",
     temporaryPassword:
       typeof body?.temporaryPassword === "string" ? body.temporaryPassword : "",
+    // Solo per i link inviati prima che le Condizioni si accettassero nel form
     condizioniAccettate: body?.condizioniAccettate === true,
-    // null = scelta non mostrata (cliente con account già esistente)
-    marketing: typeof body?.marketing === "boolean" ? body.marketing : null,
     documenti: documentiMostrati(body?.documenti),
   };
   if (!data.token || data.token.length > 100) return { error: "Link di attivazione non valido." };
-  if (!data.condizioniAccettate)
-    return { error: "Per attivare il servizio devi accettare le Condizioni del servizio." };
-  if (!data.documenti.condizioni || !data.documenti.privacy)
-    return { error: "Versione dei documenti mancante. Ricarica la pagina." };
   if (data.temporaryPassword.length > 128)
     return { error: "La password temporanea non è valida." };
   if (data.password && (data.password.length < 12 || data.password.length > 72))
