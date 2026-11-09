@@ -60,6 +60,26 @@ function whatsapp(value, campo) {
   return text;
 }
 
+// Unico dominio da cui si accettano immagini: lo storage pubblico di devops
+const HOST_IMMAGINI = ["me-referral-assets.r3-it.storage.cloud.it"];
+
+/** URL https di un'immagine sullo storage di devops. Altri domini vengono rifiutati. */
+function immagine(value, campo) {
+  const text = testo(value, campo, 500);
+  if (!text) return null;
+  let url;
+  try {
+    url = new URL(text);
+  } catch {
+    throw new ErrorePagina(`${campo}: URL non valido.`);
+  }
+  if (url.protocol !== "https:" || url.username || url.password)
+    throw new ErrorePagina(`${campo}: serve un URL https.`);
+  if (!HOST_IMMAGINI.includes(url.hostname.toLowerCase()))
+    throw new ErrorePagina(`${campo}: dominio non ammesso (${url.hostname}).`);
+  return url.href;
+}
+
 /** Colore esadecimale #rrggbb, salvato in minuscolo. */
 function colore(value, campo) {
   const text = testo(value, campo, 7);
@@ -127,9 +147,8 @@ export function validatePagina(body) {
     return {
       data: {
         versione: VERSIONE_PAGINA,
-        // Logo e foto restano nel database di devops: per ora la pagina mostra la ✓ al posto del logo
-        // e le iniziali al posto della foto. I valori ricevuti vengono ignorati.
-        logo: null,
+        // URL pubblico sullo storage di devops; null = la ✓ al posto del logo
+        logo: immagine(root.logo, "logo"),
         // Le due righe accanto al logo. Con un titolo personalizzato il sottotitolo standard non compare
         navbar: {
           titolo: testo(navbar.titolo, "navbar.titolo", 60),
@@ -155,6 +174,7 @@ export function validatePagina(body) {
           // null = nessuna icona di WhatsApp sul sito
           whatsapp: whatsapp(referente.whatsapp, "referente.whatsapp"),
           email: email(referente.email, "referente.email"),
+          // Per ora la foto del referente non si usa: il sito mostra le iniziali. Il valore ricevuto è ignorato.
           foto: null,
           presentazione: testo(referente.presentazione, "referente.presentazione", 300, { multiriga: true }),
         },
