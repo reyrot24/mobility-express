@@ -10,6 +10,8 @@ const PREZZO_GIUSTO = {
   titolo: "Il Prezzo Giusto per Te!",
   descrizione: "Il Prezzo Giusto per Te!",
   url: "https://polizzexpress.it/prezzo-giusto",
+  // public/og-prezzo-giusto.jpg
+  immagine: { url: "https://polizzexpress.it/og-prezzo-giusto.jpg", larghezza: 1200, altezza: 563 },
 };
 
 function htmlPrezzoGiusto(): Plugin {
@@ -28,6 +30,9 @@ function htmlPrezzoGiusto(): Plugin {
         [/(<meta\s+property="og:url"\s+content=")[^"]*(")/, `$1${attr(PREZZO_GIUSTO.url)}$2`],
         [/(<meta\s+property="og:title"\s+content=")[^"]*(")/, `$1${attr(PREZZO_GIUSTO.titolo)}$2`],
         [/(<meta\s+property="og:description"\s+content=")[^"]*(")/, `$1${attr(PREZZO_GIUSTO.descrizione)}$2`],
+        [/(<meta\s+property="og:image"\s+content=")[^"]*(")/, `$1${attr(PREZZO_GIUSTO.immagine.url)}$2`],
+        [/(<meta\s+property="og:image:width"\s+content=")[^"]*(")/, `$1${PREZZO_GIUSTO.immagine.larghezza}$2`],
+        [/(<meta\s+property="og:image:height"\s+content=")[^"]*(")/, `$1${PREZZO_GIUSTO.immagine.altezza}$2`],
       ];
       let html = readFileSync(path.join(outDir, "index.html"), "utf8");
       for (const [regex, valore] of sostituzioni) {
