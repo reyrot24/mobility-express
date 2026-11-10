@@ -176,7 +176,7 @@ export function validatePagina(body) {
           email: email(referente.email, "referente.email"),
           // Per ora la foto del referente non si usa: il sito mostra le iniziali. Il valore ricevuto è ignorato.
           foto: null,
-          presentazione: testo(referente.presentazione, "referente.presentazione", 300, { multiriga: true }),
+          presentazione: testo(referente.presentazione, "referente.presentazione", 500, { multiriga: true }),
         },
         sezioni: {
           fiducia: booleano(sezioni.fiducia, "sezioni.fiducia"),

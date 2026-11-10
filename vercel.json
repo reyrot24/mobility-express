@@ -1,3 +1,7 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/prezzo-giusto", "destination": "/prezzo-giusto.html" },
+    { "source": "/prezzo-giusto/(.*)", "destination": "/prezzo-giusto.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
