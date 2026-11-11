@@ -13,5 +13,5 @@ export const PgWhatsApp = () => {
   const { activeRef, targaForm, current } = usePrezzoGiusto();
   if (!activeRef.whatsapp) return null;
   const targa = [targaForm, current?.plate].find((t) => t && TARGA.test(t)) ?? null;
-  return <WhatsAppButton href={whatsappLink(activeRef.whatsapp, targa)} />;
+  return <WhatsAppButton href={whatsappLink(activeRef.whatsapp, targa)} large />;
 };

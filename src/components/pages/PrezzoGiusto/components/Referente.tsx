@@ -1,24 +1,26 @@
 import { initials, type Referente } from "../utils/model";
 import { DetailLine } from "./Surface";
 
-export const RefPerson = ({ referral }: { referral: Referente }) => (
-  <div className="flex items-center gap-3">
+export const RefPerson = ({ referral, large }: { referral: Referente; large?: boolean }) => (
+  <div className={`flex items-center ${large ? "gap-4" : "gap-3"}`}>
     {referral.photo ? (
       <img
         src={referral.photo}
         alt=""
-        className="size-11 flex-none rounded-full object-cover"
+        className={`${large ? "size-14" : "size-11"} flex-none rounded-full object-cover`}
       />
     ) : (
-      <div className="grid size-11 flex-none place-items-center rounded-full bg-[#ffe3cb] text-xs font-bold text-blueText">
+      <div
+        className={`grid ${large ? "size-14 text-sm" : "size-11 text-xs"} flex-none place-items-center rounded-full bg-[#ffe3cb] font-bold text-blueText`}
+      >
         {initials(referral.name)}
       </div>
     )}
     <div>
-      <small className="block text-[11px] opacity-70">
+      <small className={`block ${large ? "text-xs" : "text-[11px]"} opacity-70`}>
         {referral.role || "Il tuo referente"}
       </small>
-      <strong className="text-sm font-semibold">{referral.name}</strong>
+      <strong className={`${large ? "text-base" : "text-sm"} font-semibold`}>{referral.name}</strong>
     </div>
   </div>
 );

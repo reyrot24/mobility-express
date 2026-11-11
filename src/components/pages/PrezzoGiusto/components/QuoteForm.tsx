@@ -264,6 +264,16 @@ const ModuloStima = ({
                 />
               </div>
             </div>
+            <div className="-mt-1 mb-2 flex justify-end">
+              <button
+                type="button"
+                aria-pressed={snc}
+                onClick={() => setSnc((v) => !v)}
+                className="text-xs font-medium text-[var(--pg-accento-testo,#af4300)] underline underline-offset-2 hover:opacity-80 dark:text-orange"
+              >
+                {snc ? "Inserisci il numero civico" : "Senza numero civico (SNC)"}
+              </button>
+            </div>
             <input type="hidden" name="streetType" value={streetType} />
             <input type="hidden" name="street" value={street} />
             <input type="hidden" name="houseNumber" value={snc ? "SNC" : civico} />
@@ -286,15 +296,6 @@ const ModuloStima = ({
               </div>
             )}
 
-            <label className="flex w-fit cursor-pointer items-center gap-2 text-xs">
-              <input
-                type="checkbox"
-                checked={snc}
-                onChange={(e) => setSnc(e.target.checked)}
-                className="size-4 accent-orange"
-              />
-              Senza numero civico (SNC)
-            </label>
           </fieldset>
 
           <DocumentiObbligatori />

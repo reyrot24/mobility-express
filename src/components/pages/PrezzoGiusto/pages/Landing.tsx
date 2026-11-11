@@ -88,10 +88,10 @@ const Landing = () => {
             )}
             <EstimateNotice className="mt-5" />
             <div className="mt-6 flex items-center justify-between gap-3 border-t border-[#e8d5c4] pt-6 dark:border-white/10">
-              <RefPerson referral={referral} />
+              <RefPerson referral={referral} large />
               <ReferenteDialog
                 referral={referral}
-                trigger={<TextButton>Conosciamoci</TextButton>}
+                trigger={<TextButton className="text-sm">Conosciamoci</TextButton>}
               />
             </div>
           </div>
