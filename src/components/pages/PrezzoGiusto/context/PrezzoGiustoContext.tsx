@@ -23,6 +23,8 @@ type PrezzoGiustoState = {
   activePage: PaginaReferente | null;
   /** Pagine caricate per id configurazione: assente = in caricamento, null = pagina standard */
   pages: Map<string, PaginaReferente | null>;
+  /** Carica una pagina personalizzata in "pages" senza renderla attiva (es. quella di una richiesta) */
+  loadPage: (configurationId: string) => void;
   /** Link di devops aperto: referente per le richieste e, se c'è, configurazione da caricare */
   openLink: (ref: Referente, configurationId: string | null) => void;
   /** Percorso del link attivo (/prezzo-giusto/<codice>/<id configurazione>), per rifare una richiesta */
@@ -83,10 +85,8 @@ export const PrezzoGiustoProvider = ({ children }: { children: React.ReactNode }
 
   // Una sola richiesta per configurazione. Se il server non risponde si mostra la pagina standard:
   // il codice del link resta valido e la richiesta di stima va comunque al referente.
-  const openLink = useCallback((ref: Referente, id: string | null) => {
-    setLinkRef(ref);
-    setConfigurationId(id);
-    if (!id || requested.current.has(id)) return;
+  const loadPage = useCallback((id: string) => {
+    if (requested.current.has(id)) return;
     requested.current.add(id);
     leggiPagina(id)
       .catch((err) => {
@@ -95,6 +95,15 @@ export const PrezzoGiustoProvider = ({ children }: { children: React.ReactNode }
       })
       .then((page) => setPages((prev) => new Map(prev).set(id, page)));
   }, []);
+
+  const openLink = useCallback(
+    (ref: Referente, id: string | null) => {
+      setLinkRef(ref);
+      setConfigurationId(id);
+      if (id) loadPage(id);
+    },
+    [loadPage]
+  );
 
   // Ogni codice valido del link è accettato e inviato a devops.
   // TODO: mostrare i contatti del referente reale quando devops li renderà disponibili.
@@ -156,6 +165,7 @@ export const PrezzoGiustoProvider = ({ children }: { children: React.ReactNode }
         activeRef,
         activePage,
         pages,
+        loadPage,
         openLink,
         linkPath,
         current,

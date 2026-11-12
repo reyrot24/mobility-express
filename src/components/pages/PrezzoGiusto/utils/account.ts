@@ -35,6 +35,8 @@ export type Richiesta = {
   comune: string | null;
   cap: string | null;
   referral_id: string | null;
+  // Pagina personalizzata da cui è partita la richiesta (o quella del profilo, dall'area personale)
+  id_configurazione: string | null;
   stato: RequestStatus;
   consensi: Consents;
   created_at: string;
@@ -42,7 +44,7 @@ export type Richiesta = {
 };
 
 const COLONNE =
-  "id, targa, tipo_strada, strada, civico, comune, cap, referral_id, stato, consensi, created_at, risultati(prezzo)";
+  "id, targa, tipo_strada, strada, civico, comune, cap, referral_id, id_configurazione, stato, consensi, created_at, risultati(prezzo)";
 
 const LOAD_ERROR = "Non riusciamo a caricare i tuoi dati. Ricarica la pagina tra qualche istante.";
 

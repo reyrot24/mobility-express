@@ -10,6 +10,7 @@ import { ContactAction } from "../components/Ricontatto";
 import { DarkCard, DetailLine, Panel, TextButton } from "../components/Surface";
 import { Caricamento, CenterMessage } from "./Messaggi";
 import { useAuth } from "../context/AuthContext";
+import { usePrezzoGiusto } from "../context/PrezzoGiustoContext";
 import {
   estimateOf,
   fetchRichiesta,
@@ -17,12 +18,14 @@ import {
   referenteOf,
   type Richiesta,
 } from "../utils/account";
-import { PG_BASE } from "../utils/model";
+import { CONFIGURATION_ID, PG_BASE } from "../utils/model";
+import { withReferente } from "../utils/pagina";
 import { PRIVACY_EMAIL, STATUS_LABELS } from "../utils/estimate";
 
 const DettaglioStima = () => {
   const { id } = useParams();
   const { session, loading } = useAuth();
+  const { pages, loadPage } = usePrezzoGiusto();
   // undefined = in caricamento, null = non trovata (o non del cliente)
   const [r, setR] = useState<Richiesta | null | undefined>(undefined);
   const [error, setError] = useState("");
@@ -40,10 +43,18 @@ const DettaglioStima = () => {
     load();
   }, [load]);
 
+  // Referente della pagina personalizzata da cui è partita la richiesta
+  const configurazione =
+    r?.id_configurazione && CONFIGURATION_ID.test(r.id_configurazione) ? r.id_configurazione : null;
+  useEffect(() => {
+    if (configurazione) loadPage(configurazione);
+  }, [configurazione, loadPage]);
+
   if (loading) return <Caricamento />;
   if (!session) return <Navigate to={`${PG_BASE}/accesso`} replace />;
   if (error) return <FormError message={error} />;
-  if (r === undefined) return <Caricamento />;
+  // Anche la pagina del referente: niente nome demo che poi cambia
+  if (r === undefined || (configurazione && !pages.has(configurazione))) return <Caricamento />;
   if (r === null)
     return (
       <CenterMessage
@@ -52,7 +63,10 @@ const DettaglioStima = () => {
       />
     );
 
-  const referente = referenteOf(r);
+  const referente = withReferente(
+    referenteOf(r),
+    configurazione ? pages.get(configurazione) : null
+  );
   const email = session.user.email ?? "";
 
   return (
