@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { Check, LoaderCircle } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,7 @@ import { Badge, DarkCard, EmptyState, Notice, Panel } from "../components/Surfac
 import { useAuth } from "../context/AuthContext";
 import { usePrezzoGiusto } from "../context/PrezzoGiustoContext";
 import { Caricamento } from "./Messaggi";
+import { whatsappLink } from "../utils/pagina";
 import {
   estimateOf,
   fetchProfilo,
@@ -36,6 +38,37 @@ type Tab = "richieste" | "nuova" | "servizio" | "dati" | "polizze";
 
 // Finché ci sono richieste in elaborazione ricarichiamo l'elenco periodicamente
 const POLL_MS = 8000;
+
+/** Referente del cliente (pagina del profilo), con il link a WhatsApp se l'ha indicato. */
+const ReferentePill = ({ className }: { className?: string }) => {
+  const { activeRef } = usePrezzoGiusto();
+  if (!activeRef.name) return null;
+  return (
+    <div
+      className={cn(
+        "flex-none items-center gap-2 rounded-full border border-[#e0e2ed] py-1.5 pl-4 pr-1.5 text-sm dark:border-white/10",
+        !activeRef.whatsapp && "pr-4",
+        className
+      )}
+    >
+      <span className="whitespace-nowrap">
+        <span className="opacity-70">Il tuo referente: </span>
+        <strong className="font-semibold">{activeRef.name}</strong>
+      </span>
+      {activeRef.whatsapp && (
+        <a
+          href={whatsappLink(activeRef.whatsapp)}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Scrivi a ${activeRef.name} su WhatsApp`}
+          className="grid size-7 place-items-center rounded-full bg-[#25d366] text-white transition-opacity hover:opacity-85"
+        >
+          <FaWhatsapp size={17} />
+        </a>
+      )}
+    </div>
+  );
+};
 
 const AreaPersonale = () => {
   const { session, loading } = useAuth();
@@ -98,21 +131,25 @@ const AreaPersonale = () => {
         </Button>
       </PageTitle>
 
-      <div
-        className="my-6 flex gap-6 overflow-x-auto border-b border-[#e0e2ed] dark:border-white/10"
-        aria-label="Sezioni dell’area personale"
-      >
-        {tabs.map(([key, label]) => (
-          <button
-            key={key}
-            aria-pressed={tab === key}
-            className={tabClass(tab === key)}
-            onClick={() => setTab(key)}
-          >
-            {label}
-          </button>
-        ))}
+      <div className="my-6 flex items-center gap-6 border-b border-[#e0e2ed] dark:border-white/10">
+        <div
+          className="flex min-w-0 flex-1 gap-6 overflow-x-auto"
+          aria-label="Sezioni dell’area personale"
+        >
+          {tabs.map(([key, label]) => (
+            <button
+              key={key}
+              aria-pressed={tab === key}
+              className={tabClass(tab === key)}
+              onClick={() => setTab(key)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <ReferentePill className="hidden md:flex" />
       </div>
+      <ReferentePill className="-mt-3 mb-6 w-fit md:hidden" />
 
       {loadError && <FormError message={loadError} />}
 
