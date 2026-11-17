@@ -73,6 +73,7 @@ export type Referente = {
   whatsapp?: string;
   photo?: string;
   intro?: string;
+  codiceRUI?: string;
 };
 
 export type QuoteInput = {

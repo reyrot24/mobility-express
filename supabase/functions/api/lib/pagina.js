@@ -177,6 +177,9 @@ export function validatePagina(body) {
           // Per ora la foto del referente non si usa: il sito mostra le iniziali. Il valore ricevuto è ignorato.
           foto: null,
           presentazione: testo(referente.presentazione, "referente.presentazione", 500, { multiriga: true }),
+          // Codice di iscrizione al RUI. Per ora è ignorato e salvato come null: devops deve ancora
+          // validarlo. Quando sarà pronto: testo(referente.codiceRUI, "referente.codiceRUI", 20)
+          codiceRUI: null,
         },
         sezioni: {
           fiducia: booleano(sezioni.fiducia, "sezioni.fiducia"),

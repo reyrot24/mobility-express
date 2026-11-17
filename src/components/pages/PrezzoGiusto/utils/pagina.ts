@@ -28,6 +28,8 @@ export type PaginaReferente = {
     email: string | null;
     foto: string | null;
     presentazione: string | null;
+    // Codice di iscrizione al RUI. Per ora sempre null; assente nelle pagine salvate prima del campo
+    codiceRUI?: string | null;
   };
   sezioni: { fiducia: boolean; passi: boolean };
   // Colori #rrggbb. null = colori standard del sito. Assente nelle pagine salvate prima dei colori
@@ -71,6 +73,7 @@ export function withReferente(ref: Referente, pagina: PaginaReferente | null | u
     email: r.email ?? ref.email,
     photo: r.foto ?? undefined,
     intro: r.presentazione ?? undefined,
+    codiceRUI: r.codiceRUI ?? undefined,
   };
 }
 

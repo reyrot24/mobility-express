@@ -30,5 +30,6 @@ export const Contact = ({ referral }: { referral: Referente }) => (
     <RefPerson referral={referral} />
     <DetailLine label="Telefono">{referral.phone}</DetailLine>
     <DetailLine label="Email">{referral.email}</DetailLine>
+    {referral.codiceRUI && <DetailLine label="Codice RUI">{referral.codiceRUI}</DetailLine>}
   </>
 );

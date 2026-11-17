@@ -257,6 +257,7 @@ export const PAGINA_ANTEPRIMA: PaginaReferente = {
     email: "mario.prova@locale.test",
     foto: null,
     presentazione: "Referente finto dell'anteprima locale.",
+    codiceRUI: null,
   },
   sezioni: { fiducia: true, passi: true },
   colori: { navbar: null, principale: null, form: null, sezioni: null, accento: "#1f6feb" },
