@@ -77,12 +77,15 @@ export function withReferente(ref: Referente, pagina: PaginaReferente | null | u
   };
 }
 
-/** Messaggio precompilato: con la targa del form, altrimenti "sulla mia targa". */
-const whatsappMessaggio = (targa?: string | null) =>
-  `Ciao! Vorrei trasformare la stima ${targa ? `su ${targa}` : "sulla mia targa"} in un preventivo reale e definitivo. Cosa vi serve?`;
+/**
+ * Messaggio precompilato: con il nome del cliente, se lo conosciamo, e con la targa del form,
+ * altrimenti "sulla mia targa".
+ */
+const whatsappMessaggio = (targa?: string | null, nome?: string | null) =>
+  `Ciao${nome ? `, sono ${nome}` : ""}! Vorrei trasformare la stima ${targa ? `su ${targa}` : "sulla mia targa"} in un preventivo reale e definitivo. Cosa vi serve?`;
 
 /** Link alla chat di WhatsApp. wa.me vuole il prefisso internazionale: senza prefisso il numero è italiano. */
-export function whatsappLink(numero: string, targa?: string | null) {
+export function whatsappLink(numero: string, targa?: string | null, nome?: string | null) {
   const cifre = numero.replace(/\D/g, "");
   const internazionale = numero.trim().startsWith("+")
     ? cifre
@@ -91,7 +94,7 @@ export function whatsappLink(numero: string, targa?: string | null) {
       : cifre.startsWith("39") && cifre.length > 10
         ? cifre
         : `39${cifre}`;
-  return `https://wa.me/${internazionale}?text=${encodeURIComponent(whatsappMessaggio(targa))}`;
+  return `https://wa.me/${internazionale}?text=${encodeURIComponent(whatsappMessaggio(targa, nome))}`;
 }
 
 /** Testo leggibile sullo sfondo scelto dal referente: blu scuro su colori chiari, bianco su colori scuri. */

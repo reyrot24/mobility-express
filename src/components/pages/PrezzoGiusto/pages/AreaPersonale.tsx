@@ -41,7 +41,7 @@ const POLL_MS = 8000;
 
 /** Referente del cliente (pagina del profilo), con il link a WhatsApp se l'ha indicato. */
 const ReferentePill = ({ className }: { className?: string }) => {
-  const { activeRef } = usePrezzoGiusto();
+  const { activeRef, cliente } = usePrezzoGiusto();
   if (!activeRef.name) return null;
   return (
     <div
@@ -57,7 +57,7 @@ const ReferentePill = ({ className }: { className?: string }) => {
       </span>
       {activeRef.whatsapp && (
         <a
-          href={whatsappLink(activeRef.whatsapp)}
+          href={whatsappLink(activeRef.whatsapp, cliente?.targa, cliente?.nome)}
           target="_blank"
           rel="noopener noreferrer"
           aria-label={`Scrivi a ${activeRef.name} su WhatsApp`}
@@ -79,6 +79,14 @@ const AreaPersonale = () => {
   const [richieste, setRichieste] = useState<Richiesta[] | null>(null);
   const [loadError, setLoadError] = useState("");
   const userId = session?.user.id;
+  const { setCliente } = usePrezzoGiusto();
+
+  // Nome del profilo e targa dell'ultima richiesta per i messaggi WhatsApp (questo pulsante e quello fisso)
+  const nomeCliente = profilo ? `${profilo.nome} ${profilo.cognome}`.trim() : "";
+  const ultimaTarga = richieste?.[0]?.targa ?? null;
+  useEffect(() => {
+    if (profilo) setCliente({ nome: nomeCliente, targa: ultimaTarga });
+  }, [profilo, nomeCliente, ultimaTarga, setCliente]);
 
   const load = useCallback(async () => {
     if (!userId) return;
@@ -108,7 +116,7 @@ const AreaPersonale = () => {
 
   const tabClass = (active: boolean) =>
     cn(
-      "-mb-px whitespace-nowrap border-b-2 py-3.5 text-sm font-medium",
+      "whitespace-nowrap border-b-2 py-3.5 text-sm font-medium",
       active ? "border-text" : "border-transparent opacity-70"
     );
   const tabs: [Tab, string][] = [
@@ -133,7 +141,7 @@ const AreaPersonale = () => {
 
       <div className="my-6 flex items-center gap-6 border-b border-[#e0e2ed] dark:border-white/10">
         <div
-          className="flex min-w-0 flex-1 gap-6 overflow-x-auto"
+          className="no-scrollbar -mb-px flex min-w-0 flex-1 gap-6 overflow-x-auto overflow-y-hidden"
           aria-label="Sezioni dell’area personale"
         >
           {tabs.map(([key, label]) => (

@@ -9,7 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "api:dev": "supabase functions serve api --env-file supabase/functions/api/.env",
-    "api:deploy": "supabase functions deploy api --use-api"
+    "api:deploy": "supabase functions deploy api --use-api",
+    "rr:dev": "supabase functions serve risk-radar risk-radar-admin --env-file supabase/functions/risk-radar/.env",
+    "rr:deploy": "supabase functions deploy risk-radar risk-radar-admin --use-api"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.0",

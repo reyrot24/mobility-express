@@ -9,3 +9,11 @@ verify_jwt = false
 # Il codice è in JavaScript: senza questa riga la CLI cerca index.ts
 entrypoint = "./functions/api/index.js"
 import_map = "./functions/api/deno.json"
+
+# Risk Radar Aziende (ALCA Broker): pagina pubblica /risk-radar e dashboard /risk-radar/admin.
+# Nessuna sessione Supabase: la pagina è pubblica e la dashboard si protegge con l'header x-admin-key.
+[functions.risk-radar]
+verify_jwt = false
+
+[functions.risk-radar-admin]
+verify_jwt = false

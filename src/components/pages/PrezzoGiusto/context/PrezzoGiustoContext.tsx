@@ -35,6 +35,9 @@ type PrezzoGiustoState = {
   /** Targa scritta nel form (senza spazi, maiuscola), per il messaggio di WhatsApp. "" se vuota */
   targaForm: string;
   setTargaForm: (targa: string) => void;
+  /** Cliente in sessione (lo imposta l'area personale): nome e targa dell'ultima richiesta per WhatsApp */
+  cliente: ClienteWhatsApp | null;
+  setCliente: (cliente: ClienteWhatsApp | null) => void;
   findRef: (id: string) => Referente | undefined;
   /** referralId: codice referente del profilo (area personale), al posto di quello del link. Può essere vuoto */
   submitQuote: (
@@ -43,6 +46,8 @@ type PrezzoGiustoState = {
     referralId?: string | null
   ) => Promise<Quote>;
 };
+
+export type ClienteWhatsApp = { nome: string; targa: string | null };
 
 const PrezzoGiustoContext = createContext<PrezzoGiustoState | null>(null);
 
@@ -54,6 +59,7 @@ export const PrezzoGiustoProvider = ({ children }: { children: React.ReactNode }
   const requested = useRef(new Set<string>());
   const [current, setCurrent] = useState<Quote | null>(null);
   const [targaForm, setTargaForm] = useState("");
+  const [cliente, setCliente] = useState<ClienteWhatsApp | null>(null);
 
   const linkPath =
     linkRef.id && linkRef.id !== DEFAULT_REF.id
@@ -115,6 +121,10 @@ export const PrezzoGiustoProvider = ({ children }: { children: React.ReactNode }
   // Area personale senza un link aperto in questa visita: logo, colori e referente della pagina
   // da cui il cliente ha confermato la prima richiesta (salvata sul profilo)
   const userId = session?.user.id;
+  // All'uscita dalla sessione WhatsApp non deve più usare nome e targa del cliente
+  useEffect(() => {
+    if (!userId) setCliente(null);
+  }, [userId]);
   const linkAperto = configurationId !== null || linkRef.id !== DEFAULT_REF.id;
   useEffect(() => {
     if (!userId || linkAperto) return;
@@ -172,6 +182,8 @@ export const PrezzoGiustoProvider = ({ children }: { children: React.ReactNode }
         setCurrent,
         targaForm,
         setTargaForm,
+        cliente,
+        setCliente,
         findRef,
         submitQuote,
       }}

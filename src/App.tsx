@@ -6,6 +6,8 @@ import { FloatingWhatsApp } from "./components/ui/FloatingWhatsApp";
 import Questionario from "./components/pages/Questionario/Questionario";
 import PrezzoGiusto from "./components/pages/PrezzoGiusto/PrezzoGiusto";
 import { ModeToggle } from "./components/dark-mode/mode-toggle";
+import RiskRadar from "./components/pages/RiskRadar/RiskRadar";
+import RiskRadarAdmin from "./components/pages/RiskRadar/RiskRadarAdmin";
 
 function App() {
   return (
@@ -34,6 +36,9 @@ function App() {
               path="/il-prezzo-giusto/privacy"
               element={<Navigate to="/prezzo-giusto/privacy" replace />}
             />
+            {/* Risk Radar Aziende (ALCA Broker): pagina per le aziende e dashboard commerciale */}
+            <Route path="/risk-radar" element={<RiskRadar />} />
+            <Route path="/risk-radar/admin" element={<RiskRadarAdmin />} />
           </Routes>
           <FloatingWhatsApp />
           <ModeToggle />

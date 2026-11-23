@@ -7,56 +7,68 @@ export const VERSIONE_PAGINA = 1;
 // Errore di validazione: il messaggio indica il campo e torna a devops così com'è.
 class ErrorePagina extends Error {}
 
-const isObject = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
+const isObject = (value) =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
 
 function oggetto(value, campo) {
   if (value === undefined || value === null) return {};
-  if (!isObject(value)) throw new ErrorePagina(`${campo}: deve essere un oggetto.`);
+  if (!isObject(value))
+    throw new ErrorePagina(`${campo}: deve essere un oggetto.`);
   return value;
 }
 
 /** Testo semplice: spazi ai bordi rimossi, vuoto = null. Gli a capo sono ammessi solo se multiriga. */
 function testo(value, campo, max, { multiriga = false } = {}) {
   if (value === undefined || value === null) return null;
-  if (typeof value !== "string") throw new ErrorePagina(`${campo}: deve essere un testo.`);
+  if (typeof value !== "string")
+    throw new ErrorePagina(`${campo}: deve essere un testo.`);
   const text = value.replace(/\r\n?/g, "\n").trim();
   if (!text) return null;
-  if (text.length > max) throw new ErrorePagina(`${campo}: massimo ${max} caratteri.`);
-  if (!multiriga && text.includes("\n")) throw new ErrorePagina(`${campo}: non può andare a capo.`);
+  if (text.length > max)
+    throw new ErrorePagina(`${campo}: massimo ${max} caratteri.`);
+  if (!multiriga && text.includes("\n"))
+    throw new ErrorePagina(`${campo}: non può andare a capo.`);
   // eslint-disable-next-line no-control-regex
-  if (/[\u0000-\u0008\u000b-\u001f\u007f]/.test(text)) throw new ErrorePagina(`${campo}: caratteri non validi.`);
+  if (/[\u0000-\u0008\u000b-\u001f\u007f]/.test(text))
+    throw new ErrorePagina(`${campo}: caratteri non validi.`);
   return text;
 }
 
 function booleano(value, campo) {
   if (value === undefined || value === null) return true;
-  if (typeof value !== "boolean") throw new ErrorePagina(`${campo}: deve essere true o false.`);
+  if (typeof value !== "boolean")
+    throw new ErrorePagina(`${campo}: deve essere true o false.`);
   return value;
 }
 
 function lista(value, campo, max) {
   if (value === undefined || value === null) return null;
-  if (!Array.isArray(value)) throw new ErrorePagina(`${campo}: deve essere una lista.`);
-  if (value.length > max) throw new ErrorePagina(`${campo}: massimo ${max} elementi.`);
+  if (!Array.isArray(value))
+    throw new ErrorePagina(`${campo}: deve essere una lista.`);
+  if (value.length > max)
+    throw new ErrorePagina(`${campo}: massimo ${max} elementi.`);
   return value;
 }
 
 function email(value, campo) {
   const text = testo(value, campo, 254);
-  if (text && !/^\S+@[^\s@]+\.[^\s@]+$/.test(text)) throw new ErrorePagina(`${campo}: email non valida.`);
+  if (text && !/^\S+@[^\s@]+\.[^\s@]+$/.test(text))
+    throw new ErrorePagina(`${campo}: email non valida.`);
   return text?.toLowerCase() ?? null;
 }
 
 function telefono(value, campo) {
   const text = testo(value, campo, 30);
-  if (text && !/^\+?[\d\s.()/-]{6,30}$/.test(text)) throw new ErrorePagina(`${campo}: numero non valido.`);
+  if (text && !/^\+?[\d\s.()/-]{6,30}$/.test(text))
+    throw new ErrorePagina(`${campo}: numero non valido.`);
   return text;
 }
 
 /** Numero per il link di WhatsApp: oltre al formato servono abbastanza cifre per aprire la chat. */
 function whatsapp(value, campo) {
   const text = telefono(value, campo);
-  if (text && text.replace(/\D/g, "").length < 8) throw new ErrorePagina(`${campo}: numero non valido.`);
+  if (text && text.replace(/\D/g, "").length < 8)
+    throw new ErrorePagina(`${campo}: numero non valido.`);
   return text;
 }
 
@@ -84,7 +96,8 @@ function immagine(value, campo) {
 function colore(value, campo) {
   const text = testo(value, campo, 7);
   if (!text) return null;
-  if (!/^#[0-9a-f]{6}$/i.test(text)) throw new ErrorePagina(`${campo}: usa un colore nel formato #rrggbb.`);
+  if (!/^#[0-9a-f]{6}$/i.test(text))
+    throw new ErrorePagina(`${campo}: usa un colore nel formato #rrggbb.`);
   return text.toLowerCase();
 }
 
@@ -103,7 +116,9 @@ function testiEmail(value, campo) {
   return {
     oggetto: testo(o.oggetto, `${campo}.oggetto`, 80),
     titolo: testo(o.titolo, `${campo}.titolo`, 80, { multiriga: true }),
-    messaggio: testo(o.messaggio, `${campo}.messaggio`, 600, { multiriga: true }),
+    messaggio: testo(o.messaggio, `${campo}.messaggio`, 600, {
+      multiriga: true,
+    }),
   };
 }
 
@@ -114,7 +129,9 @@ function personalizzazioneEmail(value) {
   const card = colore(colori.card, "email.colori.card");
   // Nelle email il testo resta scuro: la card deve essere chiara
   if (card && luminanza(card) <= 0.4)
-    throw new ErrorePagina("email.colori.card: scegli un colore chiaro, il testo delle email è scuro.");
+    throw new ErrorePagina(
+      "email.colori.card: scegli un colore chiaro, il testo delle email è scuro.",
+    );
   return {
     colori: {
       accento: colore(colori.accento, "email.colori.accento"),
@@ -136,7 +153,9 @@ export function validatePagina(body) {
   try {
     const root = oggetto(body, "configurazione");
     if (root.versione !== undefined && root.versione !== VERSIONE_PAGINA)
-      throw new ErrorePagina(`versione: è supportata solo la ${VERSIONE_PAGINA}.`);
+      throw new ErrorePagina(
+        `versione: è supportata solo la ${VERSIONE_PAGINA}.`,
+      );
 
     const navbar = oggetto(root.navbar, "navbar");
     const hero = oggetto(root.hero, "hero");
@@ -157,13 +176,22 @@ export function validatePagina(body) {
         hero: {
           etichetta: testo(hero.etichetta, "hero.etichetta", 60),
           titolo: testo(hero.titolo, "hero.titolo", 80, { multiriga: true }),
-          titoloEvidenziato: testo(hero.titoloEvidenziato, "hero.titoloEvidenziato", 60),
-          descrizione: testo(hero.descrizione, "hero.descrizione", 400, { multiriga: true }),
+          titoloEvidenziato: testo(
+            hero.titoloEvidenziato,
+            "hero.titoloEvidenziato",
+            60,
+          ),
+          descrizione: testo(hero.descrizione, "hero.descrizione", 400, {
+            multiriga: true,
+          }),
           // null = vantaggi standard, [] = nessun vantaggio
           vantaggi:
             lista(hero.vantaggi, "hero.vantaggi", 4)?.map((v, i) => {
               const text = testo(v, `hero.vantaggi[${i}]`, 40);
-              if (!text) throw new ErrorePagina(`hero.vantaggi[${i}]: non può essere vuoto.`);
+              if (!text)
+                throw new ErrorePagina(
+                  `hero.vantaggi[${i}]: non può essere vuoto.`,
+                );
               return text;
             }) ?? null,
         },
@@ -176,10 +204,15 @@ export function validatePagina(body) {
           email: email(referente.email, "referente.email"),
           // Per ora la foto del referente non si usa: il sito mostra le iniziali. Il valore ricevuto è ignorato.
           foto: null,
-          presentazione: testo(referente.presentazione, "referente.presentazione", 500, { multiriga: true }),
+          presentazione: testo(
+            referente.presentazione,
+            "referente.presentazione",
+            500,
+            { multiriga: true },
+          ),
           // Codice di iscrizione al RUI. Per ora è ignorato e salvato come null: devops deve ancora
           // validarlo. Quando sarà pronto: testo(referente.codiceRUI, "referente.codiceRUI", 20)
-          codiceRUI: null,
+          codiceRUI: testo(referente.codiceRUI, "referente.codiceRUI", 20),
         },
         sezioni: {
           fiducia: booleano(sezioni.fiducia, "sezioni.fiducia"),

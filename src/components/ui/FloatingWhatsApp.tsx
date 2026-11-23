@@ -5,9 +5,14 @@ import { useLocation } from "react-router-dom";
 const WHATSAPP_LINK =
   "https://wa.me/393773937469?text=Ciao%2C%20sono%20un%20subagente%2C%20vorrei%20vedere%20la%20piattaforma";
 
-export const WhatsAppButton: React.FC<{ href: string; large?: boolean }> = ({ href, large }) => (
+export const WhatsAppButton: React.FC<{
+  href: string;
+  large?: boolean;
+  onClick?: React.MouseEventHandler<HTMLAnchorElement>;
+}> = ({ href, large, onClick }) => (
   <a
     href={href}
+    onClick={onClick}
     target="_blank"
     rel="noopener noreferrer"
     aria-label="Apri WhatsApp"
@@ -21,6 +26,8 @@ export const FloatingWhatsApp: React.FC = () => {
   const { pathname } = useLocation();
   // Polizze Express ("Il prezzo giusto per te") mostra il numero del referente: vedi PgWhatsApp
   if (pathname.startsWith("/prezzo-giusto")) return null;
+  // Risk Radar Aziende: pagina ALCA Broker per le aziende, non per i subagenti
+  if (pathname.startsWith("/risk-radar")) return null;
 
   return <WhatsAppButton href={WHATSAPP_LINK} />;
 };
