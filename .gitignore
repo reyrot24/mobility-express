@@ -34,3 +34,5 @@ postman/*.local.postman_collection.json
 
 # Output di build TypeScript
 *.tsbuildinfo
+
+alca-energy-web

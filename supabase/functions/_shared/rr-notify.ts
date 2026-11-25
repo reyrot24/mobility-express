@@ -219,7 +219,7 @@ export async function sendSummaryMail(to: string, o: {
   const subject = `Il tuo Risk Radar: ${o.company} [${code}]`;
   const td = "padding:7px 0;border-top:1px solid #f1efec;vertical-align:top";
   const body =
-    p(`Ecco il riepilogo dell'analisi dei rischi di <b>${esc(o.company)}</b> (P.IVA ${esc(o.piva)}).`) +
+    p(`Ecco il riepilogo dell'analisi dei rischi di <b>${esc(o.company)}</b>${o.company.includes(o.piva) ? "" : ` (P.IVA ${esc(o.piva)})`}.`) +
     `<div style="margin:6px 0 18px;padding:14px 16px;border-radius:12px;background:#fff1e6;border:1px solid #ffd9bf">
       <div style="font-size:12px;color:#a14a12;font-weight:bold;text-transform:uppercase;letter-spacing:.04em">Indice di rischio</div>
       <div style="font-size:30px;font-weight:800;color:#c2410c;line-height:1.2">${r.overall}<span style="font-size:15px;color:#a14a12">/100 · ${riskLevel(r.overall)}</span></div>
@@ -242,7 +242,7 @@ export async function sendSummaryMail(to: string, o: {
       ? "Hai chiesto di essere ricontattato: un consulente Alca Broker ti scriverà o ti chiamerà a breve. Puoi anche rispondere a questa email."
       : "Vuoi approfondire? Rispondi a questa email: un consulente Alca Broker ti aiuterà a trasformare l'analisi in una proposta su misura, senza impegno.");
   const text = [
-    `Riepilogo dell'analisi dei rischi di ${o.company} (P.IVA ${o.piva})`, "",
+    `Riepilogo dell'analisi dei rischi di ${o.company}${o.company.includes(o.piva) ? "" : ` (P.IVA ${o.piva})`}`, "",
     `Indice di rischio: ${r.overall}/100 (${riskLevel(r.overall)})`,
     `${r.sector.name} · fatturato ${r.revenue} · ${r.employees} dipendenti`, "",
     "I rischi principali:", ...risks.map((k) => `- ${k.label}: ${k.score}/100`), "",
