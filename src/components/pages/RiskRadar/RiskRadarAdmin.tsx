@@ -30,6 +30,16 @@ const DIGITAL = ["Marginali", "Gestiamo dati dei clienti", "E-commerce o servizi
 const EXPORT = ["No", "In Italia", "Anche all'estero"];
 
 const eur = (n: number) => "€ " + Math.round(n || 0).toLocaleString("it-IT", { useGrouping: "always" } as unknown as Intl.NumberFormatOptions);
+const SUMMARY: Record<string, [string, string]> = {
+  conferma_inviata: ["in attesa di conferma", "warn"], riepilogo_inviato: ["inviato", "good"], bloccata_test: ["bloccato (prova)", ""],
+  limite_superato: ["troppe richieste", "bad"], email_non_configurata: ["SMTP non configurato", "bad"], email_credenziali_errate: ["SMTP: credenziali errate", "bad"],
+};
+function summaryPill(a: Analysis) {
+  if (!a.summary_requested_at) return <span className="muted">non richiesto</span>;
+  const st = a.summary_status ?? "";
+  const [label, cls] = SUMMARY[st] ?? (st.startsWith("email_errore") ? ["errore di invio", "bad"] : ["richiesto", ""]);
+  return <><span className={`pill ${cls}`} title={st}>{label}</span>{a.summary_sent_at && <span className="small muted"> {dt(a.summary_sent_at)}</span>}</>;
+}
 const dt = (s: string) => new Date(s).toLocaleString("it-IT", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" });
 const refLink = (code: string) => `${window.location.origin}/risk-radar?ref=${encodeURIComponent(code)}`;
 const riskClass = (n: number) => (n >= 70 ? "bad" : n >= 50 ? "warn" : "good");
@@ -190,6 +200,14 @@ export default function RiskRadarAdmin() {
       setEditRef(null); showToast("Link aggiornato");
     } catch (x) { guard(x); }
   }
+  const [sending, setSending] = useState<string | null>(null);
+  async function sendLink(r: Referrer) {
+    if (!api || !r.operatore_email) return;
+    setSending(r.code);
+    try { putReferrer(await api.sendLink(r.code)); showToast(`Link e QR code inviati a ${r.operatore_email}`); }
+    catch (x) { guard(x); }
+    finally { setSending(null); }
+  }
   async function toggleReferrer(r: Referrer) {
     if (!api) return;
     try { putReferrer(await api.updateReferrer(r.code, { active: !r.active })); showToast(r.active ? "Link disattivato" : "Link riattivato"); }
@@ -338,6 +356,13 @@ export default function RiskRadarAdmin() {
               : a.notify_error ? <span className="pill bad" title={a.notify_error}>non inviata</span>
               : <span className="muted">nessun destinatario</span>}
               {a.notified_to && <div className="small muted">{a.notified_to}</div>}</dd>
+            {a.contact_requested_at && <>
+              <dt>Ricontatto chiesto</dt><dd>{dt(a.contact_requested_at)} <span className="small muted">(dopo il risultato)</span>{" "}
+                {a.contact_notified_at ? <span className="pill good">avviso inviato</span>
+                  : a.contact_notify_error ? <span className="pill bad" title={a.contact_notify_error}>avviso non inviato</span>
+                  : <span className="muted small">nessun destinatario</span>}</dd>
+            </>}
+            <dt>Riepilogo al cliente</dt><dd>{summaryPill(a)}</dd>
           </dl>
         </div>
         <div>
@@ -420,7 +445,8 @@ export default function RiskRadarAdmin() {
               return (
                 <tr key={r.code} className={r.active ? "" : "off"}>
                   <td><b>{r.name}</b></td>
-                  <td>{r.operatore_nome || <span className="muted">—</span>}{r.operatore_email && <div className="small muted">{r.operatore_email}</div>}</td>
+                  <td>{r.operatore_nome || <span className="muted">—</span>}{r.operatore_email && <div className="small muted">{r.operatore_email}</div>}
+                    {r.link_sent_at && <div className="small muted">link inviato il {dt(r.link_sent_at)}</div>}</td>
                   <td className="link">{refLink(r.code)}</td>
                   <td className="num">{s?.n ?? 0}</td>
                   <td className="num">{s?.lead ?? 0}</td>
@@ -428,6 +454,9 @@ export default function RiskRadarAdmin() {
                   <td><div className="btn-row" style={{ flexWrap: "nowrap" }}>
                     <button className="btn g sm" onClick={() => copyLink(r.code)}>Copia</button>
                     <button className="btn g sm" onClick={() => setQrRef(r)}>QR</button>
+                    <button className="btn g sm" disabled={!r.active || !r.operatore_email || sending === r.code} onClick={() => sendLink(r)}
+                      title={!r.operatore_email ? "Aggiungi l'email del titolare con Modifica" : `Invia link e QR code a ${r.operatore_email}`}>
+                      {sending === r.code ? "Invio…" : r.link_sent_at ? "Reinvia" : "Invia"}</button>
                     <button className="btn g sm" onClick={() => setEditRef(r)}>Modifica</button>
                     <button className="btn g sm" onClick={() => toggleReferrer(r)}>{r.active ? "Disattiva" : "Riattiva"}</button>
                   </div></td>
@@ -442,7 +471,9 @@ export default function RiskRadarAdmin() {
   );
 
   const owners = refs.filter((r) => r.active && r.operatore_email).length;
+  const customer = data?.settings.customer;
   const impostazioni = cfg && (
+    <>
     <div className="card" style={{ maxWidth: 760 }}>
       <div className="card-head"><div><h2>Email "Nuova analisi"</h2><div className="small muted">Parte quando un'azienda completa l'analisi, dal nostro indirizzo (lo stesso di "OK, il prezzo è giusto?").</div></div>
         {data?.settings.smtp === false && <span className="pill bad">SMTP non configurato</span>}</div>
@@ -459,9 +490,27 @@ export default function RiskRadarAdmin() {
           <button type="button" className="btn g" disabled={busy || !data?.settings.notify_emails.length} onClick={testEmail}
             title="Invia un esempio con dati inventati agli indirizzi dell'ufficio salvati">Invia email di prova</button>
         </div>
-        <p className="small muted" style={{ marginBottom: 0 }}>L'email di prova va solo agli indirizzi dell'ufficio già salvati, mai ai titolari dei link.</p>
+        <p className="small muted" style={{ marginBottom: 0 }}>L'email di prova va solo agli indirizzi dell'ufficio già salvati, mai ai titolari dei link.
+          Gli stessi destinatari ricevono anche l'avviso "L'azienda vuole essere ricontattata", quando il cliente lo chiede dopo aver visto il risultato.</p>
       </form>
     </div>
+    <div className="card" style={{ maxWidth: 760 }}>
+      <div className="card-head"><div><h2>Email ai clienti e ai titolari</h2><div className="small muted">Mittente "Alca Broker", stessa casella dell'avviso interno.</div></div>
+        {customer && (customer.live ? <span className="pill good">invio reale</span> : <span className="pill warn">in prova</span>)}</div>
+      <dl>
+        <dt>Riepilogo al cliente</dt>
+        <dd>Solo se l'azienda spunta "Inviami il riepilogo": prima riceve un link per confermare l'email (valido 24 ore), poi il riepilogo. Le risposte vanno al titolare del link o al primo indirizzo dell'ufficio.</dd>
+        <dt>Link al titolare</dt>
+        <dd>Con il pulsante "Invia" nella scheda Link: indirizzo personale e QR code in allegato.</dd>
+      </dl>
+      {customer && !customer.live && (
+        <p className="small" style={{ marginBottom: 0, marginTop: 12 }}>
+          <b>In prova:</b> il riepilogo parte solo verso {customer.allowlist.length ? customer.allowlist.join(", ") : "nessuno (RR_EMAIL_ALLOWLIST vuota)"}.
+          Per tutti i clienti imposta il secret <code>RR_EMAIL_REALI=true</code>, dopo la verifica dell'informativa privacy.
+        </p>
+      )}
+    </div>
+    </>
   );
 
   return (

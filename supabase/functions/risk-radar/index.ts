@@ -1,12 +1,16 @@
 // Risk Radar Aziende — API pubblica per la pagina cliente.
 //   POST /risk-radar/lookup   { piva }                       -> dati pubblici (VIES)
-//   POST /risk-radar/analyze  { piva, params, ref, email, phone, wants_contact } -> analisi salvata
-//   POST /risk-radar/contact  { id, phone? }                 -> il cliente chiede un consulente
+//   POST /risk-radar/analyze  { piva, params, ref, email, phone, wants_contact, send_summary } -> analisi salvata
+//   POST /risk-radar/contact  { id, phone? }                 -> il cliente chiede un consulente (email all'ufficio)
+//   POST /risk-radar/confirm  { token }                      -> conferma dell'email: parte il riepilogo al cliente
 // Le tariffe stanno SOLO qui (server): il browser riceve i risultati, non i parametri.
 //   POST /risk-radar/enrich   { piva }                       -> ATECO e fatturato cercati online (Claude + ricerca web)
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 import Anthropic from "npm:@anthropic-ai/sdk@0.121.0";
-import { notifySettings, parseEmails, sendAnalysisMail } from "../_shared/rr-notify.ts";
+import {
+  customerAllowed, mailError, notifySettings, parseEmails, sendAnalysisMail, sendConfirmMail, sendSummaryMail, SITE_URL,
+  type AnalysisMail,
+} from "../_shared/rr-notify.ts";
 
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false },
@@ -387,19 +391,72 @@ async function enrich(p: string) {
   return web;
 }
 
-async function notifyNewAnalysis(id: string, a: Parameters<typeof sendAnalysisMail>[1], ownerEmail: string | null) {
+/* ---------------- email ---------------- */
+// Avviso interno all'ufficio (+ titolare del link se attivo): "nuova analisi" o "vuole essere ricontattata".
+async function notifyOffice(id: string, a: AnalysisMail, ownerEmail: string | null) {
+  const ricontatto = a.kind === "ricontatto";
   try {
     const cfg = await notifySettings(db);
     const to = [...new Set([...cfg.emails, ...(cfg.owner ? parseEmails(ownerEmail) : [])])];
     if (!to.length) return;
     try {
-      await sendAnalysisMail(to, a, a.email);
-      await db.from("rr_analyses").update({ notified_at: new Date().toISOString(), notified_to: to.join(", "), notify_error: null }).eq("id", id);
+      await sendAnalysisMail(to, { ...a, id }, a.email);
+      await db.from("rr_analyses").update(ricontatto
+        ? { contact_notified_at: new Date().toISOString(), contact_notify_error: null }
+        : { notified_at: new Date().toISOString(), notified_to: to.join(", "), notify_error: null }).eq("id", id);
     } catch (e) {
       console.error("rr-notify", e);
-      await db.from("rr_analyses").update({ notified_to: to.join(", "), notify_error: String((e as Error).message ?? e).slice(0, 300) }).eq("id", id);
+      const err = mailError(e);
+      await db.from("rr_analyses").update(ricontatto
+        ? { contact_notify_error: err }
+        : { notified_to: to.join(", "), notify_error: err }).eq("id", id);
     }
   } catch (e) { console.error("rr-notify settings", e); }
+}
+
+// Le email partono dopo la risposta al browser: il cliente non aspetta l'SMTP.
+function background(p: Promise<unknown>) {
+  // deno-lint-ignore no-explicit-any
+  const rt = (globalThis as any).EdgeRuntime;
+  if (rt?.waitUntil) rt.waitUntil(p); else return p;
+}
+
+// Sito da mettere nei link delle email al cliente: l'origine della richiesta se è tra quelle ammesse
+// (ALLOWED_ORIGINS, lo stesso secret della funzione api), altrimenti SITE_URL. Come sitoDa() nel referral ALCA.
+const ALLOWED = (Deno.env.get("ALLOWED_ORIGINS") ?? "").split(",").map((s) => s.trim().replace(/\/$/, "")).filter(Boolean);
+function siteFrom(req: Request) {
+  const o = (req.headers.get("origin") ?? "").replace(/\/$/, "");
+  return o && (o === SITE_URL || ALLOWED.includes(o)) ? o : SITE_URL;
+}
+
+async function sha256(s: string) {
+  const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return [...new Uint8Array(h)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+const SUMMARY_CONSENT = "Desidero ricevere via email il riepilogo della mia analisi (dopo aver confermato l'indirizzo)";
+const DAY = 24 * 3600e3;
+
+// Riepilogo al cliente, passo 1: email di conferma dell'indirizzo con un link valido 24 ore.
+async function sendSummaryConfirm(id: string, email: string, token: string, company: string, site: string,
+  referrer: { operatore_nome: string | null; operatore_email: string | null } | null) {
+  let status: string;
+  try {
+    if (!customerAllowed(email)) status = "bloccata_test";
+    else {
+      const ownerMail = referrer?.operatore_email ?? null;
+      const office = (await notifySettings(db)).emails[0];
+      await sendConfirmMail(email, {
+        id, company, site, url: `${site}/risk-radar/conferma#t=${token}`,
+        owner: referrer ? { nome: referrer.operatore_nome, email: ownerMail } : null,
+        replyTo: ownerMail ?? office,
+      });
+      status = "conferma_inviata";
+    }
+  } catch (e) {
+    console.error("rr-confirm", e);
+    status = mailError(e);
+  }
+  await db.from("rr_analyses").update({ summary_status: status }).eq("id", id);
 }
 
 const clip = (s: unknown, n: number) => (typeof s === "string" ? s.trim().slice(0, n) : "");
@@ -433,6 +490,7 @@ Deno.serve(async (req) => {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return json({ error: "Email non valida" }, 400);
       const phone = clip(body.phone, 30).replace(/[^\d+ ]/g, "");
       const wants = body.wants_contact === true;
+      let summary = body.send_summary === true;
 
       let ref: string | null = clip(body.ref, 40).toLowerCase() || null;
       let referrer: { code: string; name: string; operatore_nome: string | null; operatore_email: string | null } | null = null;
@@ -446,6 +504,15 @@ Deno.serve(async (req) => {
       const web = v.web?.status === "ok" ? v.web : null;
       const result = analyze(params);
       const mid = result.packages[1];
+      // Riepilogo via email: al massimo 5 richieste al giorno per lo stesso indirizzo (come il referral ALCA).
+      let summaryStatus: string | null = null;
+      if (summary) {
+        const { count } = await db.from("rr_analyses").select("id", { count: "exact", head: true })
+          .eq("email", email).gte("summary_requested_at", new Date(Date.now() - DAY).toISOString());
+        if ((count ?? 0) >= 5) { summary = false; summaryStatus = "limite_superato"; }
+      }
+      const token = summary ? crypto.randomUUID() + crypto.randomUUID() : null;
+      const now = new Date().toISOString();
       const { data, error } = await db.from("rr_analyses").insert({
         piva, company_name: (v.checked ? v.name : null) ?? reg?.name ?? web?.name ?? null, address: v.checked ? v.address : (reg?.town ?? null),
         vies_valid: v.checked ? v.valid : null, vies_checked: v.checked, ref_code: ref,
@@ -454,30 +521,90 @@ Deno.serve(async (req) => {
         params, result, overall_risk: result.overall, budget_low: mid.low, budget_high: mid.high,
         email, phone: phone || null, wants_contact: wants,
         consent_text: wants ? "Richiesta di ricontatto da parte di un consulente ALCA Broker" : null,
+        summary_requested_at: body.send_summary === true ? now : null,
+        summary_consent_text: body.send_summary === true ? SUMMARY_CONSENT : null,
+        summary_token_hash: token ? await sha256(token) : null,
+        summary_token_expires: token ? new Date(Date.now() + DAY).toISOString() : null,
+        summary_status: summaryStatus,
       }).select("id").single();
       if (error) throw error;
-      // Email "nuova analisi": in background, la risposta al cliente non aspetta l'SMTP.
-      const mail = notifyNewAnalysis(data.id, {
-        company_name: (v.checked ? v.name : null) ?? reg?.name ?? web?.name ?? null, piva,
+      const companyName = (v.checked ? v.name : null) ?? reg?.name ?? web?.name ?? null;
+      // Email "nuova analisi" all'ufficio e, se richiesto, conferma dell'indirizzo al cliente: in background.
+      const jobs: Promise<unknown>[] = [notifyOffice(data.id, {
+        kind: "nuova", company_name: companyName, piva,
         address: v.checked ? v.address : (reg?.town ?? null), sector: result.sector.name,
         overall_risk: result.overall, budget_low: mid.low, budget_high: mid.high,
         email, phone: phone || null, wants_contact: wants, referrer,
-      }, referrer?.operatore_email ?? null);
-      // deno-lint-ignore no-explicit-any
-      const rt = (globalThis as any).EdgeRuntime;
-      if (rt?.waitUntil) rt.waitUntil(mail); else await mail;
-      return json({ id: data.id, company: { piva, ...v }, result });
+      }, referrer?.operatore_email ?? null)];
+      if (token) jobs.push(sendSummaryConfirm(data.id, email, token, companyName || `P.IVA ${piva}`, siteFrom(req), referrer));
+      await background(Promise.all(jobs));
+      return json({ id: data.id, company: { piva, ...v }, result, summary: token ? "conferma" : summaryStatus });
     }
 
     if (route === "contact") {
       const id = clip(body.id, 40);
       if (!/^[0-9a-f-]{36}$/.test(id)) return json({ error: "Richiesta non valida" }, 400);
       const phone = clip(body.phone, 30).replace(/[^\d+ ]/g, "");
-      const patch: Record<string, unknown> = { wants_contact: true, consent_text: "Richiesta di ricontatto da parte di un consulente ALCA Broker" };
+      const patch: Record<string, unknown> = {
+        wants_contact: true, contact_requested_at: new Date().toISOString(),
+        consent_text: "Richiesta di ricontatto da parte di un consulente ALCA Broker",
+      };
       if (phone) patch.phone = phone;
-      const { error } = await db.from("rr_analyses").update(patch).eq("id", id);
+      // Solo il primo clic cambia la riga: l'email all'ufficio parte una volta sola.
+      const { data: a, error } = await db.from("rr_analyses").update(patch).eq("id", id).eq("wants_contact", false)
+        .select("id,piva,company_name,address,result,overall_risk,budget_low,budget_high,email,phone,ref_code").maybeSingle();
       if (error) throw error;
+      if (a) {
+        const { data: referrer } = a.ref_code
+          ? await db.from("rr_referrers").select("name,operatore_nome,operatore_email").eq("code", a.ref_code).maybeSingle()
+          : { data: null };
+        await background(notifyOffice(a.id, {
+          kind: "ricontatto", company_name: a.company_name, piva: a.piva, address: a.address,
+          sector: a.result?.sector?.name ?? "—", overall_risk: a.overall_risk, budget_low: a.budget_low, budget_high: a.budget_high,
+          email: a.email, phone: a.phone, wants_contact: true, referrer,
+        }, referrer?.operatore_email ?? null));
+      }
       return json({ ok: true });
+    }
+
+    if (route === "confirm") {
+      // Riepilogo al cliente, passo 2: il link di conferma è stato aperto -> parte il riepilogo.
+      const token = clip(body.token, 100);
+      if (!/^[0-9a-f-]{72}$/.test(token)) return json({ error: "Link non valido o incompleto" }, 400);
+      const { data: a, error } = await db.from("rr_analyses")
+        .select("id,piva,company_name,result,email,wants_contact,ref_code,summary_token_expires,summary_sent_at")
+        .eq("summary_token_hash", await sha256(token)).maybeSingle();
+      if (error) throw error;
+      if (!a) return json({ error: "Link non valido: apri il link direttamente dall'email che ti abbiamo inviato." }, 404);
+      const company = a.company_name || `P.IVA ${a.piva}`;
+      if (a.summary_sent_at) return json({ ok: true, already: true, company, email: a.email });
+      if (new Date(a.summary_token_expires).getTime() < Date.now())
+        return json({ error: "Il link è scaduto (dura 24 ore). Rifai l'analisi e spunta di nuovo la casella per ricevere il riepilogo." }, 410);
+      if (!customerAllowed(a.email)) {
+        await db.from("rr_analyses").update({ summary_status: "bloccata_test" }).eq("id", a.id);
+        return json({ error: "L'invio del riepilogo è sospeso: il servizio è ancora in prova." }, 503);
+      }
+      // Blocca i doppi clic: solo chi imposta summary_confirmed_at per primo invia l'email.
+      const { data: lock } = await db.from("rr_analyses").update({ summary_confirmed_at: new Date().toISOString() })
+        .eq("id", a.id).is("summary_confirmed_at", null).select("id").maybeSingle();
+      if (!lock) return json({ ok: true, already: true, company, email: a.email });
+      const { data: referrer } = a.ref_code
+        ? await db.from("rr_referrers").select("operatore_nome,operatore_email").eq("code", a.ref_code).maybeSingle()
+        : { data: null };
+      try {
+        await sendSummaryMail(a.email, {
+          id: a.id, company, piva: a.piva, result: a.result, site: siteFrom(req), wantsContact: a.wants_contact,
+          owner: referrer ? { nome: referrer.operatore_nome, email: referrer.operatore_email } : null,
+          replyTo: referrer?.operatore_email ?? (await notifySettings(db)).emails[0],
+        });
+      } catch (e) {
+        console.error("rr-summary", e);
+        // si sblocca, così il cliente può riprovare dallo stesso link
+        await db.from("rr_analyses").update({ summary_confirmed_at: null, summary_status: mailError(e) }).eq("id", a.id);
+        return json({ error: "Non siamo riusciti a inviarti il riepilogo: riprova tra qualche minuto dallo stesso link." }, 502);
+      }
+      await db.from("rr_analyses").update({ summary_sent_at: new Date().toISOString(), summary_status: "riepilogo_inviato" }).eq("id", a.id);
+      return json({ ok: true, company, email: a.email });
     }
 
     return json({ error: "Percorso sconosciuto" }, 404);

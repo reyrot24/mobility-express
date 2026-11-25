@@ -7,9 +7,11 @@
 //   POST /risk-radar-admin/status          { id, status?, note? }                     -> gestione dell'analisi
 //   POST /risk-radar-admin/settings        { notify_emails, notify_owner }            -> destinatari email
 //   POST /risk-radar-admin/test-email      {}                                         -> email di prova all'ufficio
+//   POST /risk-radar-admin/referrer-send   { code, site? }                            -> link + QR code al titolare
 // Scrive solo nelle tabelle rr_* del nostro progetto.
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
-import { notifySettings, parseEmails, sendAnalysisMail } from "../_shared/rr-notify.ts";
+import qrcode from "npm:qrcode-generator@1.4.4";
+import { customerMode, mailError, notifySettings, parseEmails, sendAnalysisMail, sendLinkMail, SITE_URL } from "../_shared/rr-notify.ts";
 
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false },
@@ -33,7 +35,7 @@ function safeEq(a: string, b: string) {
 }
 const STATUSES = ["nuova", "contattata", "proposta", "chiusa", "persa"];
 const clip = (s: unknown, n: number) => (typeof s === "string" ? s.trim().slice(0, n) : "");
-const REF_COLS = "code,name,active,created_at,operatore_id,operatore_nome,operatore_email";
+const REF_COLS = "code,name,active,created_at,operatore_id,operatore_nome,operatore_email,link_sent_at,link_sent_to";
 
 /** Email singola facoltativa: "" -> null, non valida -> undefined (errore). */
 function optEmail(v: unknown): string | null | undefined {
@@ -59,7 +61,8 @@ Deno.serve(async (req) => {
       const [refs, an, cfg] = await Promise.all([
         db.from("rr_referrers").select(REF_COLS).order("created_at"),
         db.from("rr_analyses")
-          .select("id,created_at,updated_at,piva,company_name,address,vies_valid,ref_code,params,ateco_code,ateco_source,overall_risk,budget_low,budget_high,email,phone,wants_contact,status,note,notified_at,notified_to,notify_error")
+          .select("id,created_at,updated_at,piva,company_name,address,vies_valid,ref_code,params,ateco_code,ateco_source,overall_risk,budget_low,budget_high,email,phone,wants_contact,status,note,notified_at,notified_to,notify_error," +
+            "contact_requested_at,contact_notified_at,contact_notify_error,summary_requested_at,summary_confirmed_at,summary_sent_at,summary_status")
           .order("created_at", { ascending: false }).limit(1000),
         notifySettings(db),
       ]);
@@ -67,7 +70,7 @@ Deno.serve(async (req) => {
       if (an.error) throw an.error;
       return json({
         referrers: refs.data, analyses: an.data,
-        settings: { notify_emails: cfg.emails, notify_owner: cfg.owner, smtp: !!Deno.env.get("SMTP_HOST") },
+        settings: { notify_emails: cfg.emails, notify_owner: cfg.owner, smtp: !!Deno.env.get("SMTP_HOST"), customer: customerMode() },
       });
     }
 
@@ -151,6 +154,35 @@ Deno.serve(async (req) => {
         return json({ error: `Invio non riuscito: ${(e as Error).message}` }, 502);
       }
       return json({ ok: true, to: emails });
+    }
+
+    if (route === "referrer-send") {
+      // Email 4: link personale e QR code al titolare. Il sito è quello da cui lavora la dashboard
+      // (come il link copiato), purché sia un indirizzo https o il sito di sviluppo locale.
+      const code = clip(body.code, 40);
+      const { data: ref, error } = await db.from("rr_referrers").select(REF_COLS).eq("code", code).maybeSingle();
+      if (error) throw error;
+      if (!ref) return json({ error: "Link non trovato" }, 404);
+      if (!ref.active) return json({ error: "Il link è disattivato: riattivalo prima di inviarlo" }, 400);
+      if (!ref.operatore_email) return json({ error: "Manca l'email del titolare: aggiungila con Modifica" }, 400);
+      const s = clip(body.site, 200).replace(/\/$/, "");
+      const site = /^https:\/\/[a-z0-9.-]+$/i.test(s) || /^http:\/\/localhost(:\d+)?$/.test(s) ? s : SITE_URL;
+      const url = `${site}/risk-radar?ref=${encodeURIComponent(ref.code)}`;
+      const qr = qrcode(0, "M");
+      qr.addData(url);
+      qr.make();
+      const qrGif = qr.createDataURL(8, 4).split(",")[1];
+      const office = (await notifySettings(db)).emails[0];
+      try {
+        await sendLinkMail(ref.operatore_email, { name: ref.name, operatore_nome: ref.operatore_nome, url, qrGif, site, replyTo: office });
+      } catch (e) {
+        console.error("referrer-send", e);
+        return json({ error: `Invio non riuscito: ${mailError(e)}` }, 502);
+      }
+      const { data, error: e2 } = await db.from("rr_referrers")
+        .update({ link_sent_at: new Date().toISOString(), link_sent_to: ref.operatore_email }).eq("code", code).select(REF_COLS).single();
+      if (e2) throw e2;
+      return json(data);
     }
 
     return json({ error: "Percorso sconosciuto" }, 404);

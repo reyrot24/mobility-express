@@ -18,6 +18,12 @@ const RiskRadarPrivacy = () => (
       l'email e, se lo indichi, il telefono.
     </p>
     <p>
+      Se lo chiedi, ti inviamo via email il riepilogo dell'analisi: prima ti scriviamo per
+      confermare l'indirizzo (il link vale 24 ore) e solo dopo la conferma inviamo il riepilogo.
+      Le email partono a nome di Alca Broker S.r.l.; le risposte arrivano al consulente che ti
+      ha proposto il servizio o al nostro ufficio. Non usiamo l'indirizzo per altre comunicazioni.
+    </p>
+    <p>
       Il ricontatto da parte di un consulente è una scelta facoltativa: puoi ricevere
       l'analisi senza chiederlo. Per esercitare i tuoi diritti scrivi a{" "}
       <a className="underline" href={`mailto:${PRIVACY_EMAIL}`}>{PRIVACY_EMAIL}</a>.

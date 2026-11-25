@@ -39,7 +39,7 @@ function atecoMatches(q: string): Div[] {
 
 // "auto": ATECO trovato (registro o online) e mostrato in un riquadro; "pending": ricerca online in corso; "search": elenco.
 type AtecoMode = { kind: "search" } | { kind: "pending" } | { kind: "auto"; source: "registro" | "web"; code: string; description: string; src?: string | null };
-type Outcome = { id: string; company: Company; result: Result; params: Params; wants: boolean };
+type Outcome = { id: string; company: Company; result: Result; params: Params; wants: boolean; email: string; summary: "conferma" | "limite_superato" | null };
 
 export default function RiskRadar() {
   const [search] = useSearchParams();
@@ -83,6 +83,7 @@ export default function RiskRadar() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [wants, setWants] = useState(false);
+  const [sendSummary, setSendSummary] = useState(false);
   const [privacy, setPrivacy] = useState(false);
   const emailInput = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -186,8 +187,8 @@ export default function RiskRadar() {
     setLoadText("Analizziamo i rischi della tua attività…");
     setStep("load");
     try {
-      const r = await rrApi.analyze({ piva, params, ref, email: mail, phone: phone.trim(), wants_contact: wants });
-      setOutcome({ ...r, params, wants });
+      const r = await rrApi.analyze({ piva, params, ref, email: mail, phone: phone.trim(), wants_contact: wants, send_summary: sendSummary });
+      setOutcome({ ...r, params, wants, email: mail });
       setContactDone(wants);
       window.scrollTo(0, 0);
     } catch (x) { setStep(2); setE2((x as Error).message); }
@@ -207,7 +208,7 @@ export default function RiskRadar() {
     setOutcome(null); setPiva(""); setStep(1); setCompany(null); setWeb(null); setRevSrc(null);
     selectAteco(null); setAtecoQ(""); setAtecoMode({ kind: "search" });
     setRev(1); setEmp(1); setVeh(0); setVehCount(""); setProp("rent"); setDigital(0); setExp(0);
-    setEmail(""); setPhone(""); setWants(false); setE1(""); setE2("");
+    setEmail(""); setPhone(""); setWants(false); setSendSummary(false); setE1(""); setE2("");
     window.scrollTo(0, 0);
   }
 
@@ -377,10 +378,11 @@ export default function RiskRadar() {
                     </div>
                   </div>
                   <label className="check"><input type="checkbox" required checked={privacy} onChange={(e) => setPrivacy(e.target.checked)} /> <span>Ho letto l'<RrPrivacyDialog trigger={<button type="button" className="link">informativa privacy</button>} /> di Alca Broker S.r.l.</span></label>
+                  <label className="check"><input type="checkbox" checked={sendSummary} onChange={(e) => setSendSummary(e.target.checked)} /> Inviami il riepilogo dell'analisi via email (ti chiederemo prima di confermare l'indirizzo).</label>
                   <label className="check"><input type="checkbox" checked={wants} onChange={(e) => setWants(e.target.checked)} /> Desidero essere ricontattato da un consulente ALCA Broker per approfondire la mia analisi.</label>
                   <div className="err" role="alert">{e2}</div>
                   <button className="btn" type="submit" disabled={busy}>Mostra il mio Risk Radar <Icon name="arrow" /></button>
-                  <p className="after">Usiamo i tuoi dati solo per prepararti l'analisi e, se lo chiedi, per ricontattarti.</p>
+                  <p className="after">Usiamo i tuoi dati solo per prepararti l'analisi e, se lo chiedi, per inviarti il riepilogo o ricontattarti.</p>
                   <div style={{ textAlign: "center" }}><button type="button" className="back" onClick={() => { lookupSeq.current++; setStep(1); }}>← Modifica partita IVA</button></div>
                 </form>
               )}
@@ -452,6 +454,13 @@ function ResultView({ o, piva, web: webState, contactDone, contactBusy, onContac
           <button className="btn ghost" onClick={onNew}>Nuova analisi</button>
         </div>
       </div>
+
+      {o.summary === "conferma" && (
+        <div className="mailnote" role="status"><Icon name="check" /><div><b>Controlla la tua email.</b> Ti abbiamo scritto a <b>{o.email}</b>: conferma l'indirizzo entro 24 ore e ti inviamo il riepilogo dell'analisi. Non la trovi? Guarda nella posta indesiderata.</div></div>
+      )}
+      {o.summary === "limite_superato" && (
+        <div className="mailnote warn" role="status"><div>Oggi abbiamo già ricevuto troppe richieste di riepilogo per <b>{o.email}</b>: riprova domani, oppure scarica il PDF da questa pagina.</div></div>
+      )}
 
       <div className="rgrid">
         <section className="card">

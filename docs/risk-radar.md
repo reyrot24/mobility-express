@@ -17,7 +17,7 @@ Il frontend chiama `${VITE_SUPABASE_URL}/functions/v1/...`: nessuna nuova variab
 
 ## Messa in produzione (ordine)
 
-1. **Migrazioni**: eseguire `supabase/migrations/20261118000000_risk_radar.sql` e poi `20261123000000_risk_radar_operatori.sql` (SQL Editor o `supabase db push`). Si parte da zero: nessun dato copiato da alca-desk.
+1. **Migrazioni**: eseguire `supabase/migrations/20261118000000_risk_radar.sql` poi `20261123000000_risk_radar_operatori.sql` e `20261125000000_risk_radar_email.sql` (SQL Editor o `supabase db push`). Si parte da zero: nessun dato copiato da alca-desk.
 2. **Segreto Claude** (ricerca online di ATECO e fatturato):
    `npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-...`
    Senza chiave la pagina funziona lo stesso: l'utente sceglie l'ATECO dall'elenco.
@@ -53,6 +53,12 @@ Stessa struttura del portale ALCA Energia (`alca-energy-web/portale.html`): sche
 ## Email "Nuova analisi"
 
 Parte dalla funzione `risk-radar` quando un'azienda completa l'analisi, in background (`supabase/functions/_shared/rr-notify.ts`). Usa lo stesso SMTP di "OK, il prezzo è giusto?" (secret `SMTP_HOST`, `SMTP_PORT`=465, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM`, `SITE_URL` per il link alla dashboard): i secret di Supabase valgono per tutte le funzioni, non serve reimpostarli. Esito salvato in `rr_analyses.notified_at` / `notified_to` / `notify_error`. Il pulsante "Invia email di prova" scrive solo agli indirizzi dell'ufficio salvati.
+
+## Altre email (regole del referral ALCA Energia)
+- **"Vuole essere ricontattata"**: pulsante "Voglio essere ricontattato" dopo il risultato → stessi destinatari della "Nuova analisi", una sola volta per analisi (`contact_requested_at`, `contact_notified_at`, `contact_notify_error`).
+- **Riepilogo al cliente**: solo con la casella "Inviami il riepilogo". Prima un'email di conferma con link `/risk-radar/conferma#t=…` valido 24 ore (nel DB solo lo SHA-256 del token), poi il riepilogo. Massimo 5 richieste al giorno per indirizzo. Mittente `"Alca Broker" <indirizzo di MAIL_FROM>` (o secret `RR_MAIL_FROM`), risposte al titolare del link o al primo indirizzo dell'ufficio. Esito in `summary_status`.
+- **In prova**: finché `RR_EMAIL_REALI` non è `true`, le email al cliente partono solo verso `RR_EMAIL_ALLOWLIST` (indirizzi separati da virgola); le altre restano `bloccata_test`. Il link nelle email usa l'origine della pagina se è in `ALLOWED_ORIGINS`, altrimenti `SITE_URL`.
+- **Link al titolare**: pulsante "Invia" nella scheda Link → indirizzo personale e QR code (GIF in allegato e nel testo). Esito in `rr_referrers.link_sent_at` / `link_sent_to`.
 
 ## Da completare prima dell'invio alle aziende
 

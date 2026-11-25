@@ -52,9 +52,11 @@ export type Result = {
 export const rrApi = {
   lookup: (piva: string) => post<Company>("risk-radar/lookup", { piva }),
   enrich: (piva: string) => post<WebData>("risk-radar/enrich", { piva }),
-  analyze: (body: { piva: string; params: Params; ref: string | null; email: string; phone: string; wants_contact: boolean }) =>
-    post<{ id: string; company: Company; result: Result }>("risk-radar/analyze", body),
+  analyze: (body: { piva: string; params: Params; ref: string | null; email: string; phone: string; wants_contact: boolean; send_summary: boolean }) =>
+    post<{ id: string; company: Company; result: Result; summary: "conferma" | "limite_superato" | null }>("risk-radar/analyze", body),
   contact: (id: string) => post<{ ok: true }>("risk-radar/contact", { id }),
+  /** Conferma dell'email (link ricevuto): fa partire il riepilogo dell'analisi. */
+  confirm: (token: string) => post<{ ok: true; company: string; email: string; already?: boolean }>("risk-radar/confirm", { token }),
 };
 
 /* ---------- Dashboard ---------- */
@@ -63,14 +65,21 @@ export type Status = (typeof STATUSES)[number];
 export type Referrer = {
   code: string; name: string; active: boolean; created_at: string;
   operatore_id: string | null; operatore_nome: string | null; operatore_email: string | null;
+  link_sent_at: string | null; link_sent_to: string | null;
 };
 export type Analysis = {
   id: string; created_at: string; updated_at: string | null; piva: string; company_name: string | null; address: string | null; vies_valid: boolean | null;
   ref_code: string | null; params: Params | null; ateco_code: string | null; ateco_source: "registro" | "web" | "cliente" | null;
   overall_risk: number; budget_low: number; budget_high: number; email: string; phone: string | null; wants_contact: boolean; status: Status;
   note: string | null; notified_at: string | null; notified_to: string | null; notify_error: string | null;
+  contact_requested_at: string | null; contact_notified_at: string | null; contact_notify_error: string | null;
+  summary_requested_at: string | null; summary_confirmed_at: string | null; summary_sent_at: string | null; summary_status: string | null;
 };
-export type NotifySettings = { notify_emails: string[]; notify_owner: boolean; smtp?: boolean };
+export type NotifySettings = {
+  notify_emails: string[]; notify_owner: boolean; smtp?: boolean;
+  /** Email al cliente: live = RR_EMAIL_REALI "true"; altrimenti partono solo verso la allowlist. */
+  customer?: { live: boolean; allowlist: string[] };
+};
 export type DashboardData = { referrers: Referrer[]; analyses: Analysis[]; settings: NotifySettings };
 export type ReferrerInput = { name?: string; operatore_nome?: string; operatore_email?: string; active?: boolean };
 
@@ -84,5 +93,6 @@ export const rrAdminApi = (key: string) => {
       post<{ ok: true; updated_at: string }>("risk-radar-admin/status", { id, ...patch }, h),
     settings: (s: NotifySettings) => post<NotifySettings>("risk-radar-admin/settings", s, h),
     testEmail: () => post<{ ok: true; to: string[] }>("risk-radar-admin/test-email", {}, h),
+    sendLink: (code: string) => post<Referrer>("risk-radar-admin/referrer-send", { code, site: window.location.origin }, h),
   };
 };

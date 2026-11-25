@@ -8,6 +8,7 @@ import PrezzoGiusto from "./components/pages/PrezzoGiusto/PrezzoGiusto";
 import { ModeToggle } from "./components/dark-mode/mode-toggle";
 import RiskRadar from "./components/pages/RiskRadar/RiskRadar";
 import RiskRadarAdmin from "./components/pages/RiskRadar/RiskRadarAdmin";
+import RiskRadarConfirm from "./components/pages/RiskRadar/RiskRadarConfirm";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
             {/* Risk Radar Aziende (ALCA Broker): pagina per le aziende e dashboard commerciale */}
             <Route path="/risk-radar" element={<RiskRadar />} />
             <Route path="/risk-radar/admin" element={<RiskRadarAdmin />} />
+            <Route path="/risk-radar/conferma" element={<RiskRadarConfirm />} />
           </Routes>
           <FloatingWhatsApp />
           <ModeToggle />
