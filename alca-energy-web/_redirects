@@ -1,0 +1,6 @@
+https://golden-alpaca-f46088.netlify.app/*  https://alcaenergia.it/:splat  301!
+/prezzo-giusto    /prezzo-giusto.html    200
+/prezzo-giusto/*  /prezzo-giusto.html    200
+/partner          /prezzo-giusto.html    200
+/portale          /portale.html          200
+/portale/*        /portale.html          200

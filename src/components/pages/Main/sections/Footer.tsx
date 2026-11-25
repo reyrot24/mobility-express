@@ -17,6 +17,13 @@ import Privacy from "../../Legali/Privacy";
 import TerminiDiServizio from "../../Legali/TerminiDiServizio";
 import CookiePolicy from "../../Legali/CookiePolicy";
 import { useTheme } from "../../../dark-mode/theme-provider";
+import { Link } from "react-router-dom";
+
+// Servizi online di Alca Broker raggiungibili dal sito Polizze Express
+const serviceLinks = [
+  { to: "/prezzo-giusto", title: "OK, il prezzo è giusto? – RC Auto" },
+  { to: "/risk-radar", title: "Risk Radar Aziende" },
+];
 
 type ImageProps = {
   url?: string;
@@ -93,6 +100,20 @@ export const Footer = (props: Footer4Props) => {
             081 17 67 67 09.
           </p>
         </div>
+        <nav
+          aria-label="Servizi"
+          className="pb-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm font-semibold"
+        >
+          {serviceLinks.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="underline underline-offset-4 hover:decoration-orangeHover hover:text-orangeHover"
+            >
+              {link.title}
+            </Link>
+          ))}
+        </nav>
         <ul className="pb-4 flex items-center justify-center gap-x-8 gap-y-4 text-sm md:grid-flow-col md:gap-x-6 md:gap-y-0">
           {footerLinks.map((link, index) => (
             <li key={index}>

@@ -17,7 +17,7 @@ Il frontend chiama `${VITE_SUPABASE_URL}/functions/v1/...`: nessuna nuova variab
 
 ## Messa in produzione (ordine)
 
-1. **Migrazione**: eseguire `supabase/migrations/20261118000000_risk_radar.sql` (SQL Editor o `supabase db push`).
+1. **Migrazioni**: eseguire `supabase/migrations/20261118000000_risk_radar.sql` e poi `20261123000000_risk_radar_operatori.sql` (SQL Editor o `supabase db push`). Si parte da zero: nessun dato copiato da alca-desk.
 2. **Segreto Claude** (ricerca online di ATECO e fatturato):
    `npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-...`
    Senza chiave la pagina funziona lo stesso: l'utente sceglie l'ATECO dall'elenco.
@@ -41,8 +41,18 @@ Il frontend chiama `${VITE_SUPABASE_URL}/functions/v1/...`: nessuna nuova variab
 | `web_model` | Modello per la ricerca online | `claude-opus-5-5` (più economico: `claude-haiku-5-5`) |
 | `web_hourly_limit` | Ricerche online nuove all'ora | 60 |
 | `openapi_token` | Token OpenAPI "Company IT-advanced" (ATECO/fatturato ufficiali), facoltativo | — |
+| `notify_emails` | Destinatari ufficio dell'email "Nuova analisi" (virgola). Si imposta dalla dashboard, scheda Impostazioni | vuoto = nessuna email |
+| `notify_owner` | `true` = l'email va anche al titolare del link (se ha l'email) | `false` |
 
 Ogni P.IVA resta in cache 7 giorni (`rr_lookups`).
+
+## Dashboard (`/risk-radar/admin`)
+
+Stessa struttura del portale ALCA Energia (`alca-energy-web/portale.html`): schede **Cruscotto** (KPI, analisi da gestire, rendimento dei link), **Analisi** (filtri, stato, dettaglio con note interne ed esito dell'email), **Link** (crea, copia, QR in PNG, modifica titolare, disattiva) e **Impostazioni** (destinatari email, email di prova). Accesso con la chiave di amministrazione; il titolare del link si scrive a mano finché il login non passerà agli account di alca-desk.
+
+## Email "Nuova analisi"
+
+Parte dalla funzione `risk-radar` quando un'azienda completa l'analisi, in background (`supabase/functions/_shared/rr-notify.ts`). Usa lo stesso SMTP di "OK, il prezzo è giusto?" (secret `SMTP_HOST`, `SMTP_PORT`=465, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM`, `SITE_URL` per il link alla dashboard): i secret di Supabase valgono per tutte le funzioni, non serve reimpostarli. Esito salvato in `rr_analyses.notified_at` / `notified_to` / `notify_error`. Il pulsante "Invia email di prova" scrive solo agli indirizzi dell'ufficio salvati.
 
 ## Da completare prima dell'invio alle aziende
 

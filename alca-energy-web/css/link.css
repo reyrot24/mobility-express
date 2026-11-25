@@ -1,0 +1,142 @@
+/* Alca Energy · pagine dei referenti (/prezzo-giusto/<codice>): la persona in primo piano, tre modelli scelti dal portale.
+   fiducia = verde e lime, due colonne · vicino = crema e corallo, colonna unica con la foto grande · energia = blu e giallo, titolo a tutta pagina.
+   I colori passano dalle stesse variabili di sito.css. */
+html[data-modello="fiducia"] {
+  --rl-sfondo: #0e3b2e; --rl-testo: #ffffff; --rl-tenue: rgba(255, 255, 255, .8); --rl-risalto: #d6f26b; --rl-riquadro: rgba(255, 255, 255, .07); --rl-bordo: rgba(255, 255, 255, .14); --rl-su-risalto: #0e3b2e;
+}
+html[data-modello="vicino"] {
+  --sx-verde: #4a2238; --sx-verde-2: #5a2b45; --sx-verde-3: #6b3553; --sx-lime: #ffb199; --sx-lime-2: #ff9d7f; --sx-menta: #ffe9de; --sx-crema: #fff5ec;
+  --sx-testo: #33182a; --sx-tenue: #755f6c; --sx-linea: #f0ddd0; --sx-testata: rgba(74, 34, 56, .97); --sx-piede: #331726; --sx-tenue-sfondo: #fff8f3;
+  --rl-sfondo: #ffe7d8; --rl-testo: #33182a; --rl-tenue: #6a5361; --rl-risalto: #b8402a; --rl-riquadro: #ffffff; --rl-bordo: #f5d5c3; --rl-su-risalto: #ffffff;
+}
+html[data-modello="energia"] {
+  --sx-verde: #131f8f; --sx-verde-2: #1a2bc4; --sx-verde-3: #2a3bd6; --sx-lime: #ffd60a; --sx-lime-2: #f2c900; --sx-menta: #e9ecff; --sx-crema: #f3f5ff;
+  --sx-testo: #0d1440; --sx-tenue: #57608c; --sx-linea: #dfe3f8; --sx-testata: rgba(19, 31, 143, .97); --sx-piede: #0b1254; --sx-tenue-sfondo: #f7f8ff;
+  --rl-sfondo: #1a2bc4; --rl-testo: #ffffff; --rl-tenue: rgba(255, 255, 255, .85); --rl-risalto: #ffd60a; --rl-riquadro: rgba(255, 255, 255, .1); --rl-bordo: rgba(255, 255, 255, .22); --rl-su-risalto: #0d1440;
+}
+
+/* parte alta */
+.rl-eroe { background: var(--rl-sfondo); color: var(--rl-testo); padding: 44px 0 30px; overflow: hidden; }
+.rl-eroe .sx-occhiello { color: var(--rl-risalto); }
+.rl-eroe h1 { font-size: clamp(36px, 4.4vw, 58px); line-height: 1; letter-spacing: -.04em; font-weight: 800; margin: 0 0 16px; }
+.rl-eroe h1 em { font-style: normal; color: var(--rl-risalto); }
+.rl-descr { font-size: 16px; line-height: 1.6; color: var(--rl-tenue); margin: 0 0 18px; max-width: 520px; }
+.rl-eroe .sx-spunte { margin: 0; }
+.rl-eroe .sx-spunte li { background: var(--rl-riquadro); border-color: var(--rl-bordo); }
+.rl-eroe .sx-spunte svg { color: var(--rl-risalto); }
+.rl-vai { display: none; text-decoration: none; background: var(--rl-risalto); color: var(--rl-su-risalto); font-weight: 800; font-size: 17px; border-radius: 999px; padding: 16px 30px; margin-top: 24px; }
+
+/* il referente */
+.rl-ref { display: flex; gap: 24px; align-items: center; }
+.rl-foto { flex: none; display: grid; place-items: center; width: 148px; height: 148px; border-radius: 34px; overflow: hidden; background: var(--rl-risalto); color: var(--rl-su-risalto); font: 800 50px/1 "Manrope", sans-serif; letter-spacing: -.04em; }
+.rl-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.rl-ref-testo { min-width: 0; }
+.rl-ciao { font: 800 clamp(23px, 2.3vw, 29px)/1.15 "Manrope", sans-serif; letter-spacing: -.03em; margin: 0 0 4px; }
+.rl-ruolo { font-size: 13.5px; font-weight: 600; color: var(--rl-risalto); margin: 0 0 8px; }
+.rl-pres { font-size: 14.5px; line-height: 1.5; color: var(--rl-tenue); margin: 0 0 14px; }
+.rl-contatti { display: flex; flex-wrap: wrap; gap: 8px; }
+.rl-contatti a { display: inline-flex; align-items: center; gap: 7px; text-decoration: none; font-weight: 700; font-size: 13.5px; border-radius: 999px; padding: 9px 16px; border: 1px solid var(--rl-bordo); color: var(--rl-testo); background: var(--rl-riquadro); }
+.rl-contatti a.rl-wa { background: #1c8a49; border-color: #1c8a49; color: #fff; }
+.rl-contatti a:hover { filter: brightness(1.07); }
+.rl-eroe .rl-piu { margin-top: 12px; }
+.rl-eroe .rl-piu summary { color: var(--rl-testo); }
+.rl-eroe .rl-piu .pg-piu-c { background: var(--rl-riquadro); border: 1px solid var(--rl-bordo); color: var(--rl-testo); font-size: 13px; }
+.rl-eroe .rl-piu .pg-piu-c a { color: inherit; }
+.rl-eroe a:focus-visible, .rl-eroe summary:focus-visible { outline: 2px solid var(--rl-risalto); outline-offset: 3px; }
+
+/* sotto: pochi passi e poche domande */
+.rl-passi { padding: 52px 0 8px; }
+.rl-passi h2, .rl-faq h2 { font-size: clamp(25px, 3vw, 33px); font-weight: 800; margin: 0 0 20px; }
+.rl-passi ol { list-style: none; counter-reset: rl; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.rl-passi li { counter-increment: rl; background: #fff; border-radius: 20px; padding: 20px 20px 20px 66px; position: relative; display: flex; flex-direction: column; gap: 2px; }
+.rl-passi li::before { content: counter(rl); position: absolute; left: 18px; top: 20px; width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: var(--sx-lime); color: var(--sx-verde); font: 800 16px/1 "Manrope", sans-serif; }
+.rl-passi small { font-size: 13.5px; color: var(--sx-tenue); }
+.rl-faq { padding: 44px 0 64px; }
+.rl-faq .sx-wrap { max-width: 860px; }
+.rl-passi .sx-wrap { max-width: 1080px; }
+.rl-piede { padding: 30px 0 26px; font-size: 12.5px; }
+.rl-piede nav { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 14px; }
+.rl-piede nav a { text-decoration: none; color: #fff; }
+.rl-piede nav a:hover { text-decoration: underline; }
+.rl-piede p { margin: 0; line-height: 1.6; max-width: 820px; }
+
+/* video facoltativo, sotto il modulo */
+.rl-video { padding: 56px 0 8px; }
+.rl-video-in { display: grid; grid-template-columns: 280px minmax(0, 360px); gap: 56px; align-items: center; justify-content: center; }
+.rl-video h2 { font-size: clamp(27px, 3.4vw, 40px); line-height: 1.05; font-weight: 800; margin: 0 0 12px; }
+.rl-video p { color: var(--sx-tenue); font-size: 15.5px; line-height: 1.6; margin: 0 0 22px; }
+.rl-video .sx-video-q { border-radius: 28px; }
+.rl-video .sx-video-link { left: 8%; right: 8%; }
+html[data-modello="vicino"] .rl-video .sx-btn { background: #b8402a; }
+html[data-modello="energia"] .rl-video .sx-btn { background: #ffd60a; color: #0d1440; }
+/* colori del modulo che seguono il modello */
+html[data-modello] .sx-card .pg-drop b { color: var(--sx-verde); }
+html[data-modello="vicino"] .sx-card, html[data-modello="energia"] .sx-card { --pg-testo: var(--sx-testo); }
+html[data-modello="vicino"] .sx-allegato, html[data-modello="energia"] .sx-allegato { background: var(--sx-tenue-sfondo); border-color: var(--sx-linea); }
+html[data-modello="vicino"] .sx-card .sx-btn { background: #b8402a; }
+html[data-modello="vicino"] .sx-card .sx-btn:hover { background: #9c3422; }
+html[data-modello="energia"] .sx-card .sx-btn { background: #ffd60a; color: #0d1440; }
+html[data-modello="energia"] .sx-card .sx-btn:hover { background: #f2c900; }
+
+/* 1 · fiducia: referente e titolo a sinistra, modulo a destra */
+.rl-griglia { display: grid; grid-template-columns: 1.08fr .92fr; grid-template-areas: "ref form" "testo form"; grid-template-rows: auto 1fr; gap: 34px 60px; align-items: start; }
+.rl-ref { grid-area: ref; } .rl-testo { grid-area: testo; } .rl-griglia > .sx-card { grid-area: form; }
+html[data-modello="fiducia"] .rl-foto { width: 178px; height: 178px; }
+html[data-modello="fiducia"] .rl-ref { background: var(--rl-riquadro); border: 1px solid var(--rl-bordo); border-radius: 30px; padding: 22px; }
+
+/* 2 · vicino: una colonna, foto tonda grande e saluto in una nuvoletta */
+html[data-modello="vicino"] .rl-griglia { grid-template-columns: minmax(0, 620px); grid-template-areas: "ref" "testo" "form"; grid-template-rows: none; justify-content: center; gap: 26px; }
+html[data-modello="vicino"] .rl-ref { flex-direction: column; text-align: center; gap: 0; }
+html[data-modello="vicino"] .rl-foto { width: 184px; height: 184px; border-radius: 50%; border: 6px solid #fff; box-shadow: 0 18px 40px -18px rgba(74, 34, 56, .5); font-size: 60px; z-index: 1; }
+html[data-modello="vicino"] .rl-ref-testo { background: #fff; border-radius: 28px; padding: 44px 26px 22px; margin-top: -28px; width: 100%; box-sizing: border-box; box-shadow: 0 20px 44px -30px rgba(74, 34, 56, .45); }
+html[data-modello="vicino"] .rl-contatti { justify-content: center; }
+html[data-modello="vicino"] .rl-contatti a:not(.rl-wa) { background: #fff5ec; }
+html[data-modello="vicino"] .rl-piu .pg-piu-c { background: #fff5ec; text-align: left; }
+html[data-modello="vicino"] .rl-testo { text-align: center; padding-top: 6px; }
+html[data-modello="vicino"] .rl-testo h1 { font-size: clamp(32px, 4vw, 46px); }
+html[data-modello="vicino"] .rl-descr { margin-left: auto; margin-right: auto; }
+html[data-modello="vicino"] .sx-spunte { justify-content: center; }
+html[data-modello="vicino"] .rl-passi .sx-wrap { max-width: 860px; }
+html[data-modello="vicino"] .rl-eroe .sx-occhiello::before { display: none; }
+
+/* 3 · energia: titolo enorme, poi referente e modulo larghi uguali, uno sopra l'altro */
+html[data-modello="energia"] .rl-eroe { padding-top: 60px; background: linear-gradient(180deg, #1a2bc4 0, #1a2bc4 62%, #131f8f 100%); }
+html[data-modello="energia"] .rl-griglia { grid-template-columns: minmax(0, 760px); grid-template-areas: "testo" "ref" "form"; grid-template-rows: none; gap: 22px; justify-content: center; }
+html[data-modello="energia"] .rl-testo { margin-bottom: 14px; }
+html[data-modello="energia"] .rl-testo h1 { font-size: clamp(46px, 6.2vw, 84px); line-height: .94; }
+html[data-modello="energia"] .rl-vai { display: inline-block; }
+html[data-modello="energia"] .rl-ref { align-items: flex-start; gap: 20px; border-radius: var(--sx-r); background: #ffd60a; color: #0d1440; padding: 24px 30px; }
+html[data-modello="energia"] .rl-foto { width: 92px; height: 92px; border-radius: 50%; background: #1a2bc4; color: #ffd60a; font-size: 32px; }
+html[data-modello="energia"] .rl-ref-testo { flex: 1; }
+html[data-modello="energia"] .rl-ruolo, html[data-modello="energia"] .rl-pres { color: #0d1440; }
+html[data-modello="energia"] .rl-contatti a:not(.rl-wa) { color: #0d1440; border-color: rgba(13, 20, 64, .3); background: rgba(255, 255, 255, .45); }
+html[data-modello="energia"] .rl-piu summary { color: #0d1440; }
+html[data-modello="energia"] .rl-piu .pg-piu-c { color: #0d1440; background: rgba(255, 255, 255, .55); border-color: transparent; }
+/* nell'area personale: la foto accanto al nome */
+.pg-ref-foto { flex: none; display: inline-block; width: 30px; height: 30px; border-radius: 50%; overflow: hidden; }
+.pg-ref-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+@media (max-width: 960px) {
+  .rl-griglia { grid-template-columns: minmax(0, 1fr); grid-template-areas: "ref" "testo" "form"; grid-template-rows: none; gap: 28px; }
+  .rl-griglia > .sx-card { margin-top: 0; }
+  .rl-vai { display: inline-block; }
+  .rl-passi ol { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .rl-eroe { padding: 24px 0 24px; }
+  html[data-modello="energia"] .rl-eroe { padding-top: 34px; }
+  .rl-ref { gap: 16px; }
+  .rl-foto, html[data-modello="fiducia"] .rl-foto { width: 104px; height: 104px; border-radius: 24px; font-size: 34px; }
+  html[data-modello="fiducia"] .rl-ref { align-items: flex-start; padding: 16px; border-radius: 24px; }
+  html[data-modello="vicino"] .rl-foto { width: 148px; height: 148px; font-size: 48px; }
+  html[data-modello="energia"] .rl-ref { padding: 18px; gap: 14px; border-radius: 24px; }
+  html[data-modello="energia"] .rl-foto { width: 72px; height: 72px; font-size: 25px; }
+  .rl-contatti a { padding: 8px 13px; font-size: 13px; }
+  .rl-eroe h1 { font-size: 38px; }
+  .rl-eroe .sx-spunte { gap: 6px; } .rl-eroe .sx-spunte li { font-size: 12px; padding: 6px 10px 6px 8px; }
+  .rl-descr { font-size: 15px; line-height: 1.5; }
+  .rl-vai { margin-top: 18px; padding: 14px 26px; font-size: 16px; }
+  .rl-passi { padding-top: 40px; }
+  .rl-faq { padding: 34px 0 48px; }
+}
+@media (max-width: 700px) { .rl-video { padding-top: 40px; } .rl-video-in { grid-template-columns: minmax(0, 1fr); gap: 24px; } .rl-video .sx-video { max-width: 280px; } .rl-video-in > div { text-align: center; } }

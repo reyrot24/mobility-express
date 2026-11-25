@@ -6,6 +6,7 @@
 //   POST /risk-radar/enrich   { piva }                       -> ATECO e fatturato cercati online (Claude + ricerca web)
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 import Anthropic from "npm:@anthropic-ai/sdk@0.121.0";
+import { notifySettings, parseEmails, sendAnalysisMail } from "../_shared/rr-notify.ts";
 
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false },
@@ -386,6 +387,21 @@ async function enrich(p: string) {
   return web;
 }
 
+async function notifyNewAnalysis(id: string, a: Parameters<typeof sendAnalysisMail>[1], ownerEmail: string | null) {
+  try {
+    const cfg = await notifySettings(db);
+    const to = [...new Set([...cfg.emails, ...(cfg.owner ? parseEmails(ownerEmail) : [])])];
+    if (!to.length) return;
+    try {
+      await sendAnalysisMail(to, a, a.email);
+      await db.from("rr_analyses").update({ notified_at: new Date().toISOString(), notified_to: to.join(", "), notify_error: null }).eq("id", id);
+    } catch (e) {
+      console.error("rr-notify", e);
+      await db.from("rr_analyses").update({ notified_to: to.join(", "), notify_error: String((e as Error).message ?? e).slice(0, 300) }).eq("id", id);
+    }
+  } catch (e) { console.error("rr-notify settings", e); }
+}
+
 const clip = (s: unknown, n: number) => (typeof s === "string" ? s.trim().slice(0, n) : "");
 
 Deno.serve(async (req) => {
@@ -419,8 +435,10 @@ Deno.serve(async (req) => {
       const wants = body.wants_contact === true;
 
       let ref: string | null = clip(body.ref, 40).toLowerCase() || null;
+      let referrer: { code: string; name: string; operatore_nome: string | null; operatore_email: string | null } | null = null;
       if (ref) {
-        const { data } = await db.from("rr_referrers").select("code").eq("code", ref).eq("active", true).maybeSingle();
+        const { data } = await db.from("rr_referrers").select("code,name,operatore_nome,operatore_email").eq("code", ref).eq("active", true).maybeSingle();
+        referrer = data;
         if (!data) ref = null;
       }
       const v = await companyData(piva);
@@ -438,6 +456,16 @@ Deno.serve(async (req) => {
         consent_text: wants ? "Richiesta di ricontatto da parte di un consulente ALCA Broker" : null,
       }).select("id").single();
       if (error) throw error;
+      // Email "nuova analisi": in background, la risposta al cliente non aspetta l'SMTP.
+      const mail = notifyNewAnalysis(data.id, {
+        company_name: (v.checked ? v.name : null) ?? reg?.name ?? web?.name ?? null, piva,
+        address: v.checked ? v.address : (reg?.town ?? null), sector: result.sector.name,
+        overall_risk: result.overall, budget_low: mid.low, budget_high: mid.high,
+        email, phone: phone || null, wants_contact: wants, referrer,
+      }, referrer?.operatore_email ?? null);
+      // deno-lint-ignore no-explicit-any
+      const rt = (globalThis as any).EdgeRuntime;
+      if (rt?.waitUntil) rt.waitUntil(mail); else await mail;
       return json({ id: data.id, company: { piva, ...v }, result });
     }
 

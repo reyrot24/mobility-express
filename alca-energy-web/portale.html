@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="it">
+<head>
+<base href="/">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portale partner · Alca Energy</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><img class="brand-logo" src="assets/logo-alca.png" alt="Alca Broker" width="68" height="40"><div>Alca Energy<small>Luce e gas · preventivi</small></div></div>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-view="preventivo" data-seg="business">Preventivo Aziende</button>
+      <button class="tab" data-view="preventivo" data-seg="privati">Preventivo Privati <span class="pill demo" id="tab-demo">demo</span></button>
+      <span class="tab-sep" aria-hidden="true"></span>
+      <button class="tab" data-view="pratiche">CRM</button>
+      <button class="tab" data-view="invia">Invia bolletta</button>
+      <button class="tab" data-view="offerte">Offerte</button>
+      <button class="tab" data-view="indici">Indici</button>
+      <button class="tab" data-view="impostazioni">Impostazioni</button>
+    </nav>
+    <div class="spacer"></div>
+    <span class="badge-upd" id="upd-label"></span>
+  </div>
+</header>
+
+<main>
+  <div class="alert warn" id="banner" hidden style="margin:0 0 16px"></div>
+  <!-- ============ PREVENTIVO ============ -->
+  <section class="view active" id="view-preventivo">
+    <div class="alert warn solo-privati" id="demo-banner"></div>
+    <div class="grid grid-2">
+      <div>
+        <div class="card">
+          <div class="card-head"><h2><span class="step">1</span>Carica la bolletta</h2></div>
+          <div class="drop" id="drop" role="button" tabindex="0">
+            <div class="drop-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 18v-6M9 15l3-3 3 3"/></svg></div>
+            <strong>Trascina qui la bolletta</strong>
+            <span class="muted small">oppure clicca per sceglierla · PDF o foto, anche più pagine · luce, gas o dual</span>
+            <input type="file" id="file-input" accept=".pdf,image/*" multiple hidden>
+          </div>
+          <ul class="file-list" id="file-list"></ul>
+          <div class="btn-row" style="margin-top:12px">
+            <button class="btn primary" id="btn-analizza" disabled>Analizza con AI</button>
+            <button class="btn" id="btn-nuova">Nuova pratica</button>
+          </div>
+          <div class="status" id="ai-status"></div>
+          <div id="ai-avvisi"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2><span class="step">2</span>Dati cliente e bolletta</h2>
+            <div class="seg" id="seg-comm">
+              <button data-c="luce" class="active"><span class="dot" style="background:var(--luce)"></span>Luce</button>
+              <button data-c="gas"><span class="dot" style="background:var(--gas)"></span>Gas</button>
+            </div>
+          </div>
+          <div class="fields">
+            <label class="f full"><span class="solo-business">Ragione sociale</span><span class="solo-privati">Intestatario (nome e cognome)</span><input data-k="cliente.ragione_sociale"></label>
+            <label class="f"><span class="solo-business">Partita IVA</span><span class="solo-privati">Codice fiscale</span><input data-k="cliente.partita_iva"></label>
+            <label class="f solo-privati">Abitazione<select data-k="cliente.residente"><option value="si">Di residenza</option><option value="no">Non di residenza (seconda casa)</option></select></label>
+            <label class="f solo-business">Tipo cliente
+              <select data-k="cliente.tipo_cliente">
+                <option value="societa">Società</option><option value="ditta_individuale">Ditta individuale / persona fisica</option>
+                <option value="condominio">Condominio</option><option value="pertinenza">Pertinenza</option><option value="pa">Pubblica Amministrazione</option>
+              </select></label>
+            <label class="f">Email del cliente<input data-k="crm.email" type="email" inputmode="email" placeholder="cliente@esempio.it"></label>
+            <label class="f">Telefono del cliente<input data-k="crm.telefono" type="tel" inputmode="tel" placeholder="333 1234567"></label>
+            <label class="f full">Indirizzo di fornitura<input data-k="cliente.indirizzo" placeholder="Via Roma 1, 80121 Napoli (NA)"><span class="hint" id="regione-auto"></span></label>
+            <label class="f">Fornitore attuale<input data-k="cliente.fornitore_attuale"></label>
+            <label class="f">Offerta attuale<input data-k="cliente.nome_offerta_attuale"></label>
+            <label class="f">Regione<select data-k="cliente.regione" id="sel-regione"><option value="">Dall'indirizzo</option></select></label>
+          </div>
+
+          <div class="fields" id="form-luce" style="margin-top:4px">
+            <div class="section-label">Fornitura luce <label class="check" style="display:inline-flex;margin-left:auto;text-transform:none;letter-spacing:0"><input type="checkbox" data-k="luce.attiva"> includi</label></div>
+            <label class="f">Periodo dal<input type="date" data-k="luce.da"></label>
+            <label class="f">Periodo al<input type="date" data-k="luce.a"></label>
+            <label class="f">Totale fattura luce (€, IVA incl.)<input data-k="luce.totale" inputmode="decimal"></label>
+            <label class="f">Spesa materia energia (€)<input data-k="luce.materia" inputmode="decimal"></label>
+            <label class="f">Consumo periodo (kWh)<input data-k="luce.kwh" inputmode="decimal"></label>
+            <label class="f">Potenza impegnata (kW)<input data-k="luce.kw" inputmode="decimal" placeholder="3 casa · 6 azienda"></label>
+            <details class="more" id="more-luce">
+              <summary>POD, distributore e consumi per fascia <span class="sum-val" id="sum-luce"></span></summary>
+              <div class="fields">
+                <label class="f">POD<input data-k="luce.pod"></label>
+                <label class="f">Distributore<input data-k="luce.distributore" placeholder="es. e-distribuzione, Areti"></label>
+                <label class="f">Consumo annuo in bolletta (kWh)<input data-k="luce.kwhAnnuo" inputmode="decimal" placeholder="opzionale"></label>
+                <label class="f">Struttura attuale
+                  <select data-k="luce.fasceAttuali"><option value="">—</option><option>Monoraria</option><option>Bioraria</option><option>Trioraria</option></select></label>
+                <label class="f">F1 (kWh)<input data-k="luce.f1" inputmode="decimal" placeholder="opzionale"></label>
+                <label class="f">F2 (kWh)<input data-k="luce.f2" inputmode="decimal" placeholder="opzionale"></label>
+                <label class="f">F3 (kWh)<input data-k="luce.f3" inputmode="decimal" placeholder="opzionale"></label>
+                <label class="check full"><input type="checkbox" data-k="luce.usaAnnuo"> Usa il consumo annuo della bolletta invece della proiezione del periodo</label>
+              </div>
+            </details>
+          </div>
+
+          <div class="fields" id="form-gas" style="margin-top:4px;display:none">
+            <div class="section-label">Fornitura gas <label class="check" style="display:inline-flex;margin-left:auto;text-transform:none;letter-spacing:0"><input type="checkbox" data-k="gas.attiva"> includi</label></div>
+            <label class="f">Periodo dal<input type="date" data-k="gas.da"></label>
+            <label class="f">Periodo al<input type="date" data-k="gas.a"></label>
+            <label class="f">Totale fattura gas (€, IVA incl.)<input data-k="gas.totale" inputmode="decimal"></label>
+            <label class="f">Spesa materia gas (€)<input data-k="gas.materia" inputmode="decimal"></label>
+            <label class="f">Consumo periodo (Smc)<input data-k="gas.smc" inputmode="decimal"></label>
+            <label class="f">Classe contatore
+              <select data-k="gas.classe"><option value="G4 - G6">G4 – G6</option><option value="G10 - G40">G10 – G40</option><option value="G40">oltre G40</option></select></label>
+            <details class="more" id="more-gas">
+              <summary>PDR e consumo annuo <span class="sum-val" id="sum-gas"></span></summary>
+              <div class="fields">
+                <label class="f">PDR<input data-k="gas.pdr"></label>
+                <label class="f">Uso del gas (per stimare l'anno)<select data-k="gas.uso"><option value="riscaldamento">Riscaldamento (+ cucina e acqua calda)</option><option value="cottura_acs">Solo cucina e acqua calda</option><option value="processo">Uso costante (processo produttivo)</option></select></label>
+                <label class="f">Consumo annuo in bolletta (Smc)<input data-k="gas.smcAnnuo" inputmode="decimal" placeholder="opzionale"></label>
+                <label class="check full"><input type="checkbox" data-k="gas.usaAnnuo"> Usa il consumo annuo della bolletta invece della proiezione del periodo</label>
+              </div>
+            </details>
+          </div>
+
+          <div class="fields" id="form-origine" style="margin-top:12px">
+            <details class="more" id="more-origine">
+              <summary>Provenienza: agente, segnalatore, email di risposta <span class="sum-val" id="sum-origine"></span></summary>
+              <div class="fields">
+                <label class="f">Arrivata tramite<select data-k="origine.canale" id="sel-canale"></select></label>
+                <label class="f">Agente<input data-k="origine.agente" list="dl-agenti" placeholder="chi segue il cliente"></label>
+                <label class="f">Segnalatore<input data-k="origine.segnalatore" list="dl-segnalatori" placeholder="chi ha segnalato il cliente"></label>
+                <label class="f">Email per la risposta<input data-k="origine.emailRisposta" inputmode="email" placeholder="a chi mandare il preventivo"></label>
+              </div>
+            </details>
+            <div class="small muted full" id="origine-richiesta" hidden></div>
+            <datalist id="dl-agenti"></datalist><datalist id="dl-segnalatori"></datalist>
+          </div>
+          <div class="derived" id="derived"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-head"><h2><span class="step">3</span>Filtri offerte</h2>
+            <button class="btn sm" id="btn-reset-filtri">Azzera filtri</button></div>
+          <div class="filters">
+            <label class="f">Tipologia prezzo<select data-flt="tipologia"><option>Tutte</option><option>Fissa</option><option>Variabile</option></select></label>
+            <label class="f">Fasce orarie (luce)<select data-flt="fascia"><option>Tutte</option><option>Monoraria</option><option>Bioraria</option><option>Trioraria</option></select></label>
+            <label class="f">Pagamento<select data-flt="pagamento"><option>Tutti</option><option>RID</option><option>Bollettino</option></select></label>
+            <label class="f">Operazione<select data-flt="operazione"><option>Tutte</option><option>Switch-in</option><option>Switch con Voltura</option><option>Subentro</option><option>Prima Attivazione</option><option>Posa Contatore</option></select></label>
+            <label class="f solo-business">Canale di vendita<select data-flt="canale"><option>Tutti</option><option>Call Center</option><option>Store</option><option>FP</option></select></label>
+            <label class="f">Contratto<select data-flt="contratto"><option value="Tutti">Single e Dual</option><option value="single">Solo single</option><option value="dual">Solo dual</option></select></label>
+            <label class="f">Indice PUN/PSV per la stima<select data-flt="indiceModo"><option value="ultimo">Ultimo mese disponibile (come Facile)</option><option value="periodo">Media periodo bolletta</option><option value="ultimi12">Media ultimi 12 mesi</option><option value="manuale">Valore manuale</option></select></label>
+            <label class="f" id="lbl-manuale" style="display:none">Valore manuale (€/kWh · €/Smc)<input data-flt="indiceManuale" inputmode="decimal"></label>
+          </div>
+          <div class="filters-checks">
+            <label class="check"><input type="checkbox" data-flt="soloValide"> Solo offerte attive oggi</label>
+<label class="check" title="Nasconde il resto del mercato: restano solo le offerte attivabili tramite Alca"><input type="checkbox" data-flt="soloNostri"> <span id="flt-nostri-t">Solo le nostre offerte</span></label>
+            <label class="check"><input type="checkbox" data-flt="soloRisparmio"> Solo con risparmio</label>
+            <label class="check"><input type="checkbox" data-flt="escludiFornitore"> Escludi fornitore attuale</label>
+            <label class="check" title="Usa la quota fissa al netto di sconti e bonus quando il listino la indica"><input type="checkbox" data-flt="usaSconti"> Considera sconti sulla quota fissa</label>
+            <label class="check" title="Risparmio = spesa materia della bolletta − (prezzo × consumo + quota fissa) con IVA, senza dispacciamento e capacità: stesso metodo del portale Facile"><input type="checkbox" data-flt="metodoFacile"> Calcolo come Facile</label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2><span class="step">4</span>Offerte più convenienti</h2>
+            <div class="seg" id="seg-res">
+              <button data-c="luce" class="active"><span class="dot" style="background:var(--luce)"></span>Luce <span id="cnt-luce" class="muted"></span></button>
+              <button data-c="gas"><span class="dot" style="background:var(--gas)"></span>Gas <span id="cnt-gas" class="muted"></span></button>
+            </div>
+          </div>
+          <div id="kpis" class="kpis"></div>
+          <div id="results"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2><span class="step">5</span>Preventivo</h2>
+            <div class="btn-row">
+              <button class="btn" id="btn-salva">Salva nel CRM</button>
+              <button class="btn solo-server" id="btn-richiedi">Richiedi contratto</button>
+              <button class="btn no-demo" id="btn-invia">Invia al cliente</button>
+              <button class="btn primary no-demo" id="btn-stampa">Crea PDF</button>
+            </div>
+          </div>
+          <p class="muted small" style="margin:0 0 8px">Spunta le offerte da proporre nell'elenco: se non ne spunti nessuna, il preventivo mostra le 3 migliori.</p>
+          <div id="selezionate"></div>
+          <label class="f" style="margin-top:10px">Note per il cliente<textarea id="note-prev" rows="2" placeholder="es. Offerta valida fino al…, attivazione senza interruzioni…"></textarea></label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ OFFERTE ============ -->
+  <section class="view" id="view-offerte">
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Catalogo offerte</h2><div class="muted small" id="off-info">Modifica direttamente le celle. Le offerte variabili usano PUN/PSV + spread; le fisse il prezzo indicato.</div></div>
+        <div class="btn-row">
+          <div class="seg" id="seg-segoff"><button data-c="business" class="active">🏢 Aziende</button><button data-c="privati">🏠 Privati</button></div>
+          <div class="seg" id="seg-cat"><button data-c="nostre" class="active">Le nostre</button><button data-c="mercato">Mercato</button></div>
+          <div class="seg" id="seg-off"><button data-c="luce" class="active">Luce</button><button data-c="gas">Gas</button></div>
+          <button class="btn" id="btn-add-off" data-only-editor>＋ Nuova offerta</button>
+          <button class="btn primary" id="btn-import-xlsx" data-only-editor>Importa calcolatori Excel</button>
+          <input type="file" id="xlsx-input" accept=".xlsx,.xlsm,.xls" multiple hidden>
+        </div>
+      </div>
+      <div id="off-table"></div>
+    </div>
+  </section>
+
+  <!-- ============ INDICI ============ -->
+  <section class="view" id="view-indici">
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-head"><h2>PUN e PSV mensili</h2><button class="btn sm" id="btn-add-mese" data-only-editor>＋ Aggiungi mese</button></div>
+        <div class="fields" style="margin-bottom:12px">
+          <div class="section-label" style="border:0;margin:0;padding:0">Forecast (usato se il periodo non ha storico)</div>
+          <label class="f">PUN F0<input data-fc="punF0" inputmode="decimal"></label>
+          <label class="f">PUN F1<input data-fc="punF1" inputmode="decimal"></label>
+          <label class="f">PUN F23<input data-fc="punF23" inputmode="decimal"></label>
+          <label class="f">PSV €/Smc<input data-fc="psv" inputmode="decimal"></label>
+        </div>
+        <div class="table-wrap" style="max-height:520px;overflow:auto"><table class="edit-table" id="tbl-indici"></table></div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-head"><h2>Componenti Autorità – Luce</h2><button class="btn sm" data-save-comp="luce" data-only-editor>Salva</button></div>
+          <p class="muted small" style="margin-top:0">BTA altri usi: DIS, TRAS, UC3, UC6, MIS, ASOS, ARIM, dispacciamento, capacità, accise, IVA. Formato JSON.</p>
+          <textarea id="comp-luce" rows="14" spellcheck="false" style="font-family:ui-monospace,Consolas,monospace;font-size:12px"></textarea>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Componenti Autorità – Gas</h2><button class="btn sm" data-save-comp="gas" data-only-editor>Salva</button></div>
+          <p class="muted small" style="margin-top:0">QT, RS, UG1, TAU1/TAU3, ST, VR, UG2, RE, UG3, GS, accise, IVA. Formato JSON.</p>
+          <textarea id="comp-gas" rows="14" spellcheck="false" style="font-family:ui-monospace,Consolas,monospace;font-size:12px"></textarea>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Componenti domestiche – Luce <span class="pill demo">privati</span></h2><button class="btn sm" data-save-comp="luceDom" data-only-editor>Salva</button></div>
+          <p class="muted small" style="margin-top:0">Tariffa TD: trasporto (quota fissa, potenza, energia), oneri ASOS+ARIM, quota fissa non residenti, accise con esenzione residenti, IVA 10%. Servono solo per il totale stimato. Formato JSON.</p>
+          <textarea id="comp-luceDom" rows="10" spellcheck="false" style="font-family:ui-monospace,Consolas,monospace;font-size:12px"></textarea>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Componenti domestiche – Gas <span class="pill demo">privati</span></h2><button class="btn sm" data-save-comp="gasDom" data-only-editor>Salva</button></div>
+          <p class="muted small" style="margin-top:0">Come il gas aziende più accise domestiche a scaglioni, addizionale regionale (€/Smc) e IVA 10% sui primi 480 Smc. Formato JSON.</p>
+          <textarea id="comp-gasDom" rows="10" spellcheck="false" style="font-family:ui-monospace,Consolas,monospace;font-size:12px"></textarea>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PRATICHE ============ -->
+  <section class="view" id="view-invia">
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-head"><div><h2>Invia una bolletta</h2><div class="muted small">Carica la bolletta del cliente e indica chi l'ha procurata e a chi mandare il preventivo. Arriva subito all'ufficio, che risponde con il preventivo migliore.</div></div></div>
+        <div class="drop" id="ib-drop"><b>Trascina qui la bolletta</b><br><span class="muted small">PDF o foto, anche più pagine · oppure clicca per scegliere</span></div>
+        <input type="file" id="ib-input" accept=".pdf,image/*" multiple hidden>
+        <ul class="file-list" id="ib-files"></ul>
+        <div class="fields" style="margin-top:10px">
+          <label class="f">Agente<input id="ib-agente" list="dl-agenti" placeholder="il tuo nome"></label>
+          <label class="f">Segnalatore<input id="ib-segn" list="dl-segnalatori" placeholder="chi ha segnalato il cliente (facoltativo)"></label>
+          <label class="f full">Email a cui mandare il preventivo<input id="ib-email" inputmode="email" placeholder="la tua email o quella del cliente"></label>
+          <label class="f">Cliente (facoltativo)<input id="ib-rs" placeholder="ragione sociale"></label>
+          <label class="f">Partita IVA (facoltativa)<input id="ib-piva"></label>
+          <label class="f">Email del cliente<input id="ib-cli-email" type="email" inputmode="email" placeholder="cliente@esempio.it"></label>
+          <label class="f">Telefono del cliente<input id="ib-cli-tel" type="tel" inputmode="tel" placeholder="333 1234567"></label>
+          <label class="f full">Note per l'ufficio<textarea id="ib-note" rows="3" placeholder="es. vuole prezzo fisso, scadenza contratto a marzo…"></textarea></label>
+        </div>
+        <div class="btn-row" style="margin-top:10px"><button class="btn primary" id="ib-go">Invia bolletta</button></div>
+        <div class="status" id="ib-status"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Le mie bollette inviate</h2><button class="btn sm" id="ib-refresh">↻ Aggiorna</button></div>
+        <div id="ib-mie"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="view-pratiche">
+    <div class="card" id="inbox-card" hidden>
+      <div class="card-head">
+        <div><h2>Bollette in arrivo <span class="pill" id="inbox-count"></span></h2><div class="muted small">Bollette arrivate con chi le ha mandate (agente, segnalatore) e l'email a cui rispondere. Qui arriveranno anche quelle del flusso automatico.</div></div>
+        <div class="btn-row"><label class="check"><input type="checkbox" id="inbox-tutte"> Mostra anche evase</label><button class="btn" id="inbox-nuova">＋ Registra bolletta</button></div>
+      </div>
+      <div id="inbox-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div><h2>CRM preventivi</h2><div class="muted small">Ogni preventivo creato (PDF) o salvato finisce qui. Aggiorna stato, ricontatto e note del cliente.</div></div>
+        <div class="btn-row"><button class="btn" id="crm-refresh">↻ Aggiorna</button><button class="btn" id="crm-export">Esporta Excel (CSV)</button></div>
+      </div>
+      <div class="alert warn" id="crm-err" hidden></div>
+      <div id="crm-kpis" class="kpis"></div>
+      <div class="filters crm-filters">
+        <label class="f">Cerca<input id="crm-q" placeholder="Cliente, P.IVA, agente, POD, n. pratica o stima (ST-…)"></label>
+        <label class="f">Stato<select id="crm-stato"></select></label>
+        <label class="f">Tipo<select id="crm-seg"><option value="Tutti">Aziende e privati</option><option value="business">Aziende / P.IVA</option><option value="privati">Privati (demo)</option></select></label>
+        <label class="f">Agente<select id="crm-agente"></select></label>
+        <label class="f">Segnalatore<select id="crm-segn"></select></label>
+        <label class="f" id="crm-prod-wrap" hidden>Produttore<select id="crm-prod"></select></label>
+        <label class="check"><input type="checkbox" id="crm-richiamare"> Solo da ricontattare</label>
+      </div>
+      <div id="pratiche-list"></div>
+    </div>
+  </section>
+
+  <!-- ============ IMPOSTAZIONI ============ -->
+  <section class="view" id="view-impostazioni">
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-head"><h2>Intelligenza artificiale</h2></div>
+        <p class="muted" data-only-online hidden style="margin-top:0">L'analisi delle bollette usa il tuo account Claude: la prima volta ti verrà chiesto di autorizzarla. Non serve nessuna chiave.</p>
+        <div class="fields">
+          <label class="f full" data-only-local>Chiave API Anthropic<input type="password" id="set-key" placeholder="sk-ant-…" autocomplete="off"></label>
+          <label class="f" data-only-local>Modello<select id="set-model">
+            <option value="claude-opus-5-5">Claude Opus 5.5 (consigliato)</option>
+            <option value="claude-sonnet-5-5">Claude Sonnet 5.5 (più economico)</option>
+            <option value="claude-haiku-5-5">Claude Haiku 5.5 (più veloce)</option>
+          </select></label>
+          <label class="f" data-only-local>Accuratezza (effort)<select id="set-effort">
+            <option value="low">Bassa – più veloce</option><option value="medium">Media</option><option value="high">Alta – più precisa</option>
+          </select></label>
+          <label class="check full" data-only-local><input type="checkbox" id="set-remember"> Ricorda la chiave su questo computer</label>
+          <label class="f full">Nome consulente / agenzia (compare sul preventivo)<input id="set-agente"></label>
+          <label class="f full">Email mittente dei preventivi<input id="set-mittente" inputmode="email" placeholder="energia@alcabroker.it"></label>
+          <label class="f full">Firma delle email<textarea id="set-firma" rows="3" placeholder="Mario Rossi&#10;ALCA Broker – Ufficio Energia&#10;Tel. …"></textarea></label>
+        </div>
+        <div class="btn-row" style="margin-top:12px"><button class="btn primary" id="btn-save-set">Salva impostazioni</button></div>
+        <p class="muted small" data-only-local>La bolletta viene inviata direttamente dal browser all'API di Anthropic solo quando premi "Analizza con AI". La chiave e i dati restano in questo browser.</p>
+      </div>
+      <div class="card" data-only-editor>
+        <div class="card-head"><h2>Carica nuove offerte con AI</h2></div>
+        <p class="muted small" style="margin-top:0">Carica l'Excel dei calcolatori, le schede offerta in PDF, la mail del riepilogo salvata in PDF o una foto: l'AI legge le offerte, le confronta con il catalogo e ti mostra cosa è nuovo, cosa cambia e cosa chiude. Confermi tu prima di applicare.</p>
+        <div class="fields">
+          <label class="f">Aggiorna il catalogo<select id="aioff-dest"><option value="nostre">Le nostre offerte (aziende)</option><option value="mercato">Offerte di mercato (aziende)</option><option value="nostre-privati">I nostri accordi privati (residenziale)</option><option value="mercato-privati">Mercato privati (residenziale)</option></select></label>
+        </div>
+        <div class="drop small-drop" id="aioff-drop"><b>Trascina qui i file</b> o clicca per sceglierli<div class="muted small">Excel, CSV, PDF, JPG, PNG · anche più file insieme</div></div>
+        <input type="file" id="aioff-input" multiple hidden accept=".xlsx,.xlsm,.xls,.csv,.pdf,.jpg,.jpeg,.png,.webp">
+        <ul class="file-list" id="aioff-files"></ul>
+        <label class="f" style="margin-top:10px">Oppure incolla qui il testo delle offerte <span class="muted small">(es. il listino copiato dal portale partner: Offerta, Tipologia, Validità, Prezzo, CCV, Note…)</span>
+          <textarea id="aioff-testo" rows="6" placeholder="Incolla qui l'elenco delle offerte così come lo ricevi"></textarea></label>
+        <div class="btn-row" style="margin-top:10px"><button class="btn primary" id="aioff-go" disabled>Analizza e aggiorna offerte</button></div>
+        <div class="status" id="aioff-status"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Dati e backup</h2></div>
+        <div class="btn-row">
+          <button class="btn" id="btn-export">Esporta backup (JSON)</button>
+          <button class="btn" id="btn-import-json" data-only-editor>Ripristina backup</button>
+          <input type="file" id="json-input" accept=".json" hidden>
+          <button class="btn danger" id="btn-reset" data-only-editor>Ripristina catalogo originale</button>
+        </div>
+        <p class="muted small">Il backup contiene offerte, indici, componenti e pratiche salvate (non la chiave API). Usalo per spostare i dati su un altro PC.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<dialog id="dlg">
+  <div class="d-head"><h2 id="dlg-title"></h2><button class="btn sm" data-close>✕</button></div>
+  <div class="d-body" id="dlg-body"></div>
+  <div class="d-foot" id="dlg-foot"></div>
+</dialog>
+<div class="toast" id="toast"></div>
+<div id="print-area" class="pdfdoc"></div>
+
+<script src="js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="js/data.js"></script>
+<script src="js/mercato.js"></script>
+<script src="js/mercato-privati.js"></script>
+<script src="js/accordi-privati.js"></script>
+<script src="js/restrizioni.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/store.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/importer.js"></script>
+<script src="js/server.js"></script>
+<script src="js/rete.js"></script>
+<script src="js/referral.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

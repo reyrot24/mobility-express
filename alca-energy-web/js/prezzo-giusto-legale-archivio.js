@@ -1,0 +1,328 @@
+/* Archivio delle versioni precedenti dei testi legali (consultabili da /prezzo-giusto/versioni). Testi pubblicati: non modificarli. */
+/* Testi legali del servizio "Il prezzo giusto per te" (Alca Energy, marchio di Alca Broker S.r.l.).
+   Versione 1.0 — da far verificare al consulente legale / DPO prima della pubblicazione definitiva.
+   Se cambi un testo in modo sostanziale, aumenta la versione: le nuove richieste registrano la versione accettata. */
+(function () {
+  const TITOLARE = "Alca Broker S.r.l., Via Vittoria Colonna 14, 80121 Napoli, P.IVA 07965051217";
+  const CONTATTO = "energia@alcabroker.it";
+  (window.LEGALE_ARCHIVIO ||= {})["1.0"] = { periodo: "pubblicata il 20 novembre 2026, sostituita dalla versione 1.1",
+    versioni: { privacy: "1.0", condizioni: "1.0" },
+    aggiornato: "20 novembre 2026",
+    condizioni: {
+      titolo: "Condizioni del servizio",
+      testo: `
+<h2>1. Chi offre il servizio</h2>
+<p>"Il prezzo giusto per te" è un servizio gratuito di Alca Energy, marchio di ${TITOLARE} ("Alca"). Il servizio è raggiungibile tramite i link personali dei collaboratori della rete Alca.</p>
+<h2>2. Cosa fa il servizio</h2>
+<p>Carichi una bolletta di energia elettrica o gas naturale e indichi la tua email. Dopo la conferma dell'email, Alca legge i dati della bolletta con l'aiuto di un sistema di intelligenza artificiale, calcola una <b>stima orientativa</b> del risparmio possibile con le offerte che Alca può attivare e te la invia via email e nella tua area personale.</p>
+<p>Se lo lasci attivo, il servizio di <b>monitoraggio</b> ricontrolla periodicamente le offerte disponibili e ti scrive quando ne trova una più conveniente per i tuoi consumi. Puoi disattivarlo in ogni momento dall'area personale o rispondendo a una delle nostre email.</p>
+<h2>3. Natura della stima</h2>
+<p>La stima è gratuita, indicativa e non vincolante. Non è un'offerta contrattuale né una proposta di fornitura: le condizioni definitive sono solo quelle del contratto del fornitore che ti verrà proposto. Leggi le <a href="/prezzo-giusto/note">note sulla stima</a>.</p>
+<h2>4. Cosa ti chiediamo</h2>
+<ul><li>Di caricare solo bollette intestate a te o per le quali hai titolo a richiedere la stima.</li>
+<li>Di indicare un'email valida e a tua disposizione: senza la conferma dell'email non analizziamo la bolletta.</li>
+<li>Di non usare il servizio per finalità illecite o per inviare file che non siano bollette.</li></ul>
+<h2>5. Area personale</h2>
+<p>Con la conferma dell'email ti creiamo un'area personale protetta da password, scelta da te. Lì trovi le richieste, le stime, i contratti eventualmente sottoscritti tramite Alca e le tue scelte su monitoraggio e comunicazioni.</p>
+<h2>6. Costi e durata</h2>
+<p>Il servizio è gratuito e non comporta alcun obbligo di cambio fornitore. Resta attivo finché non disattivi il monitoraggio o non chiedi la cancellazione dei tuoi dati.</p>
+<h2>7. Responsabilità</h2>
+<p>Alca cura il calcolo con la massima diligenza, ma la stima dipende dai dati leggibili in bolletta, dalle condizioni economiche pubblicate dai fornitori e dall'andamento degli indici di mercato (PUN, PSV). Alca non risponde di differenze tra stima e spesa effettiva dovute a questi fattori.</p>
+<h2>8. Modifiche</h2>
+<p>Possiamo aggiornare queste condizioni: la versione accettata resta registrata con ogni richiesta e ti informeremo dei cambiamenti rilevanti.</p>
+<h2>9. Contatti</h2>
+<p>Per qualsiasi richiesta: <a href="mailto:${CONTATTO}">${CONTATTO}</a>.</p>`
+    },
+    privacy: {
+      titolo: "Informativa sul trattamento dei dati personali",
+      testo: `
+<p>Informativa ai sensi degli artt. 13 e 14 del Regolamento (UE) 2016/679 ("GDPR").</p>
+<h2>1. Titolare del trattamento</h2>
+<p>${TITOLARE}. Contatto per la privacy: <a href="mailto:${CONTATTO}">${CONTATTO}</a>.</p>
+<h2>2. Dati trattati</h2>
+<ul><li>Dati di contatto: email, numero di cellulare (facoltativo), nome e cognome se li indichi.</li>
+<li>Dati della bolletta: intestatario, indirizzo di fornitura, codici POD/PDR, fornitore e offerta attuali, consumi, importi, codice fiscale o partita IVA se presenti.</li>
+<li>Dati tecnici: indirizzo IP, data e ora delle richieste e delle conferme, browser, scelte sui consensi.</li></ul>
+<h2>3. Finalità e basi giuridiche</h2>
+<ul><li><b>a) Stima e area personale</b> — analisi della bolletta, invio della stima, gestione dell'area personale: esecuzione di misure precontrattuali richieste da te (art. 6.1.b GDPR). Conferimento necessario: senza questi dati non possiamo fornire il servizio.</li>
+<li><b>b) Monitoraggio delle offerte</b> — nuove verifiche periodiche e avvisi quando troviamo un'offerta migliore: servizio da te richiesto (art. 6.1.b), disattivabile in ogni momento.</li>
+<li><b>c) Ricontatto</b> — se lo scegli, il tuo referente ti contatta per illustrarti la stima e, se vuoi, l'attivazione: tua richiesta (art. 6.1.b). Facoltativo.</li>
+<li><b>d) Comunicazioni commerciali</b> — newsletter, promozioni e offerte di Alca anche su servizi diversi da luce e gas, via email, telefono o messaggi: consenso (art. 6.1.a). Facoltativo e revocabile in ogni momento senza conseguenze sul servizio.</li>
+<li><b>e) Obblighi di legge e difesa</b> — adempimenti fiscali, contabili e richieste delle autorità (art. 6.1.c); prova dei consensi e tutela in giudizio (art. 6.1.f).</li></ul>
+<h2>4. Intelligenza artificiale</h2>
+<p>Per leggere la bolletta usiamo un servizio di intelligenza artificiale fornito da Anthropic, che agisce come responsabile del trattamento e non usa i dati per addestrare i propri modelli. L'AI estrae i dati: il calcolo della stima segue regole definite da Alca e ogni decisione commerciale resta a persone di Alca. Non prendiamo decisioni basate unicamente su trattamenti automatizzati che producano effetti giuridici nei tuoi confronti.</p>
+<h2>5. Destinatari</h2>
+<p>I dati sono trattati dal personale di Alca e dal collaboratore della rete Alca che ti ha inviato il link (il tuo referente), autorizzati e istruiti. Fornitori tecnici che agiscono come responsabili: hosting e database (Supabase, Netlify), posta elettronica (Google Workspace), intelligenza artificiale (Anthropic). Se decidi di attivare un'offerta, i dati necessari sono comunicati al fornitore di energia scelto. I dati non sono diffusi.</p>
+<h2>6. Trasferimenti fuori dall'UE</h2>
+<p>Alcuni fornitori possono trattare dati negli Stati Uniti: il trasferimento avviene sulla base della decisione di adeguatezza UE-USA (Data Privacy Framework) o delle clausole contrattuali standard della Commissione europea.</p>
+<h2>7. Conservazione</h2>
+<ul><li>Richieste non confermate: cancellate dopo 30 giorni.</li>
+<li>Bollette, stime e area personale: finché il servizio è attivo e per 24 mesi dall'ultima attività, poi cancellati o resi anonimi.</li>
+<li>Dati per finalità commerciali: fino alla revoca del consenso e comunque non oltre 24 mesi dall'ultimo contatto.</li>
+<li>Registro dei consensi e dati contrattuali: per il tempo previsto dalla legge (fino a 10 anni).</li></ul>
+<h2>8. I tuoi diritti</h2>
+<p>Puoi chiedere accesso, rettifica, cancellazione, limitazione, portabilità dei dati e opporti al trattamento; puoi revocare i consensi in ogni momento dall'area personale o scrivendo a <a href="mailto:${CONTATTO}">${CONTATTO}</a>. Hai diritto di proporre reclamo al Garante per la protezione dei dati personali (www.garanteprivacy.it).</p>`
+    },
+    note: {
+      titolo: "Note sulla stima",
+      testo: `
+<ul><li><b>Consumo annuo.</b> Se la bolletta riporta il consumo annuo usiamo quello; altrimenti lo stimiamo dal periodo fatturato (per il gas con un profilo stagionale: una bolletta invernale non vale come un anno). In questo caso indichiamo un intervallo.</li>
+<li><b>Offerte considerate.</b> Il risparmio è calcolato sulle offerte che Alca può attivare, valide alla data del calcolo e compatibili con i tuoi dati (zona, tipo di cliente, consumi, potenza). Le offerte di mercato servono solo come confronto.</li>
+<li><b>Prezzi variabili.</b> Per le offerte indicizzate usiamo la media degli indici PUN o PSV del periodo e le previsioni disponibili: è una stima, non il prezzo futuro.</li>
+<li><b>Voci incluse.</b> Confrontiamo la spesa per la materia energia e le quote del fornitore; oneri di rete, imposte e IVA dipendono dalla normativa e restano in genere uguali tra fornitori.</li>
+<li><b>Sconti condizionati.</b> Gli sconti legati a requisiti particolari (ad esempio domiciliazione o fattura elettronica) non sono inclusi se non verificabili.</li>
+<li><b>Dati letti con l'AI.</b> La lettura automatica può contenere errori: il tuo referente verifica i dati prima di qualsiasi proposta.</li>
+<li>La stima non è un'offerta: prima di sottoscrivere riceverai le condizioni contrattuali complete del fornitore.</li></ul>`
+    },
+    cookie: {
+      titolo: "Cookie policy",
+      testo: `
+<p>Queste pagine non usano cookie di profilazione né strumenti di analisi o pubblicità di terze parti.</p>
+<p>Usiamo solo strumenti tecnici necessari: la memoria del browser (local storage) per mantenere l'accesso all'area personale, finché non esci o la sessione scade. Non serve il tuo consenso per questi strumenti (art. 122 del Codice privacy), che puoi comunque cancellare dalle impostazioni del browser.</p>
+<p>Le pagine caricano una libreria tecnica da cdn.jsdelivr.net, che può ricevere l'indirizzo IP per consegnare il file, senza cookie.</p>
+<p>Titolare: ${TITOLARE}. Contatto: <a href="mailto:${CONTATTO}">${CONTATTO}</a>.</p>`
+    }
+  };
+})();
+
+/* Testi legali del servizio "Il prezzo giusto per te" (Alca Energy, marchio di Alca Broker S.r.l.).
+   Versione 1.1 — testi del consulente legale (redazione 20 novembre 2026).
+   Dati inseriti il 20/11/2026 per la versione di prova (visura 8/4/2026, bilancio 2025, documenti pubblici dei fornitori): da riverificare per la versione definitiva.
+   Un campo ancora da completare si marca con DA_COMPLETARE(campo, testo): la pubblicazione resta bloccata finché ne resta anche uno.
+   Se cambi un testo in modo sostanziale, aumenta la versione: le nuove richieste registrano la versione accettata. */
+(function () {
+  const CONTATTO = "energia@alcabroker.it";
+  const MAIL = `<a href="mailto:${CONTATTO}">${CONTATTO}</a>`;
+  const DA_COMPLETARE = (campo, testo) => `<span class="pg-da-completare" data-campo="${campo}">${testo}</span>`;
+  (window.LEGALE_ARCHIVIO ||= {})["1.1"] = { periodo: "in vigore dal 20 novembre 2026, sostituita dalla versione 1.2 di condizioni e note e, per l'informativa cookie, dalla versione 1.2 (nuovo dominio alcaenergia.it)",
+    versioni: { privacy: "1.1", condizioni: "1.1", note: "1.1", cookie: "1.1" },
+    aggiornato: "20 novembre 2026",
+    efficacia: "20 novembre 2026",
+    condizioni: {
+      titolo: "Condizioni del servizio",
+      testo: `
+<p><b>Versione 1.1 · Data di redazione: 20 novembre 2026 · Data di efficacia: 20 novembre 2026</b></p>
+<h2>1. Chi offre il servizio</h2>
+<p>Alca Energy è un marchio di Alca Broker S.r.l., con sede in Via Vittoria Colonna 14, 80121 Napoli, partita IVA 07965051217, di seguito «Alca». Puoi contattarci a ${MAIL} o scrivere alla sede indicata.</p>
+<p>Registro delle imprese di Napoli (Camera di Commercio di Napoli), numero di iscrizione e codice fiscale 07965051217. REA: NA-922097. Capitale sociale: € 10.000,00 interamente versato, risultante dal bilancio al 31 dicembre 2025. La società non è a socio unico. Telefono aziendale: +39 081 17676699; per il servizio Alca Energy scrivi preferibilmente a ${MAIL}. PEC: <a href="mailto:alcabrokersrl@legalmail.it">alcabrokersrl@legalmail.it</a>.</p>
+<p>Queste condizioni disciplinano la stima, l’area personale, il monitoraggio facoltativo e l’assistenza relativa alla richiesta. Le <a href="/prezzo-giusto/note">Note sulla stima</a> spiegano come svolgiamo il confronto; l’<a href="/prezzo-giusto/privacy">Informativa privacy</a> e l’<a href="/prezzo-giusto/cookie">Informativa cookie</a> descrivono separatamente il trattamento dei dati.</p>
+<h2>2. A chi è rivolto</h2>
+<p>Il servizio riguarda forniture di luce e gas in Italia. Puoi utilizzarlo se sei maggiorenne e agisci per la tua fornitura oppure sei legittimato a rappresentare l’intestatario, un’impresa o un altro soggetto.</p>
+<p>Indica correttamente se la richiesta riguarda un’utenza domestica o un’attività professionale. La qualifica di consumatore dipende dallo scopo per cui agisci, non dalla sola selezione di una casella. Le tutele inderogabili del consumatore restano applicabili quando ne ricorrono i presupposti.</p>
+<p>Carica documenti pertinenti, leggibili e utilizzabili legittimamente. Se agisci per altri, dichiara il tuo ruolo e fornisci le informazioni necessarie a verificarlo. Possiamo chiedere una conferma proporzionata dei tuoi poteri prima di procedere. L’accettazione di queste condizioni non sostituisce gli obblighi di Alca verso il diverso intestatario né costituisce un’autorizzazione generale all’uso dei suoi dati.</p>
+<h2>3. Che cosa richiedi</h2>
+<p>Il servizio principale è una stima gratuita una tantum delle condizioni della fornitura e dell’eventuale risparmio ottenibile tra le offerte effettivamente analizzate. Puoi richiederla senza attivare monitoraggio, ricontatto o marketing.</p>
+<p>Il caricamento della bolletta, la conferma dell’email e la consultazione di una stima non attivano una nuova fornitura, non risolvono il contratto attuale e non conferiscono ad Alca un mandato a cambiare automaticamente venditore. Non autorizzano prelievi, pagamenti o accessi ai tuoi conti.</p>
+<p>Se desideri successivamente approfondire un’offerta, il referente verifica i dati e le condizioni prima di formulare una proposta di attivazione. Ogni eventuale contratto energetico richiede un distinto percorso con identificazione del venditore, documentazione contrattuale e manifestazione di volontà nelle forme applicabili. Il venditore resta la controparte della fornitura. Queste condizioni non sostituiscono le condizioni di quel contratto.</p>
+<h2>4. Richiesta, verifica email e area personale</h2>
+<p>Prima dell’invio puoi leggere e conservare questi documenti e correggere i dati inseriti. Accetti le condizioni con la scelta dedicata al servizio; il rapporto si perfeziona dopo la conferma dell’indirizzo email. Ti inviamo una conferma con la versione delle condizioni applicabile, conservabile senza dipendere dalle successive modifiche del sito.</p>
+<p>Prima della conferma email la bolletta resta in attesa: non viene sottoposta all’analisi mediante intelligenza artificiale né resa disponibile al referente, ferme le operazioni tecniche necessarie alla sicurezza e alla verifica della richiesta. Il collegamento di conferma dura 24 ore; puoi richiederne un altro entro sette giorni dal caricamento, senza prolungare la conservazione della richiesta non confermata oltre quei sette giorni.</p>
+<p>L’area personale permette di consultare le richieste e gestire le scelte. Impostare una password non equivale a prestare consenso al marketing. Custodisci le credenziali e segnalaci accessi sospetti: non sei responsabile automaticamente di ogni uso del profilo da parte di terzi. Il collegamento personale del referente identifica il contesto della richiesta e non sostituisce l’autenticazione né autorizza l’accesso indiscriminato della rete ai tuoi documenti.</p>
+<h2>5. Gratuità, offerte disponibili e rapporti commerciali</h2>
+<p>Non ti addebitiamo corrispettivi per stima, account, monitoraggio e assistenza descritti qui. Non sono previsti abbonamenti a pagamento o rinnovi onerosi. Gli eventuali costi di una futura fornitura sono indicati nei documenti del relativo venditore.</p>
+<p>Alca può ricevere compensi dai fornitori o dai partner commerciali per le attivazioni effettuate tramite la propria rete. Il servizio ha quindi anche una finalità commerciale. Le offerte attivabili tramite Alca e le offerte pubbliche esterne utilizzate per confronto sono presentate in gruppi distinti, con il relativo perimetro.</p>
+<p>Non promettiamo di includere tutte le offerte esistenti né di individuare sempre il prezzo più basso dell’intero mercato. I risultati dipendono da offerte disponibili, requisiti di accesso e dati della richiesta. La sezione <a href="/prezzo-giusto/note">Note sulla stima</a> descrive ordinamento, criteri di inclusione, costi e limiti del confronto. Un’offerta esterna non attivabile tramite Alca rimane riconoscibile come tale.</p>
+<h2>6. Natura e verifica della stima</h2>
+<p>La prima elaborazione può utilizzare strumenti automatici, compresa l’intelligenza artificiale per leggere i documenti. La stima non è una garanzia di risparmio, un prezzo bloccato o un impegno del venditore ad accettare la fornitura.</p>
+<p>I risultati indicano i dati e le ipotesi impiegati, la data del confronto e le componenti comprese. Se manca un elemento decisivo, chiediamo un’integrazione oppure limitiamo esplicitamente il confronto; non presentiamo come totale affidabile un importo costruito su dati essenziali non verificabili. Puoi segnalarci errori e chiedere la correzione.</p>
+<p>Prima di una proposta di attivazione è prevista una verifica umana sostanziale dei dati e dell’offerta. Per prezzi variabili e consumi futuri il risultato resta una simulazione: valori di mercato, consumi effettivi, imposte e condizioni contrattuali possono cambiare.</p>
+<h2>7. Monitoraggio facoltativo</h2>
+<p>Il monitoraggio si attiva solo con una tua scelta espressa, non preselezionata, riferita alla fornitura indicata. Dura 12 mesi dall’attivazione o dall’ultimo rinnovo espresso; non si rinnova perché il sistema ricalcola una stima, invia un’email o registra un aggiornamento automatico.</p>
+<p>Il servizio prevede un controllo ogni tre giorni delle offerte e delle informazioni disponibili secondo le Note sulla stima. Non è una sorveglianza in tempo reale e non assicura l’esame di ogni modifica intervenuta sul mercato. Se un controllo non può essere completato, il sistema non presenta il precedente risultato come aggiornato.</p>
+<p>Gli avvisi sono inviati via email quando emerge un miglioramento verificabile rispetto alla base di confronto dichiarata. Non inviamo un avviso se non emerge tale miglioramento; tra due avvisi sulle offerte trascorrono almeno sette giorni, salvo una nuova richiesta dell’utente. Le comunicazioni necessarie sul funzionamento del servizio rimangono distinte.</p>
+<p>La scelta del monitoraggio comprende una richiesta specifica di ricevere i relativi avvisi sulle offerte, secondo quanto spiegato nell’Informativa privacy; non comprende promozioni assicurative o comunicazioni commerciali generiche. Puoi interromperlo in qualsiasi momento dall’area personale o dal collegamento presente negli avvisi. Lo stop non cancella immediatamente la stima già ricevuta. Il monitoraggio termina anche alla scadenza o quando i dati non sono più affidabili e non vengono riconfermati.</p>
+<h2>8. Ricontatto e altre comunicazioni</h2>
+<p>Puoi chiedere separatamente un ricontatto sulla singola stima o sull’attivazione che ti interessa. Prima della scelta sono indicati referente e canale. La richiesta consente al massimo tre tentativi ragionevoli entro 30 giorni; puoi interromperli prima. Trascorsa questa finestra non utilizziamo la richiesta iniziale per continuare a chiamarti.</p>
+<p>Le comunicazioni promozionali ulteriori sono facoltative e seguono scelte separate per interessi e canali. Il numero di telefono non autorizza automaticamente messaggi WhatsApp. Rifiutare o revocare il marketing non impedisce di ottenere la stima o di utilizzare l’area personale. Nella configurazione del servizio qui descritta non è prevista la cessione dei dati ai partner per il loro marketing autonomo.</p>
+<h2>9. Durata, disattivazione e chiusura</h2>
+<p>La richiesta una tantum si completa con l’invio della stima o con la comunicazione motivata dell’impossibilità di elaborarla. L’area rimane disponibile secondo i tempi indicati nell’Informativa privacy: i dati strutturati, le stime e l’account sono conservati, di regola, per 24 mesi dall’ultima azione significativa dell’utente. Le sole attività automatiche non fanno ripartire questo termine.</p>
+<p>Puoi cessare gratuitamente il servizio in qualsiasi momento, senza giustificazione, dall’area personale o scrivendo a ${MAIL}. Puoi scegliere di fermare soltanto il monitoraggio oppure chiudere l’intero rapporto. La chiusura non modifica contratti di fornitura eventualmente già sottoscritti.</p>
+<p>La cessazione del servizio, la revoca dei consensi e la cancellazione dei dati sono operazioni distinte: puoi richiederle insieme o separatamente. Le richieste relative ai dati vengono gestite secondo l’Informativa privacy e il GDPR; eventuali conservazioni residue sono limitate alle finalità e ai termini giustificati.</p>
+<h2>10. Recesso del consumatore e funzione online</h2>
+<p>Oltre alla possibilità di cessare il servizio in ogni momento, riconosciamo al consumatore un diritto di recesso gratuito entro 14 giorni dalla conferma del servizio, e dalla conferma di ogni rinnovo espresso del monitoraggio. Non devi indicare un motivo. Questa tutela contrattuale non riduce termini più lunghi, proroghe o altri diritti previsti dalla legge, anche per i servizi digitali.</p>
+<p>La gratuità non comporta, da sola, l’esclusione dei diritti del consumatore. L’avvio dell’elaborazione non ti impone costi e non viene utilizzato per richiederti una rinuncia al recesso qui riconosciuto.</p>
+<p>Puoi utilizzare la funzione «<a href="/prezzo-giusto/recesso">Recedi dal servizio</a>», raggiungibile dal fondo della pagina e dall’area personale anche senza avere impostato una password. Ti permette di indicare o confermare nome, richiesta o servizio interessato e indirizzo elettronico a cui ricevere la conferma. Dopo il riepilogo invii la dichiarazione con «Conferma recesso». La funzione è disponibile continuativamente; inviamo senza indebito ritardo una ricevuta conservabile via email con contenuto, data e ora della dichiarazione. Per rispettare un termine conta il momento dell’invio.</p>
+<p>Puoi anche inviare una dichiarazione inequivoca a ${MAIL} o alla sede di Alca. Non sei obbligato a utilizzare il modulo seguente.</p>
+<div class="pg-modulo-recesso">
+<p><b>Modulo facoltativo per comunicare il recesso</b></p>
+<p>Destinatario: Alca Broker S.r.l., Via Vittoria Colonna 14, 80121 Napoli; ${MAIL}.</p>
+<p>«Comunico il recesso dal servizio Alca Energy identificato di seguito».</p>
+<ul><li>Nome e cognome del consumatore:</li>
+<li>Indirizzo del consumatore:</li>
+<li>Servizio o numero della richiesta:</li>
+<li>Data di conferma del servizio:</li>
+<li>Recapito elettronico per la ricevuta:</li>
+<li>Data della comunicazione:</li>
+<li>Firma del consumatore, soltanto per l’invio su carta:</li></ul>
+</div>
+<p>Il recesso ferma le prestazioni future interessate e non comporta addebiti per quelle già eseguite. I contenuti recuperabili vengono messi a disposizione su richiesta secondo la disciplina applicabile. Questo recesso riguarda il servizio Alca: per un distinto contratto energetico valgono i diritti e i recapiti indicati dal venditore.</p>
+<h2>11. Corretto utilizzo, disponibilità e responsabilità</h2>
+<p>Non utilizzare il servizio per caricare documenti illeciti, impersonare terzi, interferire con il sistema o accedere a richieste altrui. In presenza di un problema concreto possiamo limitare temporaneamente la funzione interessata, in misura proporzionata, spiegandone il motivo salvo esigenze di sicurezza o divieti di legge. Quando possibile ti permettiamo di correggere il problema.</p>
+<p>Alca opera con la diligenza professionale dovuta. Differenze dovute a consumi effettivi, variazioni future di mercato o condizioni del venditore non costituiscono, da sole, prova di errore nella stima; ciò non esclude la responsabilità di Alca per propri inadempimenti, errori imputabili o carenze del processo di verifica.</p>
+<p>Non sono escluse o limitate le responsabilità inderogabili, comprese quelle per dolo o colpa grave, né i rimedi e le garanzie legali applicabili al consumatore. L’utilizzo di strumenti automatici o fornitori tecnici non trasferisce sull’utente le responsabilità che la legge attribuisce ad Alca.</p>
+<p>Quando ricorrono i presupposti degli articoli 135-octies e seguenti del Codice del consumo, si applica inoltre la garanzia legale di conformità del contenuto o servizio digitale. In caso di mancata fornitura puoi invitarci a eseguirla e, nei casi previsti dalla legge, risolvere il contratto, anche immediatamente quando ne ricorrono le condizioni. Per un difetto di conformità puoi ottenere il ripristino senza spese, entro un termine congruo e senza inconvenienti significativi, oppure la risoluzione nei casi previsti, ferma ogni altra tutela applicabile. Questi rimedi non sono limitati dal termine di 14 giorni per il recesso né dalle avvertenze sulla natura orientativa della stima. La loro applicazione non modifica la gratuità del servizio.</p>
+<h2>12. Aggiornamenti delle condizioni</h2>
+<p>Ogni richiesta conserva il riferimento alla versione accettata. Possiamo aggiornare le condizioni per cambiamenti normativi, esigenze documentate di sicurezza o evoluzioni del servizio, indicando versione e data di efficacia. Le nuove condizioni valgono per le nuove richieste.</p>
+<p>Le modifiche sostanziali ai servizi già attivi sono comunicate prima dell’efficacia e richiedono una nuova accettazione, salvo quanto imposto dalla legge. Non introduciamo corrispettivi, nuovi usi dei dati o nuove finalità promozionali sulla base del solo silenzio o della prosecuzione dell’uso. Rimane possibile cessare gratuitamente il servizio.</p>
+<h2>13. Assistenza, reclami e legge applicabile</h2>
+<p>Per assistenza, errori o reclami scrivi a ${MAIL}, indicando il riferimento della richiesta e quanto necessario a comprendere il problema. Ti confermiamo la ricezione e rispondiamo nel merito senza ritardi ingiustificati. Se un reclamo non è risolto, forniamo le informazioni sugli strumenti di risoluzione alternativa delle controversie pertinenti e sulla nostra eventuale adesione, quando richiesto dalla legge. Restano fermi il ricorso al giudice e le segnalazioni alle autorità competenti.</p>
+<p>Per contestazioni sulla fatturazione o sull’esecuzione di una fornitura, il destinatario del reclamo è il venditore, secondo il suo contratto e la regolazione applicabile; possiamo assisterti senza sostituirci a tale soggetto.</p>
+<p>Si applica la legge italiana, fatte salve le tutele inderogabili eventualmente spettanti al consumatore. Per le controversie con consumatori è competente il giudice del luogo di residenza o domicilio secondo le norme inderogabili applicabili. Per gli altri utenti valgono le regole ordinarie di competenza, senza imposizione di un foro esclusivo. L’eventuale invalidità di una clausola non pregiudica i diritti dell’utente e lascia valide le restanti disposizioni nei limiti consentiti dalla legge.</p>`
+    },
+    privacy: {
+      titolo: "Informativa sul trattamento dei dati personali",
+      testo: `
+<p><b>Versione 1.1 — Efficace dal 20 novembre 2026.</b></p>
+<p>Informativa ai sensi degli articoli 13 e 14 del Regolamento (UE) 2016/679 («GDPR») per «Il prezzo giusto per te», servizio Alca Energy.</p>
+<h2>1. Chi tratta i dati e come contattarci</h2>
+<p>Il titolare del trattamento è Alca Broker S.r.l., che utilizza il marchio Alca Energy, con sede in Via Vittoria Colonna 14, 80121 Napoli, P. IVA 07965051217. Per informazioni privacy, esercizio dei diritti, revoche e opposizioni puoi scrivere a ${MAIL} oppure alla sede, all’attenzione del referente privacy.</p>
+<p>Responsabile della protezione dei dati (DPO): Alfonso Caiazzo, <a href="mailto:dpo@alcabroker.it">dpo@alcabroker.it</a>. Per le questioni privacy puoi scrivere anche a <a href="mailto:privacy@alcabroker.it">privacy@alcabroker.it</a>.</p>
+<h2>2. Quali dati utilizziamo e da dove provengono</h2>
+<p>Riceviamo i dati inseriti nel modulo e quelli contenuti nella bolletta PDF o nelle fotografie: nome, email, eventuale telefono, intestatario, indirizzo della fornitura, POD/PDR, fornitore, caratteristiche della tariffa, consumi, periodi e importi. Il documento può contenere anche codice fiscale, partita IVA, coordinate bancarie o altri elementi che non servono alla stima.</p>
+<p>Trattiamo inoltre risultati dell’estrazione, stime, correzioni, preferenze, richieste di assistenza e ricontatto, prove delle scelte effettuate, versione dei testi accettati e codice del referente associato al link. Per funzionamento e sicurezza possono essere trattati indirizzo IP, dati del browser, orari, eventi tecnici e di accesso. Gli strumenti salvati nel dispositivo sono descritti nell’<a href="/prezzo-giusto/cookie">Informativa cookie e tecnologie analoghe</a>.</p>
+<p>Carica soltanto i dati necessari. Oscura IBAN, codici di pagamento e informazioni estranee al confronto. Non inviare documenti di identità o informazioni sanitarie, comprese indicazioni di disagio fisico eventualmente presenti nella bolletta. Il servizio non prevede l’uso di dati particolari per il confronto: se il documento li contiene, occorre una versione oscurata prima dell’estrazione esterna.</p>
+<h3>Se presenti una richiesta per un altra persona o un azienda</h3>
+<p>Devi essere legittimato a rappresentarla e comunicarle questa informativa. Per una persona fisica, la base contrattuale o precontrattuale può operare quando la richiesta è effettivamente formulata dall’interessato attraverso il suo rappresentante. La disponibilità di una bolletta altrui non giustifica ogni trattamento.</p>
+<p>Per i dati di referenti e rappresentanti di aziende, il nostro legittimo interesse è gestire la richiesta dell’impresa e verificarne la provenienza, previa valutazione di necessità e bilanciamento. Possiamo chiedere una conferma o documentazione proporzionata dei poteri; non richiediamo sistematicamente documenti di identità. Se manca un presupposto valido, sospendiamo la lavorazione ed eliminiamo i dati non legittimamente conservabili.</p>
+<p>Quando riceviamo dati da un rappresentante o da altro soggetto, tale soggetto e il documento trasmesso ne costituiscono la fonte. Ove si applichi l’articolo 14 GDPR, rendiamo l’informativa all’interessato entro un mese, oppure al primo contatto o alla prima comunicazione a un destinatario se antecedenti, salvo un’eccezione applicabile e documentata, ad esempio quando l’interessato ne dispone già.</p>
+<h2>3. Perché trattiamo i dati e su quale base</h2>
+<table class="pg-tab-leg">
+<thead><tr><th>Finalità</th><th>Base giuridica e limiti</th></tr></thead>
+<tbody>
+<tr><td>Verificare l’email, gestire la richiesta, estrarre i dati necessari, elaborare e correggere la stima, renderla consultabile nell’area personale e fornire assistenza richiesta</td><td>Art. 6(1)(b) GDPR: esecuzione del servizio o misure richieste prima di un contratto. Per rappresentanti e referenti aziendali vale quanto indicato nella sezione 2.</td></tr>
+<tr><td>Monitorare la fornitura caricata, se attivi questa funzione</td><td>Art. 6(1)(b), limitatamente al servizio continuativo espressamente richiesto. Il monitoraggio dura 12 mesi dall’attivazione o dall’ultimo rinnovo espresso; puoi disattivarlo conservando l’accesso alla stima entro i relativi termini.</td></tr>
+<tr><td>Inviare gli avvisi contenenti nuove offerte previsti dal monitoraggio, quando hanno natura promozionale</td><td>Consenso, art. 6(1)(a) GDPR e art. 130 del Codice privacy, raccolto con la scelta facoltativa relativa agli avvisi e ai canali indicati. Non deriva dalla sola richiesta della stima. Gli avvisi cessano se revochi la scelta o scade il servizio.</td></tr>
+<tr><td>Eseguire il ricontatto da te richiesto per chiarimenti sulla stima o assistenza all’eventuale attivazione</td><td>Art. 6(1)(b), entro l’oggetto della singola richiesta e mediante il referente e il canale indicati. La richiesta è gestita entro 30 giorni, con non più di tre tentativi ragionevoli. Non autorizza successive campagne promozionali.</td></tr>
+<tr><td>Inviare comunicazioni commerciali Alca su energia e/o prodotti assicurativi</td><td>Consenso facoltativo, art. 6(1)(a) e art. 130 ove applicabile. Scegli separatamente i settori e i canali proposti. WhatsApp richiede una scelta che comprenda espressamente quel canale; il solo numero di telefono non equivale a consenso. Per il telemarketing rispettiamo anche la disciplina del Registro pubblico delle opposizioni applicabile al contatto.</td></tr>
+<tr><td>Garantire sicurezza, prevenire abusi e gestire incidenti</td><td>Art. 6(1)(f): legittimo interesse alla protezione del servizio e dei dati, valutato e limitato a quanto necessario; art. 6(1)(c) per gli eventuali adempimenti imposti dalla legge.</td></tr>
+<tr><td>Adempiere a obblighi concretamente applicabili e tutelare diritti</td><td>Art. 6(1)(c) per obblighi legali; art. 6(1)(f) per conservare prove minime, gestire contestazioni e difendere diritti, con accesso ristretto e verifica della necessità.</td></tr>
+</tbody>
+</table>
+<p>L’accettazione delle condizioni e la presa visione dell’informativa sono distinte dai consensi facoltativi. Puoi ottenere la stima senza marketing, monitoraggio o ricontatto. L’email è necessaria per verificare l’accesso e consegnare il servizio; il telefono è facoltativo, salvo che tu scelga una modalità di contatto che lo richieda. Senza i dati tecnici essenziali non possiamo elaborare una stima attendibile.</p>
+<h2>4. Come funzionano estrazione, controlli e accesso</h2>
+<p>Prima della verifica dell’email, il file è conservato temporaneamente per completare la richiesta: non viene inviato al sistema di intelligenza artificiale né reso disponibile al referente commerciale, fatti salvi gli accessi tecnici strettamente necessari alla sicurezza.</p>
+<p>Dopo la verifica, utilizziamo un servizio di intelligenza artificiale di Anthropic per estrarre i dati della bolletta; il confronto economico applica le regole e le tariffe del servizio. Puoi chiedere correzioni dei dati estratti. Informazioni critiche mancanti o incerte impediscono una stima numerica completa o ne limitano il perimetro, che viene segnalato.</p>
+<p>La prima stima può essere automatica. Prima di una proposta di attivazione è prevista una verifica umana sostanziale. Il servizio non cambia automaticamente fornitore e non adotta decisioni basate esclusivamente su trattamenti automatizzati che producano effetti giuridici o incidano in modo analogamente significativo sulla persona. Il confronto usa consumi e caratteristiche della fornitura; non autorizza profilazione pubblicitaria ulteriore.</p>
+<p>Dati inviati all’AI: Prima dell’invio al servizio di intelligenza artificiale, i PDF con testo vengono controllati automaticamente per individuare riferimenti a dati sanitari (ad esempio disagio fisico o apparecchiature elettromedicali): se ne troviamo, l’invio è sospeso e ti chiediamo una versione oscurata. Le fotografie e i PDF senza testo non possono essere controllati in modo automatico: prima dell’invio li esamina una persona incaricata di Alca, che li inoltra solo se non contengono dati sanitari, altrimenti ti chiede una versione oscurata. Addestramento e conservazione: il servizio è utilizzato tramite l’interfaccia di programmazione (API) di Anthropic secondo i suoi termini commerciali, che escludono l’addestramento dei modelli sui contenuti del cliente; il fornitore cancella di norma i dati inviati e le risposte entro 30 giorni, salvo le eccezioni previste dalle sue regole, ad esempio per esigenze di sicurezza o obblighi di legge.</p>
+<p>Adottiamo misure proporzionate ai rischi, tra cui autenticazione, separazione dei permessi, protezione delle comunicazioni, tracciamento degli accessi e procedure di cancellazione. Il codice del referente nel link non costituisce una credenziale per accedere alle tue pratiche.</p>
+<h2>5. Chi può ricevere o consultare i dati</h2>
+<p>Possono accedervi il personale autorizzato e i fornitori che operano per nostro conto, nei limiti delle mansioni e degli accordi applicabili.</p>
+<p>Il referente associato al link è identificato nella pagina o nella richiesta di ricontatto. Un collaboratore esterno accede soltanto dopo verifica del suo ruolo, formalizzazione dell’incarico e attribuzione dei permessi necessari. L’eventuale accesso per verificare la stima anche senza ricontatto deve essere indicato prima della raccolta: al momento nessun collaboratore esterno della rete accede alle richieste o ai documenti, che sono gestiti dal personale autorizzato di Alca. Prima di un eventuale accesso definiremo per ciascuna categoria di collaboratori il rapporto con Alca, il ruolo privacy, i dati necessari e le autorizzazioni, e lo indicheremo in questa informativa. Se intervengono un titolare autonomo o contitolari, ricevi informazioni specifiche e, per la contitolarità, il contenuto essenziale dell’accordo.</p>
+<p>I principali servizi tecnici previsti sono:</p>
+<table class="pg-tab-leg">
+<thead><tr><th>Servizio</th><th>Funzione</th><th>Informazioni da consultare</th></tr></thead>
+<tbody>
+<tr><td>Supabase</td><td>Database, autenticazione e conservazione dei file</td><td>Supabase Pte. Ltd., Singapore, secondo i termini contrattuali standard; progetto nella regione dell’Unione europea di Francoforte (Germania). <a href="https://supabase.com/legal/dpa" target="_blank" rel="noopener">Accordo sul trattamento</a>; trasferimenti: clausole contrattuali standard</td></tr>
+<tr><td>Netlify</td><td>Hosting e funzioni applicative</td><td>Netlify, Inc., Stati Uniti. <a href="https://www.netlify.com/pdf/netlify-dpa.pdf" target="_blank" rel="noopener">Accordo sul trattamento</a>; trasferimenti: EU–US Data Privacy Framework e, nei casi previsti, clausole contrattuali standard</td></tr>
+<tr><td>Google Workspace</td><td>Gestione della posta del servizio</td><td>Google Cloud Italy S.r.l., Via Federico Confalonieri 4, 20124 Milano. <a href="https://cloud.google.com/terms/data-processing-addendum/" target="_blank" rel="noopener">Cloud Data Processing Addendum</a>; trasferimenti verso gli Stati Uniti: Data Privacy Framework di Google LLC e, negli altri casi, clausole contrattuali standard</td></tr>
+<tr><td>Anthropic</td><td>Estrazione dei dati mediante AI</td><td>Anthropic Ireland, Limited, secondo i <a href="https://www.anthropic.com/legal/commercial-terms" target="_blank" rel="noopener">termini commerciali</a> e il relativo <a href="https://www.anthropic.com/legal/data-processing-addendum" target="_blank" rel="noopener">accordo sul trattamento</a>; trasferimenti: clausole contrattuali standard quando necessarie</td></tr>
+<tr><td>jsDelivr</td><td>Distribuzione di librerie del sito</td><td>Volentio JSD Limited. <a href="https://www.jsdelivr.com/terms" target="_blank" rel="noopener">Termini</a> e <a href="https://www.jsdelivr.com/documents/data-processing-agreement.pdf" target="_blank" rel="noopener">accordo sul trattamento</a> (indirizzi IP e dati tecnici delle richieste); trasferimenti: clausole contrattuali standard</td></tr>
+</tbody>
+</table>
+<p>Le schede indicano dati, ruoli, paesi, subfornitori, conservazione e garanzie. Per l’attivazione richiesta, i dati necessari possono essere comunicati al fornitore scelto o all’incaricato, previamente identificato con la relativa informativa. Possono riceverli autorità legittimate e consulenti professionali soggetti a riservatezza: consulenti legali, per assistenza, gestione delle contestazioni e tutela dei diritti; commercialisti e consulenti fiscali e contabili, per gli adempimenti amministrativi e fiscali pertinenti; fornitori informatici e di assistenza tecnica, per le attività loro affidate; autorità ed enti competenti, quando la comunicazione è dovuta o legittimamente richiesta. Il professionista agisce come titolare autonomo quando determina finalità e modalità del trattamento nell’ambito della propria attività, oppure come responsabile del trattamento per conto di Alca, secondo le sue istruzioni e con il relativo accordo; la comunicazione è limitata a quanto necessario al singolo incarico e non comprende un accesso generalizzato alle bollette. Non cediamo dati ai partner per campagne autonome né li diffondiamo al pubblico.</p>
+<h2>6. Eventuali trasferimenti fuori dallo SEE</h2>
+<p>L’uso di servizi cloud può comportare conservazione o accessi da paesi esterni allo Spazio economico europeo. In particolare: Netlify, Inc. e Google LLC (Stati Uniti) sulla base dell’EU–US Data Privacy Framework e, nei casi non coperti, delle clausole contrattuali standard; Supabase Pte. Ltd., Anthropic e jsDelivr sulla base delle clausole contrattuali standard previste dai rispettivi accordi sul trattamento, quando i dati sono trattati o resi accessibili fuori dallo Spazio economico europeo.</p>
+<p>Per ciascun trasferimento utilizziamo il presupposto effettivamente applicabile: decisione di adeguatezza, incluso il Data Privacy Framework per una specifica entità e servizio statunitense coperti, oppure clausole contrattuali standard e le ulteriori valutazioni e misure necessarie. La sola collocazione di un server in Europa non esclude accessi extra SEE. Puoi chiedere informazioni e copia delle garanzie a ${MAIL}, con eventuale oscuramento delle informazioni riservate non necessarie.</p>
+<h2>7. Per quanto tempo conserviamo i dati</h2>
+<table class="pg-tab-leg">
+<thead><tr><th>Categoria</th><th>Termine applicato</th></tr></thead>
+<tbody>
+<tr><td>Richiesta non confermata e file collegati</td><td>7 giorni dal caricamento. Il link email dura 24 ore; un nuovo invio non prolunga la conservazione del file.</td></tr>
+<tr><td>Bolletta originale, dopo la conferma</td><td>90 giorni dall’invio della stima. Se non si conclude la lavorazione: eliminazione entro 30 giorni dalla conferma. Una tua integrazione utile, espressa e documentata entro il termine, consente una sola proroga, per massimo 30 giorni dall’integrazione; poi eliminazione e, per proseguire, nuova richiesta.</td></tr>
+<tr><td>Dati strutturati necessari, stime e account</td><td>24 mesi dall’ultima azione significativa: nuovo caricamento, accesso alla propria stima o rinnovo espresso del monitoraggio. Email inviate e ricalcoli automatici non rinnovano il termine. Su richiesta di chiusura o cancellazione validamente attribuita all’interessato, eliminiamo i dati dai sistemi attivi entro 7 giorni, salvo conservazioni circoscritte giustificate.</td></tr>
+<tr><td>Monitoraggio</td><td>12 mesi dall’attivazione o dall’ultimo rinnovo espresso, o fino alla disattivazione se anteriore. Il servizio si interrompe anche quando mancano dati affidabili per proseguirlo.</td></tr>
+<tr><td>Dati utilizzati per marketing</td><td>Massimo 12 mesi dal consenso o dal rinnovo espresso, salvo revoca o opposizione anticipata.</td></tr>
+<tr><td>Prove minime delle scelte privacy</td><td>Fino a 5 anni dall’ultimo trattamento fondato sul consenso o dalla revoca, se successiva, con accesso ristretto e verifica della necessità. Non comprende la conservazione generalizzata delle bollette.</td></tr>
+<tr><td>Elenco minimo delle opposizioni</td><td>Per il periodo in cui occorre evitare nuovi contatti indesiderati, con verifica annuale della necessità. Non viene utilizzato per marketing.</td></tr>
+<tr><td>Prove minime del rapporto e documenti soggetti a specifici obblighi</td><td>Per il termine legalmente applicabile; fino a 10 anni dalla cessazione quando necessario a tutelare pretese contrattuali. Sono conservati soltanto i documenti pertinenti, non l’intero archivio del servizio.</td></tr>
+<tr><td>Log ordinari di sicurezza</td><td>90 giorni, salvo conservazione circoscritta necessaria per un incidente o una contestazione.</td></tr>
+</tbody>
+</table>
+<p>I dati cancellati dai sistemi attivi possono rimanere nelle copie di sicurezza non operative fino al completamento della rotazione, entro 30 giorni. Se una copia viene ripristinata, le cancellazioni vengono nuovamente applicate. Eventuali conservazioni ulteriori per obblighi o controversie riguardano solo i dati necessari, con limitazione dell’accesso e dell’uso.</p>
+<h2>8. I tuoi diritti e le tue scelte</h2>
+<p>Nei casi previsti dagli articoli 15–22 GDPR puoi chiedere accesso e copia dei dati, rettifica, cancellazione, limitazione e portabilità. Puoi opporti ai trattamenti basati sul legittimo interesse per motivi connessi alla tua situazione; per il marketing l’opposizione può essere esercitata in qualsiasi momento, senza motivarla, anche rispetto alla profilazione collegata.</p>
+<p>Puoi revocare i consensi, senza pregiudicare la liceità del trattamento già svolto, tramite i collegamenti nelle comunicazioni, l’area personale o ${MAIL}. La revoca del marketing non impedisce di usare la stima. Disattivazioni e opposizioni bloccano subito i relativi invii. Revoca dei consensi, cessazione del servizio e recesso sono scelte distinte: per queste ultime consulta le <a href="/prezzo-giusto/condizioni">Condizioni</a>.</p>
+<p>Rispondiamo senza ingiustificato ritardo e entro un mese dal ricevimento. In casi complessi o numerosi il termine può essere prorogato di due ulteriori mesi, comunicandoti motivi e proroga entro il primo mese. Il servizio è normalmente gratuito; valgono le eccezioni previste dal GDPR per richieste manifestamente infondate o eccessive. Chiediamo ulteriori informazioni identificative soltanto quando esistono ragionevoli dubbi sull’identità e in misura proporzionata.</p>
+<p>Puoi proporre reclamo al Garante per la protezione dei dati personali, tramite www.garanteprivacy.it, o all’autorità competente ai sensi dell’articolo 77 GDPR, e ricorrere all’autorità giudiziaria. Le limitazioni a un diritto, se applicabili, ti vengono motivate.</p>
+<h2>9. Aggiornamenti</h2>
+<p>Ti comunichiamo le modifiche rilevanti; una nuova informativa non amplia i consensi già raccolti né autorizza finalità incompatibili. Versioni precedenti: <a href="/prezzo-giusto/versioni">archivio delle versioni</a> o su richiesta.</p>`
+    },
+    note: {
+      titolo: "Note sulla stima e sul confronto delle offerte",
+      testo: `
+<p><b>Versione 1.1 · Data di redazione: 20 novembre 2026 · Data di efficacia: 20 novembre 2026</b></p>
+<h2>1. A che cosa serve il risultato</h2>
+<p>La stima ti aiuta a confrontare il costo della fornitura descritta nei documenti caricati con le offerte effettivamente analizzate per il tuo profilo. Non è un prezzo garantito, una promessa di risparmio né un contratto energetico. Il risultato è riferito a una data, a determinati consumi e a ipotesi dichiarate: può cambiare se cambiano questi elementi.</p>
+<p>Il confronto non comprende necessariamente tutti i fornitori o tutte le offerte del mercato. L’espressione «più conveniente» si riferisce esclusivamente al costo stimato, al gruppo di offerte, al periodo e alle condizioni indicati nel risultato. Non equivale a una valutazione generale della qualità del servizio del venditore.</p>
+<h2>2. Due gruppi riconoscibili</h2>
+<p>Presentiamo separatamente:</p>
+<ul><li><b>Offerte attivabili tramite Alca:</b> offerte del catalogo commerciale disponibili attraverso la nostra rete e compatibili con i dati della richiesta.</li>
+<li><b>Offerte pubbliche esterne di confronto:</b> offerte rilevate da fonti pubbliche, non attivabili tramite Alca, mostrate per ampliare il confronto quando i dati disponibili consentono una valutazione attendibile.</li></ul>
+<p>I due gruppi restano visibili e chiaramente identificati. Il risultato riporta fornitori e offerte effettivamente considerati, il numero di proposte confrontate e le principali esclusioni. Se non sono disponibili confronti esterni attendibili, lo diciamo; non presentiamo il solo catalogo Alca come rappresentativo dell’intero mercato.</p>
+<p>La presenza di un’offerta esterna non indica una partnership né la possibilità di attivarla tramite noi. La disponibilità finale deve essere verificata con il relativo venditore. Per un ulteriore confronto puoi consultare il Portale Offerte pubblico, secondo il suo ambito e le sue regole. Il nostro servizio non è il Portale Offerte e non dichiara un’accreditazione ARERA.</p>
+<h2>3. Come vengono ordinate le offerte</h2>
+<p>All’interno di ciascun gruppo, le offerte confrontabili sono ordinate per spesa stimata crescente, sullo stesso orizzonte e con il medesimo perimetro di costi. L’eventuale parità economica è indicata come tale; l’ordine grafico tra risultati pari non attribuisce una migliore convenienza.</p>
+<p>Prima dell’ordinamento applichiamo i requisiti di compatibilità: luce o gas, utenza domestica o professionale, territorio, potenza, consumo, requisiti del cliente, modalità di pagamento, servizi obbligatori, canale e validità dell’offerta. Le proposte non confrontabili sono separate o escluse con una motivazione; non vengono trasformate in una classifica mediante ipotesi nascoste.</p>
+<p>Alca può percepire compensi dalle attivazioni tramite la propria rete. I rapporti commerciali determinano il perimetro del catalogo attivabile, ma non modificano l’ordine economico all’interno dei gruppi. Non sono previste posizioni a pagamento nella graduatoria. Eventuali filtri scelti dall’utente sono evidenziati; un’offerta può essere la meno costosa soltanto entro il filtro selezionato.</p>
+<h2>4. Quali dati utilizziamo</h2>
+<p>Usiamo i dati pertinenti della bolletta e le eventuali integrazioni: periodo fatturato, consumi, letture effettive o stimate, consumo annuo, profilo domestico o professionale, località, potenza e condizioni economiche della fornitura. Codice offerta e documenti contrattuali aiutano a distinguere tariffe, scadenze e rinnovi.</p>
+<p>La lettura automatica dei file, anche mediante intelligenza artificiale, può commettere errori. Puoi verificare e correggere i dati estratti. Campi decisivi mancanti o incoerenti comportano una richiesta di chiarimento, un risultato limitato al perimetro attendibile oppure l’assenza di una stima numerica. Un dato non letto non viene considerato pari a zero. Prima di una proposta di attivazione un incaricato verifica sostanzialmente dati, requisiti e documentazione dell’offerta.</p>
+<h2>5. Consumi e periodo di confronto</h2>
+<p>Di regola confrontiamo 12 mesi e utilizziamo il consumo annuo disponibile. Un diverso orizzonte è indicato accanto ai risultati e non viene confrontato come se fosse identico a quello annuale.</p>
+<p>Se il consumo annuo manca, un’estrapolazione è ammessa solo con un metodo e limiti espliciti. Per il gas, una bolletta invernale o estiva non viene semplicemente moltiplicata per ricavare l’anno: il riscaldamento ha un andamento stagionale. Riportiamo il profilo mensile usato, la sua fonte e un intervallo quando l’incertezza è significativa. Se non abbiamo una base sufficiente, chiediamo altre bollette o il dato annuale.</p>
+<p>Per l’elettricità consideriamo le fasce quando rilevano per il prezzo. Una ripartizione stimata è segnalata. Rettifiche, conguagli e consumi già fatturati vengono distinti per evitare duplicazioni. Un cambiamento previsto di uso, potenza, occupazione dell’immobile o apparecchiature richiede l’aggiornamento delle ipotesi.</p>
+<h2>6. Con quale costo attuale confrontiamo le alternative</h2>
+<p>Il risparmio prospettico è la differenza tra il costo stimato della tariffa attuale e il costo dell’alternativa, applicati agli stessi consumi, periodo e scenario. La base di confronto è indicata nel risultato.</p>
+<p>La spesa storica di una bolletta può descrivere ciò che hai pagato, ma non coincide automaticamente con quanto pagheresti nei prossimi dodici mesi. Se la tua tariffa scade, è soggetta a rinnovo o presenta condizioni future non note, lo segnaliamo. Non manteniamo tacitamente per un anno un prezzo valido solo per pochi mesi. Se non è possibile costruire una base futura attendibile, mostriamo il confronto parziale o scenari distinti, senza una promessa unica di risparmio.</p>
+<h2>7. Costi inclusi, esclusi e imposte</h2>
+<p>Ogni risultato distingue chiaramente la spesa complessiva stimata dall’eventuale confronto limitato alla materia energia e alle quote del venditore. Un risparmio riferito a queste sole componenti non viene presentato come percentuale di riduzione dell’intera bolletta.</p>
+<p>Nella spesa complessiva includiamo le componenti applicabili e determinabili: energia o gas, commercializzazione e quote fisse del venditore, componenti regolate di rete e sistema, servizi obbligatori, costi una tantum pertinenti, sconti verificati e imposte. Indichiamo separatamente eventuali elementi non stimabili. Gli importi al netto di imposte e IVA sono etichettati accanto al numero; non vengono confrontati con importi lordi.</p>
+<p>Le componenti regolate possono essere comuni a offerte riferite allo stesso profilo, ma non per questo vengono omesse senza indicazione. Le aliquote e le agevolazioni dipendono dalle condizioni applicabili; l’IVA in euro varia anche quando resta invariata l’aliquota. Per le utenze professionali non presumiamo automaticamente esenzioni, agevolazioni o piena detraibilità.</p>
+<p>Canone televisivo, arretrati, interessi, depositi cauzionali e partite riferite ad altri periodi non sono risparmi energetici. Li trattiamo separatamente, spiegando eventuali esclusioni. Gli oneri di uscita dal contratto attuale, quando previsti e conosciuti, sono evidenziati nel costo della scelta; se non li conosciamo, chiediamo di verificarli prima di decidere.</p>
+<h2>8. Prezzi fissi e prezzi variabili</h2>
+<p>Per un’offerta fissa specifichiamo quale componente è fissa e per quanto tempo. Un prezzo fisso dell’energia non implica che tutte le voci della bolletta restino immutate. Se il periodo coperto è inferiore all’orizzonte confrontato, le condizioni successive devono essere note oppure rappresentate attraverso scenari dichiarati.</p>
+<p>Per le offerte indicizzate utilizziamo l’indice effettivamente previsto dal contratto, per esempio il riferimento PUN applicabile o il PSV, con spread, periodicità e altri elementi della formula. Indichiamo fonte, data, unità di misura e valori utilizzati. Una media storica non viene presentata come previsione; una previsione non viene presentata come prezzo certo.</p>
+<p>Le alternative variabili sono confrontate sullo stesso scenario di mercato e sui medesimi profili di consumo. Quando il risultato è sensibile agli indici mostriamo scenari o intervalli, identificati come simulazioni e non come probabilità garantite. Non combiniamo una tariffa fissa annuale con pochi mesi favorevoli di un indice senza dichiararlo.</p>
+<h2>9. Sconti, requisiti e durata</h2>
+<p>Includiamo uno sconto soltanto quando importo, durata e condizioni sono verificabili per la richiesta. Sono evidenziati eventuali vincoli: domiciliazione, bolletta elettronica, nuovo cliente, fornitura duale, permanenza minima o acquisto di altri servizi. Gli sconti una tantum incidono sul periodo in cui maturano e non vengono ripetuti artificialmente negli anni successivi.</p>
+<p>Se l’ammissibilità è incerta, lo sconto non entra nel risultato principale oppure è mostrato in uno scenario distinto, da verificare. Un’offerta che richiede servizi aggiuntivi non viene presentata come più conveniente ignorandone il costo obbligatorio.</p>
+<h2>10. Fonti, aggiornamento e monitoraggio</h2>
+<p>I dati provengono dal catalogo commerciale e da fonti pubbliche identificabili, come documenti dei venditori e Portale Offerte quando utilizzabile. Per ogni offerta conserviamo fonte, codice quando disponibile, data di rilevazione, validità e condizioni utilizzate. Data di consultazione della fonte e decorrenza della tariffa sono elementi diversi e restano distinguibili.</p>
+<p>Il monitoraggio facoltativo dura 12 mesi e prevede controlli ogni tre giorni, secondo le <a href="/prezzo-giusto/condizioni">Condizioni del servizio</a>. Un controllo aggiorna il confronto solo se l’acquisizione e la verifica dei dati hanno esito utile. Offerte scadute, incompatibili o prive di informazioni decisive non vengono mantenute tra quelle valide. Se una fonte non è verificabile, indichiamo il limite o sospendiamo il relativo risultato.</p>
+<p>Gli avvisi riguardano un miglioramento rispetto alla base dichiarata e ai dati ancora attendibili; non garantiscono che il mercato non offra alternative ulteriori. Dopo una variazione della tua fornitura, del contratto o dei consumi devi aggiornare i dati perché il monitoraggio rimanga significativo. Nessun avviso determina automaticamente il cambio di fornitore.</p>
+<h2>11. Errori e decisione finale</h2>
+<p>Per segnalare dati non corretti, un’offerta scaduta o un calcolo incomprensibile scrivi a ${MAIL}, indicando il riferimento della stima. Verifichiamo la segnalazione e, quando necessario, correggiamo o ritiriamo il risultato. I limiti della simulazione non escludono le responsabilità previste dalla legge per errori imputabili ad Alca.</p>
+<p>Prima di sottoscrivere una fornitura verifica la documentazione del venditore: condizioni economiche e contrattuali, scheda sintetica quando prevista, durata, rinnovi, servizi, pagamenti e recesso. La decisione rimane tua; la stima costituisce uno strumento di supporto.</p>`
+    },
+    cookie: {
+      titolo: "Informativa cookie e tecnologie analoghe",
+      testo: `
+<p><b>Versione 1.1 — Efficace dal 20 novembre 2026.</b></p>
+<h2>1. Chi gestisce il sito</h2>
+<p>Il titolare è Alca Broker S.r.l., Via Vittoria Colonna 14, 80121 Napoli, P. IVA 07965051217, che utilizza il marchio Alca Energy. Per domande e diritti privacy: ${MAIL}. Questa informativa riguarda il dominio golden-alpaca-f46088.netlify.app, per le pagine con percorso /prezzo-giusto (pagina pubblica del link, conferma dell’email, area personale, pagine legali e pagina di recesso), e integra l’<a href="/prezzo-giusto/privacy">Informativa privacy</a>.</p>
+<h2>2. Che cosa sono questi strumenti</h2>
+<p>I cookie sono piccoli file che un sito può salvare nel browser. Altre tecnologie, come local storage e session storage, memorizzano informazioni nel dispositivo; pixel, identificatori e componenti esterni possono raccogliere dati sulle interazioni. Le regole dipendono da scopi e funzionamento, non dal nome della tecnologia.</p>
+<p>Gli strumenti strettamente necessari a trasmettere una comunicazione o fornire una funzione richiesta, come autenticazione e sicurezza, possono operare senza consenso ai sensi dell’articolo 122 del Codice privacy. Gli strumenti per finalità diverse richiedono il consenso quando previsto. Gli analytics non sono automaticamente tecnici: l’eventuale esenzione va valutata nelle condizioni concrete.</p>
+<h2>3. Strumenti tecnici utilizzati</h2>
+<p>Questo sito utilizza esclusivamente gli strumenti tecnici descritti nell’inventario seguente. Non utilizza strumenti di profilazione pubblicitaria né analytics soggetti a consenso. Per questa configurazione non è richiesto un banner di consenso. Il consenso facoltativo a ricevere email promozionali o avvisi non viene usato come consenso al tracciamento del browser.</p>
+<h3>Inventario</h3>
+<table class="pg-tab-leg">
+<thead><tr><th>Nome esatto o chiave</th><th>Tecnologia e soggetto che la utilizza</th><th>Finalità concreta</th><th>Durata massima e rinnovo</th><th>Presupposto</th></tr></thead>
+<tbody>
+<tr><td>ae-cliente</td><td>Local storage; impostato dalla libreria di autenticazione del sito (client Supabase Auth) solo dopo l’accesso all’area personale</td><td>Mantenere la sessione di accesso richiesta</td><td>Fino al logout (viene rimosso all’uscita) o finché la sessione non può più essere rinnovata; il rinnovo della sessione la prolunga solo durante l’uso</td><td>Tecnico, strettamente necessario (art. 122 Codice privacy)</td></tr>
+<tr><td>pg.codice</td><td>Session storage; impostato dal sito</td><td>Ricordare da quale link del referente è arrivato il visitatore, perché la pagina del referente e le pagine legali mostrino il contesto corretto</td><td>Fino alla chiusura della scheda del browser</td><td>Tecnico</td></tr>
+<tr><td>pg.scheda</td><td>Session storage; impostato dal sito</td><td>Ricordare la sezione aperta nell’area personale</td><td>Fino alla chiusura della scheda del browser o al logout</td><td>Tecnico</td></tr>
+<tr><td>pg.nuovapw</td><td>Session storage; impostato dal sito</td><td>Mantenere aperto il passaggio di creazione della password dopo un collegamento di invito o di reimpostazione</td><td>Fino al salvataggio della password o alla chiusura della scheda del browser</td><td>Tecnico</td></tr>
+</tbody>
+</table>
+<p>«Fino alla scadenza» non identifica da solo una durata: l’inventario specifica il termine o il criterio concreto applicato. Un aggiornamento automatico può incidere sulla durata soltanto nei limiti dichiarati.</p>
+<h2>4. Componenti e servizi esterni</h2>
+<p>Il sito può richiamare servizi necessari per distribuzione dei contenuti, autenticazione e funzionamento. I servizi effettivamente attivi sono Netlify (hosting delle pagine), Supabase (database, autenticazione e conservazione dei file; progetto nella regione UE eu-central-1, Francoforte) e jsDelivr (CDN che distribuisce la libreria JavaScript di Supabase nelle pagine pubbliche).</p>
+<p>Una richiesta a un servizio esterno può comunicare indirizzo IP e informazioni tecniche anche senza cookie. Perciò «non installa cookie» non significa «non tratta dati». Per ciascun servizio sono disponibili i documenti dei fornitori: Netlify, Inc. (<a href="https://www.netlify.com/pdf/netlify-dpa.pdf" target="_blank" rel="noopener">accordo sul trattamento</a>), Supabase Pte. Ltd. (<a href="https://supabase.com/legal/dpa" target="_blank" rel="noopener">accordo sul trattamento</a>) e Volentio JSD Limited per jsDelivr (<a href="https://www.jsdelivr.com/terms" target="_blank" rel="noopener">termini</a>, <a href="https://www.jsdelivr.com/documents/data-processing-agreement.pdf" target="_blank" rel="noopener">accordo sul trattamento</a>). Queste informazioni e le basi del trattamento sono coordinate con l’informativa privacy. Puoi chiedere copia delle garanzie per trasferimenti extra SEE a ${MAIL}.</p>
+<h2>5. Come controllare o eliminare le informazioni</h2>
+<p>Puoi cancellare cookie e dati del sito dalle impostazioni privacy del browser o bloccarne la memorizzazione. Ciò può terminare la sessione e rendere necessario un nuovo accesso; alcune funzioni tecniche potrebbero non funzionare. La cancellazione locale non equivale alla cancellazione della pratica conservata sui server, che puoi richiedere attraverso i contatti privacy.</p>
+<h2>6. Diritti e aggiornamenti</h2>
+<p>Puoi esercitare i diritti applicabili e presentare reclamo al Garante per la protezione dei dati personali. Modalità, termini e contatti sono nell’informativa privacy. L’inventario viene aggiornato quando cambiano gli strumenti. Nuove finalità soggette a consenso non vengono attivate per il solo aggiornamento di questo documento: richiedono una scelta valida e precedente all’attivazione.</p>`
+    }
+  };
+})();

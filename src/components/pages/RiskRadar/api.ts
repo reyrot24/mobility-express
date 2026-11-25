@@ -60,18 +60,29 @@ export const rrApi = {
 /* ---------- Dashboard ---------- */
 export const STATUSES = ["nuova", "contattata", "proposta", "chiusa", "persa"] as const;
 export type Status = (typeof STATUSES)[number];
-export type Referrer = { code: string; name: string; active: boolean; created_at: string };
+export type Referrer = {
+  code: string; name: string; active: boolean; created_at: string;
+  operatore_id: string | null; operatore_nome: string | null; operatore_email: string | null;
+};
 export type Analysis = {
-  id: string; created_at: string; piva: string; company_name: string | null; address: string | null; vies_valid: boolean | null;
+  id: string; created_at: string; updated_at: string | null; piva: string; company_name: string | null; address: string | null; vies_valid: boolean | null;
   ref_code: string | null; params: Params | null; ateco_code: string | null; ateco_source: "registro" | "web" | "cliente" | null;
   overall_risk: number; budget_low: number; budget_high: number; email: string; phone: string | null; wants_contact: boolean; status: Status;
+  note: string | null; notified_at: string | null; notified_to: string | null; notify_error: string | null;
 };
+export type NotifySettings = { notify_emails: string[]; notify_owner: boolean; smtp?: boolean };
+export type DashboardData = { referrers: Referrer[]; analyses: Analysis[]; settings: NotifySettings };
+export type ReferrerInput = { name?: string; operatore_nome?: string; operatore_email?: string; active?: boolean };
 
 export const rrAdminApi = (key: string) => {
   const h = { "x-admin-key": key };
   return {
-    data: () => post<{ referrers: Referrer[]; analyses: Analysis[] }>("risk-radar-admin/data", {}, h),
-    referrer: (name: string) => post<Referrer>("risk-radar-admin/referrer", { name }, h),
-    status: (id: string, status: Status) => post<{ ok: true }>("risk-radar-admin/status", { id, status }, h),
+    data: () => post<DashboardData>("risk-radar-admin/data", {}, h),
+    referrer: (r: ReferrerInput & { name: string }) => post<Referrer>("risk-radar-admin/referrer", r, h),
+    updateReferrer: (code: string, r: ReferrerInput) => post<Referrer>("risk-radar-admin/referrer-update", { code, ...r }, h),
+    update: (id: string, patch: { status?: Status; note?: string }) =>
+      post<{ ok: true; updated_at: string }>("risk-radar-admin/status", { id, ...patch }, h),
+    settings: (s: NotifySettings) => post<NotifySettings>("risk-radar-admin/settings", s, h),
+    testEmail: () => post<{ ok: true; to: string[] }>("risk-radar-admin/test-email", {}, h),
   };
 };
