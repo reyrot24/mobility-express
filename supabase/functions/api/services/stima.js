@@ -1,6 +1,8 @@
 // Lettura del risultato inviato da devops alla nostra API (webhook).
-// Formato: { richiestaId, compagnia, prezzoTotale, idRicerca, providerCode } con prezzo annuale
-// in euro, oppure { richiestaId, prezzoTotale: null } se devops non ha un prezzo per la richiesta.
+// Formato: { richiestaId, status, message, compagnia, prezzoTotale, idRicerca, providerCode }.
+// status 1: tutto a posto, prezzoTotale è il prezzo annuale in euro.
+// status 0: nessun prezzo, message spiega perché (va nell'email al cliente).
+// Senza status (formato precedente): prezzoTotale null vuol dire nessun prezzo.
 
 /**
  * Intervallo mostrato al cliente: da 10 € sotto a 30 € sopra il prezzo, in multipli di 10.
@@ -27,7 +29,9 @@ export const DEMO_ESTIMATE = {
  * @throws {Error} se il formato non è valido
  */
 export function parseStima(result) {
-  if (result?.prezzoTotale === null) return null;
+  if (esitoNegativo(result)) return null;
+  // Formato precedente, senza status: prezzoTotale null = nessun prezzo
+  if (result?.status == null && result?.prezzoTotale === null) return null;
 
   const { prezzoTotale: prezzo, compagnia } = result ?? {};
   if (typeof prezzo !== "number" || !Number.isFinite(prezzo) || prezzo <= 0)
@@ -44,4 +48,23 @@ export function parseStima(result) {
     company: compagnia.trim(),
     demo: false,
   };
+}
+
+/** status 0 (anche "0"): devops non ha un prezzo. Qualsiasi altro valore diverso da 1 non è valido. */
+function esitoNegativo(result) {
+  const status = result?.status;
+  if (status === undefined || status === null) return false;
+  if (status === 0 || status === "0") return true;
+  if (status === 1 || status === "1") return false;
+  throw new Error("INVALID_STATUS");
+}
+
+/**
+ * Motivo per cui devops non ha un prezzo ("message" con status 0), da mostrare al cliente.
+ * @returns {string|null}
+ */
+export function motivoSenzaStima(result) {
+  if (!esitoNegativo(result) || typeof result?.message !== "string") return null;
+  const motivo = result.message.trim().slice(0, 1000);
+  return motivo || null;
 }

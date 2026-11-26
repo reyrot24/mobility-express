@@ -10,13 +10,15 @@ const range = (estimate) =>
  * Email al cliente con la stima orientativa.
  * @param {{id: string, targa: string, estimate: object|null, referente: {name, phone, email}|null,
  *          callbackRequested: boolean, areaUrl: string, servizioUrl: string, condizioniUrl: string,
- *          email?: object|null}} params
+ *          motivo?: string|null, email?: object|null}} params
+ *        motivo: perché non c'è un prezzo (message di devops con status 0)
  *        email: personalizzazione del referente (configurazione.email)
  */
 export function stimaEmail({
   id,
   targa,
   estimate,
+  motivo = null,
   referente,
   callbackRequested,
   areaUrl,
@@ -35,7 +37,14 @@ export function stimaEmail({
         <div style="font-size:40px;font-weight:600;letter-spacing:-1.5px;margin-top:8px">${range(estimate)}<small style="font-size:15px;font-weight:400;color:#5e637e;letter-spacing:0"> / anno · indicativo</small></div>
         <p style="font-size:12px;color:#5e637e;margin:4px 0 0">Richiesta ${escapeHtml(id)} · veicolo ${escapeHtml(targa)}</p>
       </div>`
-    : `<p style="margin:24px 0">Al momento non è disponibile una stima attendibile per il veicolo <strong>${escapeHtml(targa)}</strong>: con i dati disponibili non possiamo indicarti un importo. Puoi chiedere al tuo referente un preventivo effettivo.</p>`;
+    : motivo
+      ? `<p style="margin:24px 0 12px">Al momento non è disponibile una stima per il veicolo <strong>${escapeHtml(targa)}</strong>.</p>
+      <div style="background:#f0f1f6;border-radius:12px;padding:16px 20px;margin:0 0 12px">
+        <p style="font-size:12px;color:#5e637e;margin:0 0 4px">Motivo</p>
+        <p style="margin:0">${multiline(motivo)}</p>
+      </div>
+      <p style="margin:0 0 24px">Puoi chiedere al tuo referente un preventivo effettivo.</p>`
+      : `<p style="margin:24px 0">Al momento non è disponibile una stima attendibile per il veicolo <strong>${escapeHtml(targa)}</strong>: con i dati disponibili non possiamo indicarti un importo. Puoi chiedere al tuo referente un preventivo effettivo.</p>`;
 
   const notice = `<div style="border-left:4px solid ${stile.accento};background:#fff5eb;border-radius:6px;padding:12px 16px;font-size:12px;line-height:1.6">
       <p style="margin:0">${ESTIMATE_DISCLAIMER}</p>
@@ -78,7 +87,9 @@ export function stimaEmail({
     "",
     estimate
       ? `${estimate.min === estimate.max ? "Prezzo" : "Range"} indicativo per il veicolo ${targa}: ${range(estimate)} / anno.`
-      : `Al momento non è disponibile una stima attendibile per il veicolo ${targa}.`,
+      : motivo
+        ? `Al momento non è disponibile una stima per il veicolo ${targa}.\nMotivo: ${motivo}`
+        : `Al momento non è disponibile una stima attendibile per il veicolo ${targa}.`,
     "",
     ...(estimate ? [ESTIMATE_DISCLAIMER, ESTIMATE_METHOD, `Condizioni del servizio: ${condizioniUrl}`, ""] : []),
     ...[messaggio, stile.firma].filter(Boolean).flatMap((t) => [t, ""]),

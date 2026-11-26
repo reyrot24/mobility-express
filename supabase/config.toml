@@ -11,7 +11,7 @@ entrypoint = "./functions/api/index.js"
 import_map = "./functions/api/deno.json"
 
 # Risk Radar Aziende (ALCA Broker): pagina pubblica /risk-radar e dashboard /risk-radar/admin.
-# Nessuna sessione Supabase: la pagina è pubblica e la dashboard si protegge con l'header x-admin-key.
+# Nessuna sessione Supabase: la pagina è pubblica e la dashboard ha un suo login (nome utente e password, header x-admin-token).
 [functions.risk-radar]
 verify_jwt = false
 

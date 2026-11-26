@@ -20,6 +20,7 @@ import {
   fetchProfilo,
   fetchRichieste,
   indirizzoOf,
+  motivoOf,
   updateProfilo,
   type Profilo,
   type Richiesta,
@@ -381,7 +382,11 @@ const RigaRichiesta = ({ richiesta: r }: { richiesta: Richiesta }) => {
           <p className="mt-2 truncate text-xs opacity-80">
             {new Date(r.created_at).toLocaleDateString("it-IT")} · {indirizzoOf(r)}
           </p>
-          {statusNote[r.stato] && <p className="mt-1 text-xs opacity-70">{statusNote[r.stato]}</p>}
+          {(motivoOf(r) ?? statusNote[r.stato]) && (
+            <p className="mt-1 line-clamp-2 text-xs opacity-70">
+              {motivoOf(r) ?? statusNote[r.stato]}
+            </p>
+          )}
         </div>
         <div className="flex shrink-0 items-center gap-3 text-right">
           {estimate && (

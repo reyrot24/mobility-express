@@ -41,10 +41,18 @@ export type Richiesta = {
   consensi: Consents;
   created_at: string;
   risultati: Risultato | null;
+  // Perché devops non ha un prezzo (solo con stato "non_disponibile", può mancare)
+  motivo_non_disponibile: string | null;
 };
 
+/** Motivo di devops per cui non c'è un prezzo, se presente. */
+export const motivoOf = (r: Richiesta) =>
+  r.stato === "non_disponibile" && r.motivo_non_disponibile?.trim()
+    ? r.motivo_non_disponibile.trim()
+    : null;
+
 const COLONNE =
-  "id, targa, tipo_strada, strada, civico, comune, cap, referral_id, id_configurazione, stato, consensi, created_at, risultati(prezzo)";
+  "id, targa, tipo_strada, strada, civico, comune, cap, referral_id, id_configurazione, stato, consensi, created_at, motivo_non_disponibile, risultati(prezzo)";
 
 const LOAD_ERROR = "Non riusciamo a caricare i tuoi dati. Ricarica la pagina tra qualche istante.";
 

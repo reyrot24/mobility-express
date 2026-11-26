@@ -15,6 +15,7 @@ import {
   estimateOf,
   fetchRichiesta,
   indirizzoOf,
+  motivoOf,
   referenteOf,
   type Richiesta,
 } from "../utils/account";
@@ -91,6 +92,12 @@ const DettaglioStima = () => {
               pending={r.stato === "in_elaborazione"}
               className="my-4 text-[#ffab6d]"
             />
+            {motivoOf(r) && (
+              <div className="mb-4 rounded-lg bg-white/10 px-4 py-3 text-sm">
+                <p className="text-[11px] uppercase tracking-wide opacity-70">Motivo</p>
+                <p className="mt-1 whitespace-pre-line">{motivoOf(r)}</p>
+              </div>
+            )}
             <EstimateNotice className="bg-white/10 text-white [&_p]:!text-white" />
           </DarkCard>
           <Panel>

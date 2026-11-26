@@ -33,7 +33,7 @@ import { inBackground } from "../lib/http.js";
 import { EmailBloccataError, sendMail } from "./mailer.js";
 import { configurazioneEmail } from "./pagine.js";
 import { inviaAPiattaforma } from "./piattaforma.js";
-import { DEMO_ESTIMATE, parseStima } from "./stima.js";
+import { DEMO_ESTIMATE, motivoSenzaStima, parseStima } from "./stima.js";
 import { attivazioneEmail, richiestaRicevutaEmail } from "../templates/richiestaEmail.js";
 import { ricontattoEmail } from "../templates/ricontattoEmail.js";
 import { stimaEmail } from "../templates/stimaEmail.js";
@@ -466,7 +466,8 @@ async function inviaADevops(id) {
     console.warn(`[richieste] ${id} non inviata a devops: ${motivo}`);
     await updateRichiesta(id, {
       stato: adesione?.stato === "cessata" ? "annullata" : "errore",
-      errore: motivo,
+      errore: null,
+    motivo_non_disponibile: motivo,
       invio_avviato_at: null,
       prossimo_tentativo_at: null,
     });
@@ -610,6 +611,8 @@ export async function registraRisultato(body, estimateOverride) {
   if (richiesta.stato === "annullata") return "annullata";
 
   const estimate = estimateOverride ?? parseStima(body);
+  // status 0: il messaggio di devops spiega al cliente perché non c'è un prezzo
+  const motivo = estimate ? null : motivoSenzaStima(body);
   const residenza = residenzaDaRisultato(body, richiesta.id);
   if (estimate)
     await saveRisultato({
@@ -620,6 +623,7 @@ export async function registraRisultato(body, estimateOverride) {
   await updateRichiesta(richiesta.id, {
     stato: estimate ? "completata" : "non_disponibile",
     errore: null,
+    motivo_non_disponibile: motivo,
     ...(residenza ?? {}),
   });
   if (residenza) await aggiornaResidenzaProfilo(richiesta.user_id, residenza);
@@ -636,6 +640,7 @@ export async function registraRisultato(body, estimateOverride) {
         id: richiesta.id,
         targa: richiesta.targa,
         estimate,
+        motivo,
         referente: referenteEmail(pagina),
         callbackRequested: richiesta.consensi.callback.granted,
         areaUrl: accessoUrl(),
@@ -651,7 +656,7 @@ export async function registraRisultato(body, estimateOverride) {
       adesioneId: adesione?.id,
       richiestaId: richiesta.id,
       tipo: estimate ? "stima_inviata" : "stima_non_disponibile",
-      dettagli: estimate ? { min: estimate.min, max: estimate.max, demo: estimate.demo } : null,
+      dettagli: estimate ? { min: estimate.min, max: estimate.max, demo: estimate.demo } : motivo ? { motivo } : null,
     });
   }
   return "salvato";

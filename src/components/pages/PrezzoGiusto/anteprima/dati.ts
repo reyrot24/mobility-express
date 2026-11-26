@@ -49,6 +49,7 @@ function richiesta(
     consensi: consensi(),
     created_at: giorniFa(giorni),
     risultati: prezzo === null ? null : { prezzo },
+    motivo_non_disponibile: null,
     ...extra,
   };
 }
@@ -67,7 +68,9 @@ const creaStore = () => ({
   richieste: [
     richiesta(1, "AB123CD", "completata", 520, 2, { consensi: consensi(true) }),
     richiesta(2, "EF456GH", "in_elaborazione", null, 0),
-    richiesta(3, "IL789MN", "non_disponibile", null, 5),
+    richiesta(3, "IL789MN", "non_disponibile", null, 5, {
+      motivo_non_disponibile: "Il veicolo non risulta assicurabile con le compagnie convenzionate.",
+    }),
     richiesta(4, "PQ012RS", "errore", null, 7),
     richiesta(5, "TU345VZ", "annullata", 610, 30),
   ],
@@ -140,6 +143,7 @@ export async function richiediStima(data: QuoteRequest): Promise<RichiestaRespon
     consensi: consensi(data.callback, data.marketing),
     created_at: new Date().toISOString(),
     risultati: null,
+    motivo_non_disponibile: null,
   };
   store().richieste.unshift(nuova);
   // Dall'area personale la stima "arriva" dopo qualche secondo, come farebbe devops

@@ -1,6 +1,8 @@
 // Risk Radar Aziende — API della dashboard ALCA Broker.
-// Ogni richiesta deve avere l'header  x-admin-key  (la chiave non è salvata in chiaro:
-// nel database c'è solo il suo SHA-256, in rr_settings.admin_key_sha256).
+// Accesso con nome utente e password (tabella rr_admin_users, solo l'hash PBKDF2):
+//   POST /risk-radar-admin/login           { username, password }                     -> { token, username, expires_at }
+//   POST /risk-radar-admin/logout          {}                                         -> chiude la sessione
+// Tutte le altre rotte vogliono l'header  x-admin-token  (sessione di 12 ore; nel DB solo il suo SHA-256).
 //   POST /risk-radar-admin/data            {}                                         -> link, analisi, impostazioni
 //   POST /risk-radar-admin/referrer        { name, operatore_nome?, operatore_email? } -> nuovo link
 //   POST /risk-radar-admin/referrer-update { code, name?, operatore_nome?, operatore_email?, active? }
@@ -19,7 +21,7 @@ const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SE
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "content-type, x-admin-key, authorization, apikey, x-client-info",
+  "Access-Control-Allow-Headers": "content-type, x-admin-token, authorization, apikey, x-client-info",
 };
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { ...CORS, "Content-Type": "application/json" } });
 
@@ -33,6 +35,70 @@ function safeEq(a: string, b: string) {
   for (let i = 0; i < a.length; i++) x |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return x === 0;
 }
+
+/* ---------- accesso ---------- */
+const SESSION_HOURS = 12;
+const MAX_FAILS = 5;
+const LOCK_MINUTES = 15;
+const b64 = (u: Uint8Array) => btoa(String.fromCharCode(...u));
+const unb64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+
+/** Hash nel formato di scripts/rr-admin-user.mjs: pbkdf2_sha256$iterazioni$sale$hash (base64). */
+async function pbkdf2(password: string, salt: Uint8Array, iterations: number) {
+  const k = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
+  return new Uint8Array(await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt, iterations }, k, 256));
+}
+async function checkPassword(password: string, stored: string) {
+  const [alg, it, salt, hash] = stored.split("$");
+  const iterations = Number(it);
+  if (alg !== "pbkdf2_sha256" || !salt || !hash || !(iterations >= 100_000 && iterations <= 2_000_000)) return false;
+  return safeEq(b64(await pbkdf2(password, unb64(salt), iterations)), hash);
+}
+// Per un nome utente che non esiste si calcola comunque un hash: la risposta non rivela se esiste.
+const DUMMY_HASH = "pbkdf2_sha256$210000$AAAAAAAAAAAAAAAAAAAAAA==$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+
+async function login(body: any) {
+  const username = clip(body.username, 40).toLowerCase();
+  const password = typeof body.password === "string" ? body.password.slice(0, 200) : "";
+  if (!username || !password) return json({ error: "Inserisci nome utente e password" }, 400);
+
+  const { data: u, error } = await db.from("rr_admin_users")
+    .select("username,password_hash,active,failed_attempts,locked_until").eq("username", username).maybeSingle();
+  if (error) throw error;
+  if (u?.locked_until && new Date(u.locked_until) > new Date()) {
+    return json({ error: `Troppi tentativi sbagliati: riprova tra ${LOCK_MINUTES} minuti` }, 429);
+  }
+  const ok = await checkPassword(password, u?.password_hash ?? DUMMY_HASH);
+  if (!u || !u.active || !ok) {
+    if (u) {
+      const fails = u.failed_attempts + 1;
+      await db.from("rr_admin_users").update(fails >= MAX_FAILS
+        ? { failed_attempts: 0, locked_until: new Date(Date.now() + LOCK_MINUTES * 60_000).toISOString() }
+        : { failed_attempts: fails }).eq("username", u.username);
+    }
+    return json({ error: "Nome utente o password non validi" }, 401);
+  }
+
+  const raw = crypto.getRandomValues(new Uint8Array(32));
+  const token = b64(raw).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const expires_at = new Date(Date.now() + SESSION_HOURS * 3_600_000).toISOString();
+  const now = new Date().toISOString();
+  await db.from("rr_admin_sessions").delete().lt("expires_at", now); // pulizia delle sessioni scadute
+  const ins = await db.from("rr_admin_sessions").insert({ token_hash: await sha256(token), username: u.username, expires_at });
+  if (ins.error) throw ins.error;
+  await db.from("rr_admin_users").update({ failed_attempts: 0, locked_until: null, last_login_at: now }).eq("username", u.username);
+  return json({ token, username: u.username, expires_at });
+}
+
+/** Utente della sessione, o null se il token manca, è scaduto o l'account è disattivato. */
+async function sessionUser(token: string): Promise<string | null> {
+  if (!token || token.length > 100) return null;
+  const { data } = await db.from("rr_admin_sessions")
+    .select("username,expires_at,rr_admin_users!inner(active)").eq("token_hash", await sha256(token)).maybeSingle();
+  if (!data || new Date(data.expires_at) <= new Date() || !(data as any).rr_admin_users?.active) return null;
+  return data.username;
+}
+
 const STATUSES = ["nuova", "contattata", "proposta", "chiusa", "persa"];
 const clip = (s: unknown, n: number) => (typeof s === "string" ? s.trim().slice(0, n) : "");
 const REF_COLS = "code,name,active,created_at,operatore_id,operatore_nome,operatore_email,link_sent_at,link_sent_to";
@@ -48,15 +114,27 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "Metodo non consentito" }, 405);
 
-  const key = req.headers.get("x-admin-key") ?? "";
-  const { data: setting } = await db.from("rr_settings").select("value").eq("key", "admin_key_sha256").maybeSingle();
-  if (!key || !setting || !safeEq(await sha256(key), setting.value)) return json({ error: "Chiave non valida" }, 401);
-
   const route = new URL(req.url).pathname.split("/").pop();
   let body: any = {};
   try { body = await req.json(); } catch { /* corpo vuoto */ }
 
+  if (route === "login") {
+    try { return await login(body); } catch (e) {
+      console.error("risk-radar-admin login", e);
+      return json({ error: "Errore del server" }, 500);
+    }
+  }
+
+  const token = req.headers.get("x-admin-token") ?? "";
+  const user = await sessionUser(token);
+  if (!user) return json({ error: "Sessione scaduta: accedi di nuovo" }, 401);
+
   try {
+    if (route === "logout") {
+      await db.from("rr_admin_sessions").delete().eq("token_hash", await sha256(token));
+      return json({ ok: true });
+    }
+
     if (route === "data") {
       const [refs, an, cfg] = await Promise.all([
         db.from("rr_referrers").select(REF_COLS).order("created_at"),
@@ -69,7 +147,7 @@ Deno.serve(async (req) => {
       if (refs.error) throw refs.error;
       if (an.error) throw an.error;
       return json({
-        referrers: refs.data, analyses: an.data,
+        user, referrers: refs.data, analyses: an.data,
         settings: { notify_emails: cfg.emails, notify_owner: cfg.owner, smtp: !!Deno.env.get("SMTP_HOST"), customer: customerMode() },
       });
     }

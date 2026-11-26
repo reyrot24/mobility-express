@@ -80,12 +80,17 @@ export type NotifySettings = {
   /** Email al cliente: live = RR_EMAIL_REALI "true"; altrimenti partono solo verso la allowlist. */
   customer?: { live: boolean; allowlist: string[] };
 };
-export type DashboardData = { referrers: Referrer[]; analyses: Analysis[]; settings: NotifySettings };
+export type DashboardData = { user: string; referrers: Referrer[]; analyses: Analysis[]; settings: NotifySettings };
 export type ReferrerInput = { name?: string; operatore_nome?: string; operatore_email?: string; active?: boolean };
 
-export const rrAdminApi = (key: string) => {
-  const h = { "x-admin-key": key };
+/** Accesso alla dashboard: il token vale 12 ore e va nell'header x-admin-token. */
+export const rrAdminLogin = (username: string, password: string) =>
+  post<{ token: string; username: string; expires_at: string }>("risk-radar-admin/login", { username, password });
+
+export const rrAdminApi = (token: string) => {
+  const h = { "x-admin-token": token };
   return {
+    logout: () => post<{ ok: true }>("risk-radar-admin/logout", {}, h),
     data: () => post<DashboardData>("risk-radar-admin/data", {}, h),
     referrer: (r: ReferrerInput & { name: string }) => post<Referrer>("risk-radar-admin/referrer", r, h),
     updateReferrer: (code: string, r: ReferrerInput) => post<Referrer>("risk-radar-admin/referrer-update", { code, ...r }, h),

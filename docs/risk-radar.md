@@ -8,8 +8,8 @@ Dashboard commerciale: analisi ricevute, link dei collaboratori, export CSV.
 | Pagina aziende | `/risk-radar` (link collaboratore: `/risk-radar?ref=<codice>`) → `src/components/pages/RiskRadar/RiskRadar.tsx` |
 | Dashboard | `/risk-radar/admin` → `src/components/pages/RiskRadar/RiskRadarAdmin.tsx` |
 | API pubblica | Edge Function `risk-radar` (`lookup`, `enrich`, `analyze`, `contact`) |
-| API dashboard | Edge Function `risk-radar-admin` (`data`, `referrer`, `status`), header `x-admin-key` |
-| Tabelle | `rr_referrers`, `rr_analyses`, `rr_settings`, `rr_lookups` (migrazione `20261118000000_risk_radar.sql`) |
+| API dashboard | Edge Function `risk-radar-admin` (`login`, `logout`, `data`, `referrer`, `status`, …), header `x-admin-token` |
+| Tabelle | `rr_referrers`, `rr_analyses`, `rr_settings`, `rr_lookups` (migrazione `20261118000000_risk_radar.sql`), `rr_admin_users`, `rr_admin_sessions` (`20261127000000_risk_radar_accesso.sql`) |
 
 Le tabelle `rr_*` non hanno policy: il browser non le legge mai, passa solo dalle funzioni (service role).
 Non toccano le tabelle di "Il prezzo giusto per te" (`richieste`, `profili`, …) né la funzione `api`.
@@ -17,19 +17,13 @@ Il frontend chiama `${VITE_SUPABASE_URL}/functions/v1/...`: nessuna nuova variab
 
 ## Messa in produzione (ordine)
 
-1. **Migrazioni**: eseguire `supabase/migrations/20261118000000_risk_radar.sql` poi `20261123000000_risk_radar_operatori.sql` e `20261125000000_risk_radar_email.sql` (SQL Editor o `supabase db push`). Si parte da zero: nessun dato copiato da alca-desk.
+1. **Migrazioni**: eseguire `supabase/migrations/20261118000000_risk_radar.sql` poi `20261123000000_risk_radar_operatori.sql`, `20261125000000_risk_radar_email.sql` e `20261127000000_risk_radar_accesso.sql` (SQL Editor o `supabase db push`). Si parte da zero: nessun dato copiato da alca-desk.
 2. **Segreto Claude** (ricerca online di ATECO e fatturato):
    `npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-...`
    Senza chiave la pagina funziona lo stesso: l'utente sceglie l'ATECO dall'elenco.
-3. **Chiave della dashboard**: scegliere una chiave lunga e casuale, salvarne solo lo SHA-256:
-   ```sh
-   CHIAVE=$(openssl rand -base64 32); echo "$CHIAVE"   # conservarla in un password manager
-   printf %s "$CHIAVE" | shasum -a 256 | cut -d' ' -f1
-   ```
-   ```sql
-   insert into rr_settings (key, value) values ('admin_key_sha256', '<hash>')
-   on conflict (key) do update set value = excluded.value;
-   ```
+3. **Account della dashboard**: `npm run rr:admin-user -- <nome-utente>` genera la password e stampa
+   l'SQL da eseguire (nel DB solo l'hash PBKDF2-SHA256). Sessione di 12 ore; dopo 5 password sbagliate
+   l'account si blocca per 15 minuti. Rieseguire lo stesso comando reimposta la password.
 4. **Funzioni**: `npm run rr:deploy` (Verify JWT disattivato da `supabase/config.toml`).
 5. **Frontend**: push su `main` (Vercel).
 
@@ -37,7 +31,7 @@ Il frontend chiama `${VITE_SUPABASE_URL}/functions/v1/...`: nessuna nuova variab
 
 | Chiave | Significato | Predefinito |
 |---|---|---|
-| `admin_key_sha256` | Impronta della chiave dashboard | — (obbligatoria) |
+| `admin_key_sha256` | Vecchia chiave unica della dashboard, non più usata: si può cancellare | — |
 | `web_model` | Modello per la ricerca online | `claude-opus-5-5` (più economico: `claude-haiku-5-5`) |
 | `web_hourly_limit` | Ricerche online nuove all'ora | 60 |
 | `openapi_token` | Token OpenAPI "Company IT-advanced" (ATECO/fatturato ufficiali), facoltativo | — |

@@ -1,20 +1,20 @@
 // Dashboard commerciale del Risk Radar, sulla struttura del portale ALCA Energia (alca-energy-web/portale.html):
 // barra scura con le schede Cruscotto / Analisi / Link / Impostazioni, card, KPI e tabelle.
-// Accesso con la chiave di amministrazione: nel DB c'è solo il suo SHA-256 (rr_settings.admin_key_sha256).
-// La chiave resta in sessionStorage solo per la scheda corrente.
+// Accesso con nome utente e password (account in rr_admin_users, creati con npm run rr:admin-user).
+// Il token di sessione (12 ore) resta in sessionStorage solo per la scheda corrente.
 // Gli operatori di alca-desk non si leggono ancora: il titolare del link si scrive a mano.
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import qrcode from "qrcode-generator";
 import { useTheme } from "@/components/dark-mode/theme-provider";
 import {
-  RrApiError, rrAdminApi, STATUSES,
+  RrApiError, rrAdminApi, rrAdminLogin, STATUSES,
   type Analysis, type DashboardData, type NotifySettings, type Referrer, type Status,
 } from "./api";
 import { DIVMAP, EMP, REV } from "./data";
 import "./RiskRadar.css";
 import "./RiskRadarAdmin.css";
 
-const SESSION_KEY = "rr_admin";
+const SESSION_KEY = "rr_admin_token";
 const TAB_KEY = "rr_admin_tab";
 const TABS = [
   { id: "cruscotto", label: "Cruscotto" },
@@ -92,7 +92,7 @@ function downloadQrPng(text: string, name: string) {
 export default function RiskRadarAdmin() {
   const { setForcedTheme } = useTheme();
   const [key, setKey] = useState<string | null>(() => store.get(sessionStorage, SESSION_KEY));
-  const [keyInput, setKeyInput] = useState("");
+  const [cred, setCred] = useState({ username: "", password: "" });
   const [loginErr, setLoginErr] = useState("");
   const [data, setData] = useState<DashboardData | null>(null);
   const [updatedAt, setUpdatedAt] = useState("");
@@ -129,6 +129,8 @@ export default function RiskRadarAdmin() {
   }, [setForcedTheme]);
 
   const logout = useCallback(() => {
+    const k = store.get(sessionStorage, SESSION_KEY);
+    if (k) rrAdminApi(k).logout().catch(() => undefined);
     store.set(sessionStorage, SESSION_KEY, null);
     setKey(null); setData(null); setCfg(null);
   }, []);
@@ -140,7 +142,7 @@ export default function RiskRadarAdmin() {
     setUpdatedAt(new Date().toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }));
   }, []);
 
-  // Chiave già in sessione: carica subito, e se non è più valida torna al login.
+  // Sessione già aperta: carica subito, e se è scaduta torna al login.
   useEffect(() => { if (key && !data) load(key).catch(logout); }, [key, data, load, logout]);
 
   // Aggiornamento automatico ogni 2 minuti a scheda visibile (come i pallini del portale ALCA).
@@ -150,20 +152,20 @@ export default function RiskRadarAdmin() {
     return () => window.clearInterval(t);
   }, [key, load]);
 
-  // Ogni 401 riporta al login (la chiave è stata cambiata).
+  // Ogni 401 riporta al login (sessione scaduta o password cambiata).
   const guard = (e: unknown) => { if (e instanceof RrApiError && e.status === 401) logout(); showToast((e as Error).message); };
   const api = key ? rrAdminApi(key) : null;
 
   async function login(e: FormEvent) {
     e.preventDefault();
-    const k = keyInput.trim();
     setLoginErr("");
     try {
-      await load(k);
-      setKey(k);
-      store.set(sessionStorage, SESSION_KEY, k);
-      setKeyInput("");
-    } catch (x) { setLoginErr(x instanceof RrApiError && x.status === 401 ? "Chiave non valida" : (x as Error).message); }
+      const { token } = await rrAdminLogin(cred.username.trim(), cred.password);
+      await load(token);
+      setKey(token);
+      store.set(sessionStorage, SESSION_KEY, token);
+      setCred({ username: "", password: "" });
+    } catch (x) { setLoginErr((x as Error).message); }
   }
 
   /* ---------- azioni ---------- */
@@ -529,7 +531,7 @@ export default function RiskRadarAdmin() {
           )}
           {data && (
             <div className="user">
-              <div>Amministratore<small>aggiornato alle {updatedAt}</small></div>
+              <div>{data.user}<small>aggiornato alle {updatedAt}</small></div>
               <button className="btn g sm" onClick={() => key && load(key).catch(guard)} title="Aggiorna">↻</button>
               <button className="btn g sm" onClick={logout}>Esci</button>
             </div>
@@ -540,8 +542,9 @@ export default function RiskRadarAdmin() {
         {!data ? (
           <form className="card login" onSubmit={login}>
             <h2>Accesso dashboard</h2>
-            <p className="muted small">Inserisci la chiave di amministrazione.</p>
-            <input type="password" autoComplete="current-password" placeholder="Chiave" style={{ width: "100%" }} value={keyInput} onChange={(e) => setKeyInput(e.target.value)} />
+            <p className="muted small">Inserisci le credenziali ricevute da ALCA Broker.</p>
+            <input name="username" autoComplete="username" autoCapitalize="none" spellCheck={false} placeholder="Nome utente" aria-label="Nome utente" style={{ width: "100%", marginBottom: 8 }} value={cred.username} onChange={(e) => setCred((c) => ({ ...c, username: e.target.value }))} />
+            <input name="password" type="password" autoComplete="current-password" placeholder="Password" aria-label="Password" style={{ width: "100%" }} value={cred.password} onChange={(e) => setCred((c) => ({ ...c, password: e.target.value }))} />
             <div className="err">{loginErr}</div>
             <button className="btn" style={{ width: "100%", justifyContent: "center" }}>Entra</button>
           </form>
