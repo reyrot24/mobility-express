@@ -58,12 +58,12 @@ export async function getProfilo(userId) {
   );
 }
 
-/** Pagina del referente da cui il cliente è arrivato: la usano le richieste dall'area personale. */
-export async function updateConfigurazioneProfilo(userId, idConfigurazione) {
-  unwrap(
-    await db().from("profili").update({ id_configurazione: idConfigurazione }).eq("id", userId),
-    "aggiornamento configurazione profilo"
-  );
+/**
+ * Referente e pagina da cui il cliente è arrivato: li usano l'area personale e le richieste fatte da lì.
+ * @param {{referral_id?: string|null, id_configurazione?: string|null}} campi
+ */
+export async function updateReferenteProfilo(userId, campi) {
+  unwrap(await db().from("profili").update(campi).eq("id", userId), "aggiornamento referente profilo");
 }
 
 /** Comune e CAP arrivati da devops con il risultato: il cliente non li modifica dall'area. */

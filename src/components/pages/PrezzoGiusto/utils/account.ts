@@ -106,8 +106,24 @@ export async function fetchConfigurazioneProfilo(userId: string) {
     .eq("id", userId)
     .maybeSingle();
   if (error || !data) return null;
-  return data as { referral_id: string | null; id_configurazione: string | null };
+  const profilo = data as ConfigurazioneReferente;
+  if (profilo.referral_id && profilo.id_configurazione) return profilo;
+  // Profilo senza pagina: quella dell'ultima richiesta arrivata da un link, se è dello stesso
+  // referente (o se il profilo non ne ha uno), come fa l'API alla conferma
+  let query = supabase
+    .from("richieste")
+    .select("referral_id, id_configurazione")
+    .not("id_configurazione", "is", null);
+  if (profilo.referral_id) query = query.eq("referral_id", profilo.referral_id);
+  else query = query.not("referral_id", "is", null);
+  const { data: ultima } = await query
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return (ultima as ConfigurazioneReferente | null) ?? profilo;
 }
+
+type ConfigurazioneReferente = { referral_id: string | null; id_configurazione: string | null };
 
 export async function updateProfilo(userId: string, profilo: ProfiloModificabile) {
   if (inAnteprima()) return finti.updateProfilo(profilo);

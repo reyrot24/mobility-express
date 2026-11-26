@@ -23,7 +23,7 @@ import {
   releaseActivation,
   riprendiRichiestaInErrore,
   saveRisultato,
-  updateConfigurazioneProfilo,
+  updateReferenteProfilo,
   updateResidenzaProfilo,
   updateRichiesta,
 } from "../data/db.js";
@@ -152,8 +152,9 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null, { 
   // Solo per riprendere nome, cognome e referente: senza sessione l'identità va comunque verificata
   const accountId = sessionUser?.id ?? (await findUserIdByEmail(email));
   const profilo = accountId ? await getProfilo(accountId) : null;
-  // Cliente registrato: il referral è quello del link con cui ha attivato l'area (anche vuoto)
-  const referralId = (profilo ? profilo.referral_id : data.referralId) || null;
+  // Cliente registrato: il referral è quello del suo profilo. Se il profilo non ne ha uno vale
+  // quello del link, che il profilo adotterà quando la richiesta viene confermata.
+  const referralId = profilo?.referral_id || data.referralId || null;
   // La configurazione del link vale solo se la richiesta resta al referente di quel link.
   // Dall'area personale (nessun link) vale quella salvata sul profilo, se è dello stesso referente.
   const idConfigurazione =
@@ -221,6 +222,7 @@ export async function creaRichiesta(data, idempotencyKey, sessionUser = null, { 
       marketing: data.marketing === true ? true : null,
       dettagli: { user_agent: userAgent?.slice(0, 300) ?? null },
     });
+    await adottaReferente(sessionUser.id, richiesta);
     const confermata = await getRichiesta(richiesta.id);
     // L'email di conferma parte da inviaADevops, solo se devops accetta la richiesta
     if (debug) return { ...toResponse(confermata), rispostaDevops: await rispostaDevops(richiesta.id) };
@@ -394,14 +396,7 @@ export async function attivaArea(
         condizioni_accettate_nel_form_at: sceltaForm?.acceptedAt ?? null,
       },
     });
-    // Pagina del referente sul profilo: la useranno le richieste fatte dall'area personale
-    if (richiesta?.id_configurazione) {
-      const profilo = await getProfilo(userId);
-      if (profilo && !profilo.id_configurazione && (profilo.referral_id || null) === (richiesta.referral_id || null))
-        await updateConfigurazioneProfilo(userId, richiesta.id_configurazione).catch((err) =>
-          console.error(`[richieste] configurazione non salvata sul profilo ${userId}:`, err.message)
-        );
-    }
+    if (richiesta) await adottaReferente(userId, richiesta);
   } catch (err) {
     await releaseActivation(token);
     throw err;
@@ -411,6 +406,31 @@ export async function attivaArea(
   if (debug) return { ...attivata, rispostaDevops: await risposteDevops([{ id: adesione.richiesta_id }]) };
   inviaInBackground(adesione.richiesta_id);
   return attivata;
+}
+
+/**
+ * Referente e pagina della richiesta confermata sul profilo, se il profilo non li ha ancora:
+ * li useranno l'area personale e le richieste fatte da lì. Un referente già presente non cambia.
+ * Non blocca la conferma: se fallisce resta nei log.
+ */
+async function adottaReferente(userId, richiesta) {
+  try {
+    const profilo = await getProfilo(userId);
+    if (!profilo || !richiesta.referral_id) return;
+    if (!profilo.referral_id)
+      await updateReferenteProfilo(userId, {
+        referral_id: richiesta.referral_id,
+        id_configurazione: richiesta.id_configurazione ?? null,
+      });
+    else if (
+      !profilo.id_configurazione &&
+      richiesta.id_configurazione &&
+      profilo.referral_id === richiesta.referral_id
+    )
+      await updateReferenteProfilo(userId, { id_configurazione: richiesta.id_configurazione });
+  } catch (err) {
+    console.error(`[richieste] referente non salvato sul profilo ${userId}:`, err.message);
+  }
 }
 
 // ───────────── 3. Invio a devops ─────────────
@@ -466,8 +486,7 @@ async function inviaADevops(id) {
     console.warn(`[richieste] ${id} non inviata a devops: ${motivo}`);
     await updateRichiesta(id, {
       stato: adesione?.stato === "cessata" ? "annullata" : "errore",
-      errore: null,
-    motivo_non_disponibile: motivo,
+      errore: motivo,
       invio_avviato_at: null,
       prossimo_tentativo_at: null,
     });
