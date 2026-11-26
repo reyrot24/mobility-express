@@ -42,8 +42,9 @@ const POLL_MS = 8000;
 
 /** Referente del cliente (pagina del profilo), con il link a WhatsApp se l'ha indicato. */
 const ReferentePill = ({ className }: { className?: string }) => {
-  const { activeRef, cliente } = usePrezzoGiusto();
-  if (!activeRef.name) return null;
+  const { activeRef, activePage, cliente } = usePrezzoGiusto();
+  // Senza la pagina di un referente il nome sarebbe quello demo: meglio non mostrare nulla
+  if (!activePage?.referente?.nome || !activeRef.name) return null;
   return (
     <div
       className={cn(
