@@ -110,17 +110,16 @@ export async function fetchConfigurazioneProfilo(userId: string) {
   if (profilo.referral_id && profilo.id_configurazione) return profilo;
   // Profilo senza pagina: quella dell'ultima richiesta arrivata da un link, se è dello stesso
   // referente (o se il profilo non ne ha uno), come fa l'API alla conferma
-  let query = supabase
+  // Il filtro sul referente si fa qui: le catene condizionali del client sforano i tipi di TS
+  const { data: conPagina } = await supabase
     .from("richieste")
     .select("referral_id, id_configurazione")
-    .not("id_configurazione", "is", null);
-  if (profilo.referral_id) query = query.eq("referral_id", profilo.referral_id);
-  else query = query.not("referral_id", "is", null);
-  const { data: ultima } = await query
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  return (ultima as ConfigurazioneReferente | null) ?? profilo;
+    .not("id_configurazione", "is", null)
+    .order("created_at", { ascending: false });
+  const ultima = ((conPagina ?? []) as ConfigurazioneReferente[]).find((r) =>
+    profilo.referral_id ? r.referral_id === profilo.referral_id : Boolean(r.referral_id)
+  );
+  return ultima ?? profilo;
 }
 
 type ConfigurazioneReferente = { referral_id: string | null; id_configurazione: string | null };
